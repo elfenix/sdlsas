@@ -22,7 +22,7 @@ void upscore(int upby);
 // Global variables: 
 
 // Constants. (tune game here)
-const int   GAME_CLOCK    = 30;           // Number of mseconds between ticks.
+const int   GAME_CLOCK    = 9;           // Number of mseconds between ticks.
 
 const float START_DIST    = 70;           // Disance asteroids start from ship
 const int   MAXASTEROIDS  = 16;           // Max # Asteroids
@@ -499,12 +499,14 @@ void ResetShip()
 // respond to this event faster than the timer
 // TODO: BugFix this..
 static int sastWantTicks = 0;
+static int FinishedLastCall = 0;
 
 Uint32 TimerTick(Uint32 interval, void* param)
 {
   SDL_Event myEvent;
   
-  if(sastWantTicks) {
+  if(sastWantTicks && FinishedLastCall) {
+    FinishedLastCall = 0;
     myEvent.type = SDL_USEREVENT;
     SDL_PushEvent(&myEvent);
   }
@@ -560,6 +562,7 @@ void PlayGame()
   GameOver = 0;
   cReq = 0;
   sastWantTicks = 1;
+  FinishedLastCall = 1;
 
   while (!GameOver) {
     while (SDL_PollEvent(&event)) {
@@ -692,7 +695,7 @@ void PlayGame()
 	
 	Ui::updateScreen();
 
-
+	FinishedLastCall = 1;
       }
       
       if(!sastWantTicks) {
@@ -700,6 +703,7 @@ void PlayGame()
 	Ui::ShowText(60, 180, pstr);
 	Ui::updateScreen();
 	SetGamePalette();
+	FinishedLastCall = 1;
 	//	SetupObjects();
       }
     }
