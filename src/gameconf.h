@@ -7,7 +7,7 @@
 // Information about the Game
 
 // Set the version string for SDL Sasteroids
-#define VERSION "1.99"
+#define VERSION "2.00"
 
 // Where do we want the game files?
 // Note: This is NOT the place to edit this, use the *MAKEFILE*
@@ -47,7 +47,7 @@
 
 // Resizable by default? (Uncomment/Comment to enable/disable)
 // Only set as resizable if we aren't resizable.
-#define WANT_RESIZE SDL_RESIZABLE
+// #define WANT_RESIZE SDL_RESIZABLE
 
 
 #ifndef WANT_FULLSCREEN
