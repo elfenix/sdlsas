@@ -163,9 +163,16 @@ void sounddisplay()
 void botline()
 {
     int y, x, x1;
+    static int animstage = 200;
+    static int animdir = -2;
 
     IntegerDisplay::display_integer(score, 10.0f, float(Ui::HEIGHT()) - 2.0f);
     IntegerDisplay::display_integer(Glevel, Ui::WIDTH()- 40.0f, 20.0f);
+
+    animstage += animdir;
+    if(animstage < 155)  animdir = -animdir;
+    if(animstage > 205) animdir = -animdir;
+    
 
     y = Ui::HEIGHT() - 20;
     x1 = Ui::WIDTH() - 205;
@@ -173,11 +180,11 @@ void botline()
       // Draw weapon + shield energy meter.
       Gbit[BULLET].put(x1-12, (y));
       for( x = 0; x < (PlayerShip.weaponPercent()*2); x++ ) {
-	Ui::setpixel(x1+x, y, 255-x, (55)+x, 0);
-	Ui::setpixel(x1+x, y+1, 255-x, 55+x, 0);
-	Ui::setpixel(x1+x, y+2, 255-x, 55+x, 0);
-	Ui::setpixel(x1+x, y+3, 255-x, 55+x, 0);
-	Ui::setpixel(x1+x, y+4, 255-x, 55+x, 0);
+	Ui::setpixel(x1+x, y, 255-x, (55)+x, 0, animstage);
+	Ui::setpixel(x1+x, y+1, 255-x, 55+x, 0, animstage);
+	Ui::setpixel(x1+x, y+2, 255-x, 55+x, 0, animstage);
+	Ui::setpixel(x1+x, y+3, 255-x, 55+x, 0, animstage);
+	Ui::setpixel(x1+x, y+4, 255-x, 55+x, 0, animstage);
       } 
       
       // Draw shield energy meter.
@@ -186,11 +193,11 @@ void botline()
 
     Gbit[BULLET].put(x1-12, y);
     for( x = 0; x < (PlayerShip.shieldPercent()*2); x++ ) {
-      Ui::setpixel(x1+(x), y, 255-x, (55)+x, 0);
-      Ui::setpixel(x1+(x), y+1, 255-x, 55+x, 0);
-      Ui::setpixel(x1+(x), y+2, 255-x, 55+x, 0);
-      Ui::setpixel(x1+(x), y+3, 255-x, 55+x, 0);
-      Ui::setpixel(x1+(x), y+4, 255-x, 55+x, 0);
+      Ui::setpixel(x1+(x), y, 255-x, (55)+x, 0, animstage);
+      Ui::setpixel(x1+(x), y+1, 255-x, 55+x, 0, animstage);
+      Ui::setpixel(x1+(x), y+2, 255-x, 55+x, 0, animstage);
+      Ui::setpixel(x1+(x), y+3, 255-x, 55+x, 0, animstage);
+      Ui::setpixel(x1+(x), y+4, 255-x, 55+x, 0, animstage);
     } 
     
     y = (Ui::HEIGHT() - 24);

@@ -115,16 +115,16 @@ void ScreenObject::tick()
 	    tx = position.GetX();
 	    ty = position.GetY();
 	    if (tx > ScreenLimits.GetX())
-		tx = 0.1f-size.GetX();
+		tx = 0.1f-(size.GetX()/2.0f);
 	    if (ty > ScreenLimits.GetY())
-		ty = 0.1f-size.GetY();
+		ty = 0.1f-(size.GetY()/2.0f);
 	    position.SetXY(tx, ty);
 	}
     }
 
 
-    if (position.GetX() + (GetWidth()/2.0f) < (0.0f-size.GetX()) || 
-	position.GetY() + (GetWidth()/2.0f)< (0.0f-size.GetY())) {
+    if (position.GetX() - (GetWidth()/2.0f) < (0.0f) || 
+	position.GetY() - (GetWidth()/2.0f) < (0.0f)) {
 	if (!wrapMoves)
 	    die();
 	else {
@@ -132,10 +132,10 @@ void ScreenObject::tick()
 	    ty = position.GetY();
 
 	    if (tx < (1.0f - size.GetX()))
-		tx = ScreenLimits.GetX() - 0.1f;
+		tx = ScreenLimits.GetX() - 0.1f + (GetWidth()/2.0f);
 
 	    if (ty < (1.0f - size.GetY()))
-		ty = ScreenLimits.GetY() - 0.1f;
+		ty = ScreenLimits.GetY() - 0.1f + (GetHeight()/2.0f);
 
 	    position.SetXY(tx, ty);
 	}

@@ -70,17 +70,17 @@ class Ui
       return TTF_FontHeight(myfont); 
     }
 
-  static void inline setpixel(int x, int y, char r, char g, char b)
+  static void inline setpixel(int x, int y, char r, char g, char b, char a = 255)
     {
       if(x < 0 || x >= myscreen->w) return;
       if(y < 0 || y >= myscreen->h) return;
 
 #ifdef WANT_OPENGL
-      char byteBuffer[3] = { r, g, b };
+      char byteBuffer[4] = { r, g, b, a };
 
 
       glRasterPos2i(x, y);
-      glDrawPixels(1, 1, GL_RGB, GL_UNSIGNED_BYTE, &byteBuffer);
+      glDrawPixels(1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &byteBuffer); 
 
       /*
 
