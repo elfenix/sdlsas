@@ -7,8 +7,6 @@ echo Installing "sasteroids" in /usr/games
 install --strip --mode=4755 src/sasteroids /usr/games
 echo Installing "sast.cf" in /usr/games
 install --mode=644 sast.cf /usr/games
-echo Installing "sastsound.cf" in /usr/games
-install --mode=644 sastsound.cf /usr/games
 echo Installing man page in /usr/man/man6
 install --mode=644 sasteroids.6 /usr/man/man6
 echo Installing font in /usr/games/
