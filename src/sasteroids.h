@@ -75,7 +75,11 @@ const int SND_BOOM_B = 1;
 const int SND_BOOM_C = 2;
 const int SND_FIRE = 3;
 const int SND_WARP = 4;
+const int SND_ENEMY = 5;
+const int SND_POWERUP = 6;
+const int SND_ENGINE = 7;
 
+const int NUM_SOUNDS = 8;
 
 // Constants. (tune game here)
 const int   GAME_CLOCK    = 33;           // Number of msec(33) between ticks.
@@ -83,14 +87,18 @@ const float START_DIST    = 70;           // Disance asteroids start from ship
 const int   MAXASTEROIDS  = 10;           // Max # Asteroids
 
 const float MassBigAst    = 8.0f;         // Masses for bouncing + collision
-const float MassSmallAst  = 4.0f;
-const float MassMedAst    = 6.0f;
+const float MassSmallAst  = 0.8f;
+const float MassMedAst    = 4.0f;
 const float MassShip      = 5.0f / 4.0f;
 const float MassEnemy     = 1.0f;
 const float MassBullet    = 1.0f / 8.0f;
 const float MassSpinner   = 2.0f;
 
 const float BUL_SPEED     = 7.5f;
+
+const float BigAstMax     = 2.0f;
+const float MedAstMax     = 6.0f;
+const float SmallAstMax   = 10.0f;
 
 class SBitmap;
 class Ship;
@@ -115,8 +123,12 @@ extern int eeggU, eeggD, eeggL, eeggR, eeggS;
 extern char HiScoreStrings[10][10];
 extern int HiScoreNumbers[10];
 
+extern char globalMessage[256];
+extern int gMsgTimeLeft;
+
+
 #ifdef HAV_SOUND
-extern Mix_Chunk *soundSamples[8];
+extern Mix_Chunk *soundSamples[NUM_SOUNDS];
 #endif
 
 void PlaySound(int soundNumber);
@@ -128,5 +140,6 @@ void CleanUpStuff();
 void GenerateAsteroids();
 int MoveObjects();
 void LoadBitmaps();
+void MakeGlobalMessage(char* Tstring);
 
 #endif

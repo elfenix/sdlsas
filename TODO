@@ -1,7 +1,7 @@
 This first release isn't functionally complete, things left to do:
 
-1.) Add the little alien ship that shoots at you back in.
-2.) Add the high score list
-3.) Add sound fx
-4.) Tune some of the collision detection, etc...
-5.) Add Options Screen
+1.) Add the high score list(Needs DONE)
+2.) Tune some of the collision detection, etc...(80% done)
+3.) Add Options Screen(Needs Done)
+4.) Add code to disable screensaver(system specific. :()
+

@@ -6,8 +6,8 @@ CC = g++
 INCLUDE = -I/usr/include
 OPTIMIZE = -fomit-frame-pointer -O2 -ffast-math -funroll-loops -march=pentium -mcpu=pentium
 OPTS = -Wall -pipe
-#GDIR=\"$(GAMEDIR)\"
-GDIR=\"/usr/share/sasteroids/\"
+GDIR=\"$(GAMEDIR)\"
+#GDIR=\"/usr/share/sasteroids/\"
 DEFINES = -DGAMEDIR=$(GDIR)
 
 

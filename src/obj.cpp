@@ -69,13 +69,18 @@ void ScreenObject::tick()
     // Good enough for a game..
     tchd = 0;
     position += velocity;
-    velocity += accelleration;
-
+    
     vlimit = velocity.lengthSqrd();
 
     if (vlimit > maxspeed) {
       velocity /= sqrt(vlimit);
       velocity *= sqrt(maxspeed);
+    }
+
+    if(bounce > 0) {
+      bounce--;
+    } else {
+      velocity += accelleration;
     }
 
     // Look to see if we are visible...
@@ -157,6 +162,25 @@ void ScreenObject::randomDir(float magn)
 }
 
 
+void ScreenObject::trim()
+{
+  float vlimit = velocity.lengthSqrd();
+
+  if (vlimit > maxspeed) {
+    velocity /= sqrt(vlimit);
+    velocity *= sqrt(maxspeed);
+  }
+  
+  if(isnan(velocity.length())) {
+    velocity.SetXY(0.3f, 0.3f); // just so things don't really feck up.
+  }
+}
+
+
+void ScreenObject::setbounce()
+{
+  bounce = 15;
+}
 
 // Rotate the pixmaps for all of the ships, spinners, etc... that rotate
 // around. =)
@@ -191,10 +215,6 @@ void InitShips()
    }
   }
 }
-
-
-
-
 
 
 ScreenObject *ObjectList[MAX_OBJECTS];
@@ -266,6 +286,25 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
     // play a sound. :)
     PlaySound(SND_BOOM_B);
 
+    // up the points, but only if WE killed the asteroid
+    if(killedBy != 0 && ObjectList[killedBy]) {
+      if(ObjectList[killedBy]->type() == SHIP_BUL) {
+	if(ObjectList[number]->type() == BIGAST && numasts == 1)
+	  upscore(1000*Glevel);
+	else
+	  upscore(25);
+
+	if(ObjectList[number]->type() == MEDAST && numasts == 1) 
+	  upscore(500*Glevel);
+	else
+	  upscore(50);
+	
+	if(ObjectList[number]->type() == SMALLAST) 
+	  upscore(100);
+      }
+    }
+    
+
     ObjectList[number]->die();    
     numasts -= 1;
     
@@ -303,17 +342,7 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
     }
 
 
-
-    // up the points, but only if WE killed the asteroid
-    if(killedBy != 0 && ObjectList[killedBy]) {
-      if(ObjectList[killedBy]->type() == SHIP_BUL) {
-	if(ObjectList[number]->type() == BIGAST) upscore(500);
-	if(ObjectList[number]->type() == MEDAST) upscore(250);
-	if(ObjectList[number]->type() == SMALLAST) upscore(100);
-      }
-    }
-    
-    // figure out the new type of asteroids to create.
+   // figure out the new type of asteroids to create.
     if(ObjectList[number]->type() == BIGAST) ctype = MEDAST;
     else if(ObjectList[number]->type() == MEDAST) ctype = SMALLAST;
     else ctype = 255;
@@ -342,13 +371,13 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
 
       do {
 	rA2 = rand() % 255;
-      } while( abs(rA2 - rA1) < 5 && abs(rA2 - (rA1+124)) < 5);      
+      } while( abs(rA2 - rA1) < 10 && abs(rA2 - (rA1+124)) < 10);      
       rA1 = int(rA2 + 128) % 255;
       CreateAsteroid( px, py,
 		      FastMath::sin(rA1) * 1.0f + vx,
 		      FastMath::cos(rA1) * 1.0f + vy, ctype );
-      if(ctype == MEDAST && !(rand()%LevelOdds(16,4))) {
-	j = GetOpenObject();
+      if(ctype == MEDAST && !(rand()%LevelOdds(16,7))) {
+      	j = GetOpenObject();
 	ObjectList[j] = new Spinner;
 	ObjectList[j]->SetXY(px, py);
 	ObjectList[j]->SetVel(FastMath::sin(rA2)*1.0f + vx, 
@@ -384,7 +413,7 @@ int CreateAsteroid(float x, float y, float xv, float yv, int type)
 
     numasts++;
 
-    if((type == SMALLAST && !(rand()%LevelOdds(30,3))) && !ClassicMode
+    if((type == SMALLAST && !(rand()%LevelOdds(30,7))) && !ClassicMode
        && (Glevel > 3))
       {
 	type = ESMAST;
@@ -403,17 +432,20 @@ int CreateAsteroid(float x, float y, float xv, float yv, int type)
       newobject->SetSize(40, 40);
       newobject->setsize(20);
       newobject->setmass(MassBigAst);
+      newobject->SetMaxSpeed(BigAstMax);
       break;
     case SMALLAST:
     case ESMAST:
       newobject->SetSize(10, 10);
       newobject->setsize(7);
       newobject->setmass(MassSmallAst);
+      newobject->SetMaxSpeed(SmallAstMax);
       break;
     case MEDAST:
       newobject->setsize(10);
       newobject->SetSize(20,20);
       newobject->setmass(MassMedAst);
+      newobject->SetMaxSpeed(MedAstMax);
       break;
     }
 
@@ -487,6 +519,7 @@ void PowerUpF(int i)
   iobj = (PowerUp*)ObjectList[i];
   if(!iobj) return;
 
+  PlaySound(SND_POWERUP);
   ptype = iobj->effect();
   switch(ptype) {
   case P_WMAX:
@@ -611,11 +644,13 @@ void ObjectsHit(int i, int j, int& touched, int& crash)
     break; 
   case ENEMY:	
     if(ObjectList[j]->type() == BULLET2) break;
+    if(ObjectList[j]->type() == P_TYPE) break;
     BounceObjects(i, j);
     break;
   case SPINNER:
     Spinner* t = (Spinner*)ObjectList[i];
     if(t->morph()!=-1) break;
+    if(ObjectList[j]->type() == P_TYPE) break;
     BounceObjects(i, j);
   }
 }
@@ -723,27 +758,19 @@ void LoadBitmaps()
 // readable.
 void BounceObjects(int i, int j) 
 {
-  float ti, tj, t;
+  float ti, tj;
   Vector vi, vj;
   Vector t1, t2;
 
-  rcollide(ObjectList[i], ObjectList[j]);
+  //  rcollide(ObjectList[i], ObjectList[j]);
 
-  if(ObjectList[j]->GetX()==ObjectList[i]->GetX() &&
-     ObjectList[j]->GetY()==ObjectList[i]->GetY()) return;
-
-  int xt1 = int(ObjectList[j]->GetX()) - int(ObjectList[i]->GetX());
-  int yt1 = int(ObjectList[j]->GetY()) - int(ObjectList[i]->GetY());
-  if(xt1 == 0 || yt1 == 0) return;
-
-  Vector ij(ObjectList[j]->GetX()-ObjectList[i]->GetX(),
-	      ObjectList[j]->GetY()-ObjectList[i]->GetY());
-  if(ij.length()<0.01f) return;
-
+  Vector ij(ObjectList[j]->GetCenX()-ObjectList[i]->GetCenX(),
+	      ObjectList[j]->GetCenY()-ObjectList[i]->GetCenY());
   ij /= ij.length();
   
-  t = ij.length();
-  if(t < 1.0f) return;
+  if(isnan(ij.length())){
+    return;
+  }
   
   vi = ObjectList[i]->GetVel();
   vj = ObjectList[j]->GetVel();
@@ -755,7 +782,7 @@ void BounceObjects(int i, int j)
     (ObjectList[i]->getMass()+ObjectList[j]->getMass());
   
   if(t3 < 0) t3 = -t3;
-
+  
   t1 = vi;
   t1 -= (t3 * ObjectList[j]->getMass()) * ij;
   
@@ -765,7 +792,11 @@ void BounceObjects(int i, int j)
   // Make sure we put in only valid numbers.
   if(isnan(t1.length()) || isnan(t2.length())) return;
     
-  ObjectList[i]->SetVel(t1);
-  ObjectList[j]->SetVel(t2);   
+  ObjectList[i]->SetVel(t1); 
+  ObjectList[i]->trim();
+  ObjectList[i]->setbounce();
+  ObjectList[j]->SetVel(t2); 
+  ObjectList[j]->trim();
+  ObjectList[j]->setbounce();
 }
 

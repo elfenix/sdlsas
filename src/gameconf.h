@@ -7,7 +7,7 @@
 // Information about the Game
 
 // Set the version string for SDL Sasteroids
-#define VERSION "1.97 (CVS RELEASE)"
+#define VERSION "1.99"
 
 // Where do we want the game files?
 // Note: This is NOT the place to edit this, use the *MAKEFILE*
@@ -21,7 +21,7 @@
 // #define _OLD_CPP_HEADERS
 
 // Use Sound?
-// #define HAVE_SOUND
+#define HAVE_SOUND
 
 // Double Size 320x200 displays?
 #define DOUBLE_SIZE	
@@ -41,6 +41,26 @@
 
 // Extras that you might want to turn off on slower systems
 #define SAS_EXTRAS
+
+// Run in fullscreen mode by default? (Comment to disable)
+#define WANT_FULLSCREEN SDL_FULLSCREEN
+
+// Resizable by default? (Uncomment/Comment to enable/disable)
+// Only set as resizable if we aren't resizable.
+#define WANT_RESIZE SDL_RESIZABLE
+
+
+#ifndef WANT_FULLSCREEN
+#define WANT_FULLSCREEN 0 
+#else
+#ifdef WANT_RESIZE
+#undef WANT_RESIZE
+#endif
+#endif
+
+#ifndef WANT_RESIZE
+#define WANT_RESIZE 0
+#endif
 
 ///////////////////////////////////////////////////////
 // Don't Edit bellow this line for standard configuration

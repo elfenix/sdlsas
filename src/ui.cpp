@@ -118,7 +118,7 @@ void Ui::resync(int newX, int newY)
 {
   Uint32 flags;
 
-  flags = SDL_HWSURFACE | SDL_ANYFORMAT | SDL_RESIZABLE;
+  flags = SDL_HWSURFACE | SDL_ANYFORMAT | WANT_RESIZE | WANT_FULLSCREEN;
   if(wantFullScreen) flags |= SDL_FULLSCREEN;
   myscreen = SDL_SetVideoMode(newX, newY, 16, flags);
 

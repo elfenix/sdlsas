@@ -51,9 +51,11 @@ class ScreenObject {
   
   void die(); 
   void restore();
+  void trim();
   void SetBitmap(SBitmap* sprite);
   void randomDir(float magn);
   void randomSpeed(float start, float stop);  
+  void setbounce();
 
   virtual void draw();	// Draw the object
   virtual void tick();	// Move the object for one time tick
@@ -206,7 +208,7 @@ class ScreenObject {
   Vector accelleration;
   Vector size;
   SBitmap* mysprite;
-  int objtype, mysize, tchd;
+  int objtype, mysize, tchd, bounce;
 };
 
 
@@ -231,8 +233,7 @@ class Ship : public ScreenObject
   void Hyper();
   void dischargeWeapon();
   void Brake();
-  void SetBounce();
-
+ 
   void shieldOn();
   void shieldOff();
   void shieldAdd(int a);
@@ -309,7 +310,7 @@ class Ship : public ScreenObject
     }
   
  protected:
-  int angle, shieldMax, shieldTimeLeft, bounce, shieldLives;
+  int angle, shieldMax, shieldTimeLeft, shieldLives;
   int lives, thrustcnt, wPower, pos, deadStick;
   int maxPower, rechargeRate, shieldStatus;
 };
@@ -376,7 +377,7 @@ class Enemy : public ScreenObject
   virtual void tick();
   
  private:
-  int lastFire, cBitmap;
+  int lastFire, cBitmap, vChange;
 };
 
 
@@ -443,6 +444,8 @@ inline void rcollide(ScreenObject *i, ScreenObject *j)
   iM = (d-viM) / (vjM+viM);   // Calculate distance to move i and
   jM = (d-vjM) / (vjM+viM);   // j.
 
+  if(isnan(iM) || isnan(jM)) return;
+  
   vecIM *= -1 * iM;
   vecJM *= -1 * jM;
   fPi += vecIM;

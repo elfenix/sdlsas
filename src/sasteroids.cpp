@@ -27,7 +27,7 @@ SBitmap titleScreen;
 SBitmap extraLives;                       // 1/2 scale ship for extra men.
 
 #ifdef HAVE_SOUND
-Mix_Chunk *soundSamples[8];               // Sound!
+Mix_Chunk *soundSamples[NUM_SOUNDS];               // Sound!
 #endif
 
 int G_use_backdrop = 0;
@@ -103,9 +103,10 @@ void upscore(int up)
 {
     score = score + up;
 
-    if (oldscore + 10000 < score) {
+    if (oldscore + 30000 < score) {
 	PlayerShip.addship();	// TODO: Play sound FX
 	oldscore = score;
+	PlaySound(SND_POWERUP);
     }
 }
 
@@ -206,10 +207,15 @@ void botline()
     int y, x, x1;
 
     y = 10;
-    x1 = Ui::WIDTH() - DDIV2CONST(205);
+
     sprintf(text, "Score:%7d", score);
     Ui::ShowText(DMULTCONST(5), DMULTCONST(5), text);
 
+    sprintf(text, "Level:%7d", Glevel);
+    x1 = Ui::WIDTH() - 120;
+    Ui::ShowText(DDIV2CONST(x1), DDIV2CONST(Ui::HEIGHT()-19), text);
+
+    x1 = Ui::WIDTH() - DDIV2CONST(205);
     if(!ClassicMode) { 
       // Draw weapon + shield energy meter.
       Gbit[BULLET].put(DDIVCONST(x1)-DMULTCONST(3), DDIVCONST(y));
@@ -265,6 +271,8 @@ void ResetShip()
 // TODO: BugFix this..
 static int sastWantTicks = 0;
 static int FinishedLastCall = 0;
+char globalMessage[256];
+int gMsgTimeLeft = 0;
 
 Uint32 TimerTick(Uint32 interval, void* param)
 {
@@ -284,6 +292,12 @@ Uint32 TimerTick(Uint32 interval, void* param)
 }
 
 
+void MakeGlobalMessage(char* Tstring)
+{
+  strcpy(globalMessage, Tstring);
+  gMsgTimeLeft = Ui::HEIGHT();
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 // play a game..
@@ -294,6 +308,7 @@ void PlayGame()
   int dead = 0;
   int finalDead = 0;
   int aegg = 0;
+  int chOn;
   SDL_Event event;
   SDL_TimerID timer;
   
@@ -335,6 +350,12 @@ void PlayGame()
   finalDead = 0;
   FinishedLastCall = 1;
   deathTimer = -1;
+  gMsgTimeLeft = 0;
+  chOn = 1;
+  
+#ifdef HAVE_SOUND
+  Mix_ExpireChannel(0, 0);
+#endif  
 
   while (!GameOver) {
     while (SDL_PollEvent(&event)) {
@@ -364,7 +385,10 @@ void PlayGame()
 	// I hate cheaters... Do something fun with the old cheat code. :D
 	if (event.key.keysym.sym == SDLK_o && 
 	    (keystatebuffer[SDLK_LSHIFT] || keystatebuffer[SDLK_RSHIFT])  &&
-	    !pause) deathTimer = 3; 
+	    !pause) {
+	  deathTimer = 3; 
+	  MakeGlobalMessage("CHEATER!!! C H E A T E R!!! CHEATER!!!");
+	}
 
 	// Leave this cheat code in, nice for debugging.
 	if (event.key.keysym.sym == SDLK_n && !pause) Glevel++;
@@ -461,6 +485,9 @@ void PlayGame()
 	break;
       
       case SDL_USEREVENT:	      
+	if(gMsgTimeLeft > 0) gMsgTimeLeft-=5;
+	if(gMsgTimeLeft < 0) gMsgTimeLeft = 0;
+
 	// This only gets called while the GAME CLOCK ITSELF is ticking =)
 	deathTimer--;
 	if(deathTimer < -128) deathTimer = -1;
@@ -472,8 +499,20 @@ void PlayGame()
 	if (keystatebuffer[SDLK_LEFT])
 	  PlayerShip.rotLeft(1);
 	
-	if (keystatebuffer[SDLK_UP])
+	if (keystatebuffer[SDLK_UP] && !dead) {
 	  PlayerShip.Thrust(0.15f);
+#ifdef HAVE_SOUND
+	  if(!chOn) {
+	    Mix_PlayChannel(0, soundSamples[SND_ENGINE], -1);
+	    chOn = 1;
+	  } 
+#endif
+	} else {
+#ifdef HAVE_SOUND
+	  Mix_ExpireChannel(0, 10);
+	  chOn = 0;
+#endif
+	}
 
 	if (keystatebuffer[SDLK_DOWN])
 	  PlayerShip.shieldOn();
@@ -486,18 +525,24 @@ void PlayGame()
 	
 	
 	if (numasts <= 0) {
+	  char tempString[256];
 	  Glevel++;
+	  sprintf(tempString, "Entering Level %d", Glevel);
+	  MakeGlobalMessage(tempString);
 	  numasts = 0;
 	  GenerateAsteroids();
 	  PlayerShip.addMaxPower(2);
 	  PlayerShip.addRegPower(1);
 	}
 
-	if (!(rand()%250)) {
+
+	if(!(rand()%LevelOdds(32, 1250, 1))) {
 	  int j;
 	  j = GetOpenObject();
 	  ObjectList[j] = new Enemy;
+	  PlaySound(SND_ENEMY);
 	}
+	
 
 	if (!(rand()%250) && !ClassicMode) {
 	  int j;
@@ -512,7 +557,6 @@ void PlayGame()
 	if(dead == 1) {
 	  PlaySound(SND_BOOM_C);
 	  int j;
-	  
 	  strcpy(pstr, "Press s to start");
 	  PlayerShip.death();
 	  PlayerShip.SetDeadStick(1);
@@ -527,6 +571,8 @@ void PlayGame()
 					 PlayerShip.VelX(),
 					 PlayerShip.VelY());
 	  dead++;
+	  ResetShip();
+	  PlayerShip.SetDeadStick(1);
 	} else if(dead > 1) { 
 	  strcpy(pstr, "Press s to start");
 	  dead = 2;
@@ -572,7 +618,10 @@ void PlayGame()
 	  strcpy(pstr, "Strange, the only way to win is to not play.");
 	  Ui::CenterXText(140, pstr);
 	}
-	
+      }
+      
+      if(gMsgTimeLeft > 0) {
+	Ui::CenterXText(gMsgTimeLeft, globalMessage);
       }
 
       if(!sastWantTicks) {
@@ -583,6 +632,10 @@ void PlayGame()
       Ui::updateScreen();
     }
   }
+
+#ifdef HAVE_SOUND
+  Mix_ExpireChannel(0, 0); // Always kill jet sound.
+#endif
 
   SDL_RemoveTimer(timer);
 }
@@ -618,6 +671,7 @@ void ShowInfo()
     Ui::CenterXText( y + 160, " UP ARROW - Thrust ");
     Ui::CenterXText( y + 180, " DOWN ARROW - Shield");
     Ui::CenterXText( y + 200, " LEFT ALT - Hyperspace");
+    Ui::CenterXText( y + 220, " F - Toggle Full Screen");
     Ui::CenterXText( y + 240, " P - Pause");
     Ui::CenterXText( y + 280, " Q - Quit");
     Ui::updateScreen();
@@ -677,11 +731,6 @@ void showScoringInfo()
 
 
 
-
-
-
-
-
 //////////////////////////////////////////////////////////
 // Load ze Wavs!
 void LoadWavs()
@@ -692,10 +741,11 @@ void LoadWavs()
   soundSamples[SND_BOOM_C] = Mix_LoadWAV(BINDIR "sounds/shipexplode.wav");
   soundSamples[SND_FIRE]   = Mix_LoadWAV(BINDIR "sounds/zap.wav");
   soundSamples[SND_WARP]   = Mix_LoadWAV(BINDIR "sounds/warp.wav");
+  soundSamples[SND_ENEMY]  = Mix_LoadWAV(BINDIR "sounds/flash.wav");
+  soundSamples[SND_POWERUP] = Mix_LoadWAV(BINDIR "sounds/powerup.wav");
+  soundSamples[SND_ENGINE] = Mix_LoadWAV(BINDIR "sounds/engine.wav");
 #endif
 }
-
-
 
 
 /////////////////////////////////////////////////////////
@@ -751,6 +801,7 @@ int main(int argc, char *argv[])
   }
 
   Mix_AllocateChannels(16);
+  Mix_ReserveChannels(1);  // for jet engine!
 #endif
 
   FastMath::init(1); 

@@ -166,11 +166,6 @@ void Ship::shieldAdd(int a)
   if(shieldTimeLeft > shieldMax) shieldTimeLeft = shieldMax;
 }
 
-void Ship::SetBounce()
-{
-  bounce = 15;
-}
-
 /////////////////////////////////////////////
 // Spinner Class (works a lot like ship class )
 
@@ -197,12 +192,21 @@ void Spinner::tick()
     
     ax = ax / 160;
     ay = ay / 100;
-    
+
+    if(PlayerShip.isDeadStick() || PlayerShip.shielded())
+      { ax = -ax; ay = -ay; }
+
     if(ax < 0) ax -= 0.5f;
     if(ax > 0) ax += 0.5f;
     if(ay < 0) ay -= 0.5f;
     if(ay > 0) ay += 0.5f;
+
+    if(!(rand()%20)) { ax = 0.8f; }
+    if(!(rand()%21)) { ax = -0.8f; }
+    if(!(rand()%30)) { ay = 0.8f; }
+    if(!(rand()%31)) { ay = -0.8f; }
     
+
     velocity.SetXY(ax, ay);    
 
     wrapMoves = 1;
@@ -325,11 +329,27 @@ void Enemy::tick()
 {
   Vector temp;
   int j;
+
+  SetMaxSpeed(2.5f); 
+  if(!(rand()%20)) {
+    if(vChange) vChange = 0;
+    else vChange = 1;
+  }
+
+  if(GetY() < 2) vChange = 0;
+  if(GetY() > 60) vChange = 1;
+  if(!bounce) {
+    if(vChange) {
+      velocity.SetXY(0.6f, -0.8f);
+    } else {
+      velocity.SetXY(0.6f, 0.8f);
+    }
+  } else bounce -= 2;
+
   ScreenObject::tick(); 
 
 
-
-  if(!(rand()%50)) {
+  if(!(rand()%50) && !PlayerShip.isDeadStick()) {
     j = GetOpenObject();
     temp.SetXY( PlayerShip.GetX()-GetX()+PlayerShip.VelX(), 
 		PlayerShip.GetY()-GetY()+PlayerShip.VelY());  
@@ -402,6 +422,9 @@ void HitSpinner(int number, int killedBy)
 			    spinner->VelY());
     j = GetOpenObject();
     ObjectList[j] = explode;
+    PlaySound(SND_BOOM_C);
+  } else {
+    PlaySound(SND_BOOM_A);
   }
 }
 
@@ -422,5 +445,6 @@ void HitEnemy(int number, int killedBy)
 				e->GetY(),
 				e->VelX(),
 				e->VelY());
+  PlaySound(SND_BOOM_C);
 }
 
