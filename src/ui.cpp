@@ -116,9 +116,11 @@ void Ui::ShowTextColor(int x, int y, char *msg, char r, char g, char b)
 
 void Ui::resync(int newX, int newY)
 {
-  myscreen = SDL_SetVideoMode(newX, newY, 16, 
-				SDL_HWSURFACE | SDL_ANYFORMAT | 
-				SDL_RESIZABLE);
+  Uint32 flags;
+
+  flags = SDL_HWSURFACE | SDL_ANYFORMAT | SDL_RESIZABLE;
+  if(wantFullScreen) flags |= SDL_FULLSCREEN;
+  myscreen = SDL_SetVideoMode(newX, newY, 16, flags);
 
   if(!myscreen) {
     cerr << "Resize Failed, Bailing out." << endl;

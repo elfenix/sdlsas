@@ -58,7 +58,7 @@ int G_use_backdrop = 0;
 Ship PlayerShip;	                  // Info about player's ship.
 int score, Glevel, numasts, oldscore;     // scoring and level info
 int ClassicMode = 0;                      // classic mode?
-int BackdropOn = 1;                       // is the backdrop on?
+int BackdropOn = 1, wantFullScreen = 0;   // is the backdrop on?
 
 // Power Ups, etc...
 int canShootThree = 1;                    // Has the three shooter powerup?
@@ -485,10 +485,12 @@ void Fire()
      
     fsin = -FastMath::cos(PlayerShip.getAngle());
     fcos = FastMath::sin(PlayerShip.getAngle());
+
     // Give it a bit of a kick back... ehehehheeheh
-    if(!ClassicMode)
+    if(!ClassicMode) {
       PlayerShip.AddVel(-fcos / 10.0f, -fsin / 10.0f);
-    PlayerShip.dischargeWeapon();
+      PlayerShip.dischargeWeapon();
+    }
 
     bullet = GetOpenObject();
     ObjectList[bullet] = new ScreenObject;
@@ -550,34 +552,37 @@ void Fire()
 void botline()
 {
     char text[256] = { 0 };
-    int y, x;
+    int y, x, x1;
 
     y = 10;
-    x = Ui::HEIGHT() - 
+    x1 = Ui::WIDTH() - DDIV2CONST(205);
     sprintf(text, "Score:%7d", score);
     Ui::ShowText(DMULTCONST(5), DMULTCONST(5), text);
 
-    // Draw weapon + shield energy meter.
-    Gbit[BULLET].put(52, DDIVCONST(y));
-    for( x = 0; x < (PlayerShip.weaponPercent()*2); x++ ) {
-      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y, 255-x, (55)+x, 0);
-      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+1, 255-x, 55+x, 0);
-      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+2, 255-x, 55+x, 0);
-      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+3, 255-x, 55+x, 0);
-      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+4, 255-x, 55+x, 0);
+    if(!ClassicMode) { 
+      // Draw weapon + shield energy meter.
+      Gbit[BULLET].put(DDIVCONST(x1)-DMULTCONST(3), DDIVCONST(y));
+      for( x = 0; x < (PlayerShip.weaponPercent()*2); x++ ) {
+	Ui::setpixel(x1+DDIV2CONST(x), y, 255-x, (55)+x, 0);
+	Ui::setpixel(x1+DDIV2CONST(x), y+1, 255-x, 55+x, 0);
+	Ui::setpixel(x1+DDIV2CONST(x), y+2, 255-x, 55+x, 0);
+	Ui::setpixel(x1+DDIV2CONST(x), y+3, 255-x, 55+x, 0);
+	Ui::setpixel(x1+DDIV2CONST(x), y+4, 255-x, 55+x, 0);
+      } 
+      
+      // Draw shield energy meter.
+      y += 10;
     }
 
-    // Draw shield energy meter.
-    y += 10;
-    Gbit[BULLET].put(52, DDIVCONST(y));
-    for( x = 0; x < (PlayerShip.weaponPercent()*2); x++ ) {
-      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y, 255-x, (55)+x, 0);
-      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+1, 255-x, 55+x, 0);
-      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+2, 255-x, 55+x, 0);
-      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+3, 255-x, 55+x, 0);
-      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+4, 255-x, 55+x, 0);
+    Gbit[BULLET].put(DDIVCONST(x1)-DMULTCONST(3), DDIVCONST(y));
+    for( x = 0; x < (PlayerShip.shieldPercent()*2); x++ ) {
+      Ui::setpixel(x1+DDIV2CONST(x), y, 255-x, (55)+x, 0);
+      Ui::setpixel(x1+DDIV2CONST(x), y+1, 255-x, 55+x, 0);
+      Ui::setpixel(x1+DDIV2CONST(x), y+2, 255-x, 55+x, 0);
+      Ui::setpixel(x1+DDIV2CONST(x), y+3, 255-x, 55+x, 0);
+      Ui::setpixel(x1+DDIV2CONST(x), y+4, 255-x, 55+x, 0);
     } 
-
+    
     y = DDIVCONST(Ui::HEIGHT() - DMULTCONST(12));
     for( x = 0; x < (PlayerShip.ships()-1); x++) {
       extraLives.put(2+x*10, y);
@@ -830,7 +835,7 @@ void PlayGame()
 	  ObjectList[j] = new Enemy;
 	}
 
-	if (!(rand()%250)) {
+	if (!(rand()%250) && !ClassicMode) {
 	  int j;
 	  j = GetOpenObject();
 	  ObjectList[j] = new PowerUp;
@@ -1044,6 +1049,22 @@ void InitializeSDL()
 
 
 /////////////////////////////////////////////////////////
+// Handle Command Line Parameters
+void HandleCommandLine(int argc, char** argv)
+{
+  int i;
+
+  for( i = 0; i < argc; i++) {
+    if(argv[i]) {
+      if(strcmp(argv[i], "-fullscreen")==0) wantFullScreen = 1;
+      if(strcmp(argv[i], "-classic")==0) ClassicMode = 1;
+    }
+  }
+}
+
+
+
+/////////////////////////////////////////////////////////
 // Main Program Starts Here 
 // Starts all the tasks, etc...
 int main(int argc, char *argv[])
@@ -1055,6 +1076,8 @@ int main(int argc, char *argv[])
   srand((unsigned int) time(NULL));
   
   InitializeSDL();
+  HandleCommandLine(argc, argv);
+
 
 #ifdef HAVE_SOUND
   if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024)==-1) {

@@ -35,7 +35,8 @@ void g_getpixelB3(SDL_Surface* v, int x, int y, char *r, char *g, char *b);
 void g_getpixelB4(SDL_Surface* v, int x, int y, char *r, char *g, char *b);
 void getpixel(SDL_Surface *screen, int x, int y, char *r, char *g, char *b);
 
-
+// Other integers
+extern int wantFullScreen;
 
 class Ui 
 {

@@ -129,7 +129,7 @@ void Ship::draw()
 {
   if(!deadStick) {
 
-    Gbit[SHIELD].put( position.GetX(), position.GetY() );
+    Gbit[SHIELD].put( int(position.GetX()), int(position.GetY()) );
 
     /* TODO: Implement this as part of the shield.
     for(i = 0; i < 255; i++) {
@@ -371,7 +371,6 @@ PowerUp::PowerUp()
 {
   const int MaxSlots = 4;
   int SlotMachine[MaxSlots] = { P_WMAX, P_WENG, P_WENG, P_WTHR };
-  int rX, rY;
 
   ptype = SlotMachine[rand()%MaxSlots];
   

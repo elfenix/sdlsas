@@ -127,7 +127,7 @@ void SBitmap::scale2x()
 // Rotate bitmap by 90 degrees
 void SBitmap::rotc90()
 {
-  unsigned int x, y;
+  int x, y;
   char r, g, b;
   SDL_Surface* newSurface;
   
@@ -183,7 +183,7 @@ void SBitmap::rotc90()
 void SBitmap::rot(Angle degrees)
 {
   double xo, yo;
-  unsigned int x, y, x1, y1;
+  int x, y, x1, y1;
   char r, g, b;
   SDL_Surface* newSurface;
   
