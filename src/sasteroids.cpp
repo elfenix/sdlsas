@@ -206,7 +206,6 @@ void KillAsteroid(int number, int killedBy)
 {
   int j, ctype;
   Explosion* explode;
-  char blastAngle;
 
   if(ObjectList[number]->alive()) {
     // play a sound. :)
@@ -595,13 +594,13 @@ void PlayGame()
       switch (event.type) {
 	
       case SDL_KEYDOWN:
-	if (event.key.keysym.sym == SDLK_LALT)
+	if (event.key.keysym.sym == SDLK_LALT && !pause)
 	  PlayerShip.Hyper();
 	
-	if (event.key.keysym.sym == SDLK_RALT)
+	if (event.key.keysym.sym == SDLK_RALT && !pause)
 	  PlayerShip.Hyper();
 	
-	if (event.key.keysym.sym == SDLK_SPACE)
+	if (event.key.keysym.sym == SDLK_SPACE && !pause)
 	  Fire();
 	
 	if (event.key.keysym.sym == SDLK_f)
@@ -615,7 +614,7 @@ void PlayGame()
 	  }
 	}
 	
-	if (event.key.keysym.sym == SDLK_p) {
+	if (event.key.keysym.sym == SDLK_p && !dead) {
 	  strcpy(pstr, "Press any key to continue.");
 	  if (!pause) {
 	    sastWantTicks = 0;
@@ -631,7 +630,7 @@ void PlayGame()
 	  sastWantTicks = 1;
 	}
 	
-	if (event.key.keysym.sym == SDLK_q) {
+	if (event.key.keysym.sym == SDLK_q && !dead && !pause) {
 	  if (!pause) {
 	    sastWantTicks = 0;
 	    pause = 2;
@@ -711,27 +710,24 @@ void PlayGame()
 	  dead = 2;
 	}
 	
-	
-	Gbackdrop.put(0, 0);
-	DrawObjects();
-	botline();
-	
-	if(dead) {
-	  Ui::ShowText(60, 180, pstr);
-	}
-	
-	Ui::updateScreen();
-
 	FinishedLastCall = 1;
       }
       
+      Gbackdrop.put(0, 0);
+      DrawObjects();
+      botline();
+
+      if(dead) {
+	Ui::CenterXText(180, pstr);
+      }
+
       if(!sastWantTicks) {
-	displayScreen("title.raw");
-	Ui::ShowText(60, 180, pstr);
-	Ui::updateScreen();
+	Ui::CenterText(pstr);
 	SetGamePalette();
 	FinishedLastCall = 1;
       }
+
+      Ui::updateScreen();
     }
   }
 
@@ -787,25 +783,55 @@ void showInfo()
 
 
 // Show the Game Title..
-void ShowTitle()
+void ShowTitle(int selected)
 {
     displayScreen("title.raw");
 
-    Ui::ShowText(DMULTCONST(40), DMULTCONST(90),
-		 "SDL Sasteroids Version " VERSION);
+    Ui::ShowTextColor(DMULTCONST(40), DMULTCONST(90),
+		      "SDL Sasteroids Version " VERSION,
+		      255, 255, 255);
     
-    Ui::ShowText(DMULTCONST(40), DMULTCONST(100),
-		 "(I) INFORMATION");
-
-    Ui::ShowText(DMULTCONST(40), DMULTCONST(110),
-		 "(H) HIGH SCORES" );
+    Ui::ShowTextColor(DMULTCONST(40), DMULTCONST(100),
+		      "(I) INFORMATION",
+		      255, 255, 255);
     
-    Ui::ShowText(DMULTCONST(40), DMULTCONST(120),
-		 "(S) START GAME");
+    Ui::ShowTextColor(DMULTCONST(40), DMULTCONST(110),
+		      "(H) HIGH SCORES",
+		      255, 255, 255);
+    
+    Ui::ShowTextColor(DMULTCONST(40), DMULTCONST(120),
+		      "(S) START GAME",
+		      255, 255, 255);
 
-    Ui::ShowText(DMULTCONST(40), DMULTCONST(130),
-		 "(Q) TO QUIT");
+    Ui::ShowTextColor(DMULTCONST(40), DMULTCONST(130),
+		      "(Q) QUIT",
+		      255, 255, 255);
 
+
+    switch(selected) 
+      {
+      case 1:
+	Ui::ShowTextColor(DMULTCONST(40)+1, DMULTCONST(100)+1,
+			  "(I) INFORMATION",
+			  255, 255, 0);
+	break;
+      case 2:
+	Ui::ShowTextColor(DMULTCONST(40)+1, DMULTCONST(110)+1,
+			  "(H) HIGH SCORES",
+			  255, 255, 0);
+	break;
+      case 3:
+	Ui::ShowTextColor(DMULTCONST(40)+1, DMULTCONST(120)+1,
+			  "(S) START GAME",
+			  255, 255, 0);
+	break;
+      case 4:   
+	Ui::ShowTextColor(DMULTCONST(40)+1, DMULTCONST(130)+1,
+			  "(Q) QUIT",
+			  255, 255, 0);
+	break;
+      }
+    
     updateScreen();
 }
 
@@ -867,7 +893,7 @@ void InitializeSDL()
 int main(int argc, char *argv[])
 {
   char c;
-  int done = 0, dirty = 1, mode = 1;
+  int done = 0, dirty = 1, mode = 1, menu = 1;
   SDL_Event event;
   
   srand((unsigned int) time(NULL));
@@ -894,7 +920,7 @@ int main(int argc, char *argv[])
   LoadBitmaps();	      
   Ui::init();
   SetGamePalette();	
-  ShowTitle();
+  ShowTitle(menu);
   LoadWavs();
   
   while (!done) {
@@ -912,6 +938,28 @@ int main(int argc, char *argv[])
 	  c = 'q';
 	if (event.key.keysym.sym == SDLK_s)
 	  c = 's';
+
+	if (event.key.keysym.sym == SDLK_RETURN)
+	  {
+	    PlaySound(SND_BOOM_C);
+	    if(menu == 1) c = 'i';
+	    if(menu == 2) c = 'h';
+	    if(menu == 3) c = 's';
+	    if(menu == 4) c = 'q';
+	  }
+
+	if (event.key.keysym.sym == SDLK_DOWN) 
+	  if(menu < 4 && mode == 1) {
+	    PlaySound(SND_FIRE);
+	    menu++, dirty = 1;
+	  }
+	
+	if (event.key.keysym.sym == SDLK_UP) 
+	  if(menu > 1 && mode == 1) {
+	    PlaySound(SND_FIRE);
+	    menu--, dirty = 1;
+	  }
+	
 	if (mode != 1)
 	  mode = 1, dirty = 1;
 	break;
@@ -949,7 +997,7 @@ int main(int argc, char *argv[])
     if (dirty) {
       switch (mode) {
       case 1:
-	ShowTitle();
+	ShowTitle(menu);
 	break;
       case 2:
 	showInfo();

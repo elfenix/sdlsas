@@ -42,7 +42,10 @@ class Ui
   
   static void message( int y, char *msg ); // message centered at line y
   static void message( char *msg ) { message(0,msg); }
+  static void CenterText(char* msg);
+  static void CenterXText(int y, char* msg);
   static void ShowText(int x, int y, char* msg );
+  static void ShowTextColor(int x, int y, char* msg, char r, char g, char b);
   static char yesNo( const char *msg );
   
   // returns last key pressed (eg. CR or ESC)

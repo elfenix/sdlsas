@@ -23,13 +23,48 @@ TTF_Font *Ui::myfont = 0;
 void (*Ui::pixelDriver)(SDL_Surface* visual, int x, int y, 
 			char r, char g, char b);
 
-void
- Ui::ShowText(int x, int y, char *msg)
+
+void Ui::CenterText(char* msg)
+{
+  int y, x, height, width;
+
+  TTF_SizeText(myfont, msg, &width, &height);
+
+  x = SCREEN_X - width;
+  y = SCREEN_Y - height;
+  x /= 2;
+  y /= 2;
+
+  ShowText(x, y, msg);
+}
+
+
+void Ui::CenterXText(int y, char* msg)
+{
+  int x, height, width;
+
+  TTF_SizeText(myfont, msg, &width, &height);
+
+  x = SCREEN_X - width;
+  x /= 2;
+
+  ShowText(x, y, msg); 
+}
+
+
+
+void Ui::ShowText(int x, int y, char *msg)
+{
+  ShowTextColor(x, y, msg, 255, 255, 255);
+}
+
+
+void Ui::ShowTextColor(int x, int y, char *msg, char r, char g, char b)
 {
     SDL_Surface *surface = 0;
     SDL_Rect dest;
     SDL_Color mycolor = {
-    255, 255, 255};
+    r, g, b};
 
     dest.x = x;
     dest.y = y;
@@ -43,6 +78,7 @@ void
     SDL_BlitSurface(surface, NULL, myscreen, &dest);
     SDL_FreeSurface(surface);
 }
+
 
 
 // set drawing to virtualScn screen

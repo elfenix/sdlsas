@@ -7,7 +7,7 @@
 // Information about the Game
 
 // Set the version string for SDL Sasteroids
-#define VERSION "1.96.2(CVS)"
+#define VERSION "1.96.2(CVS RELEASE)"
 
 // Where do we want the game files?
 #ifndef BINDIR
