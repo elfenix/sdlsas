@@ -202,6 +202,37 @@ void Fire()
   }
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// sound display - displays the current mixer level
+int sDisplayTimer = 0;
+
+
+void sounddisplay() 
+{
+  int x, x1 = 24;
+  int y = 36;
+
+  if(sDisplayTimer > 0) sDisplayTimer--;
+  if(sDisplayTimer < 0) sDisplayTimer = 0;
+  if(!sDisplayTimer) return;
+
+  for( x = 0; x < MainVolume; x++ ) {
+    Ui::setpixel(x1+DDIV2CONST(x), y, 255-x, (55)+x, 0);
+    Ui::setpixel(x1+DDIV2CONST(x), y+1, 255-x, 55+x, 0);
+    Ui::setpixel(x1+DDIV2CONST(x), y+2, 255-x, 55+x, 0);
+    Ui::setpixel(x1+DDIV2CONST(x), y+3, 255-x, 55+x, 0);
+    Ui::setpixel(x1+DDIV2CONST(x), y+4, 255-x, 55+x, 0);
+  } 
+
+}
+
+
+
+
+
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////
 // botline - modified from xasteroids
@@ -449,12 +480,13 @@ void PlayGame()
 	  }
 	}
 
-	if(event.key.keysym.sym == SDLK_PLUS) {
+	if(event.key.keysym.sym == SDLK_PLUS || event.key.keysym.sym == SDLK_EQUALS) {
 	  if(MainVolume < 128) MainVolume+=8;
 	  if(MainVolume > 128) MainVolume=128;
 	  DispVolume = 64;
 #ifdef HAVE_SOUND
 	  Mix_Volume( -1, MainVolume);
+	  sDisplayTimer = 35;
 #endif
 	}
 
@@ -464,6 +496,7 @@ void PlayGame()
 	  DispVolume = 64;
 #ifdef HAVE_SOUND
 	  Mix_Volume( -1, MainVolume );
+	  sDisplayTimer = 35;
 #endif	 
 	}
 
@@ -649,7 +682,8 @@ void PlayGame()
 	Ui::CenterText(pstr);
 	FinishedLastCall = 1;
       }
-
+      
+      sounddisplay();
       Ui::updateScreen();
     }
   }
