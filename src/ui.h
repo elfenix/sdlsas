@@ -32,8 +32,7 @@ void g_setpixelB4(SDL_Surface* visual, int x, int y, char r, char g, char b);
 
 class Ui 
 {
- public:
-  
+ public: 
   static void updateScreen();
   static void drawToPhysical();
   static void drawToVirtual();
@@ -91,6 +90,7 @@ class Ui
   friend class Bitmap;
   
   static SDL_Surface* myscreen;
+
  private:
   static TTF_Font *myfont;
   static void die(int);
