@@ -493,7 +493,7 @@ void PlayGame()
 	  PlayerShip.addRegPower(1);
 	}
 
-	if (!(rand()%5000)) {
+	if (!(rand()%250)) {
 	  int j;
 	  j = GetOpenObject();
 	  ObjectList[j] = new Enemy;

@@ -514,6 +514,8 @@ void ObjectsHit(int i, int j, int& touched, int& crash)
   if(!ObjectList[i]->alive()) return;
   if(!ObjectList[j]->alive()) return;
 
+  if(i == j) return;
+
   // First, Swap objects so we only need 1 set of code
   switch(ObjectList[i]->type()) {
   case SMALLAST:
@@ -557,7 +559,7 @@ void ObjectsHit(int i, int j, int& touched, int& crash)
       	KillAsteroid(j, i);
       	crash = 1; touched++;
       } else {
-	//	BounceObjects(i, j);
+	BounceObjects(i, j);
       }
       break;
     case SPINNER: 
@@ -569,7 +571,7 @@ void ObjectsHit(int i, int j, int& touched, int& crash)
 	HitSpinner(j, i);
 	crash = 1; touched++;
       } else {
-	//	BounceObjects(i, j); 
+	BounceObjects(i, j); 
       }
       break; 
     case ENEMY:
@@ -577,7 +579,7 @@ void ObjectsHit(int i, int j, int& touched, int& crash)
 	crash = 1; touched = 1;
 	ObjectList[j]->die();
       } else {
-	//	BounceObjects(i, j);
+	BounceObjects(i, j);
       }
       break;
     case P_TYPE:
@@ -609,12 +611,12 @@ void ObjectsHit(int i, int j, int& touched, int& crash)
     break; 
   case ENEMY:	
     if(ObjectList[j]->type() == BULLET2) break;
-    // BounceObjects(i, j);
+    BounceObjects(i, j);
     break;
   case SPINNER:
     Spinner* t = (Spinner*)ObjectList[i];
     if(t->morph()!=-1) break;
-    // BounceObjects(i, j);
+    BounceObjects(i, j);
   }
 }
 
@@ -724,6 +726,8 @@ void BounceObjects(int i, int j)
   float ti, tj, t;
   Vector vi, vj;
   Vector t1, t2;
+
+  rcollide(ObjectList[i], ObjectList[j]);
 
   if(ObjectList[j]->GetX()==ObjectList[i]->GetX() &&
      ObjectList[j]->GetY()==ObjectList[i]->GetY()) return;

@@ -183,6 +183,11 @@ class ScreenObject {
       velocity = nVelocity;
     }
 
+  inline void SetXY(const Vector& nXY)
+    {
+      position = nXY;
+    }
+
   inline void touch() {
     tchd = 1;
   }
@@ -390,9 +395,6 @@ class PowerUp : public ScreenObject
 };
 
 
-
-
-
 // Simple collision function
 // TODO: make more accurate
 inline bool collide(ScreenObject* b1, ScreenObject* b2)
@@ -404,12 +406,50 @@ inline bool collide(ScreenObject* b1, ScreenObject* b2)
   d *= d;
   dx *= dx;
   dy *= dy;
-
+  
   if ( (dx+dy) < d) {	
-      return true;
-    }
+    return true;
+  }
   
   return false;
+}
+
+
+// Reverse a collision(avoid objects moving inside
+// each other(not the best way of doing this, bu
+// should work.... This also keeps the bounce
+// code from going crazy. 
+inline void rcollide(ScreenObject *i, ScreenObject *j)
+{
+  Vector vecIM, vecJM, fPi(i->GetXYVec()), fPj(j->GetXYVec());
+  float desiredDistance = (float)i->Size() + (float)j->Size();
+  float dx = float(i->GetCenX() - j->GetCenX());
+  float dy = float(i->GetCenY() - j->GetCenY());
+  float d = sqrt(dx*dx + dy*dy);
+  float iM, jM, viM, vjM;
+
+  if(isnan(desiredDistance) || isnan(d)) return;
+  if(d > desiredDistance) return;
+
+  d = desiredDistance - d;    // Amount we want to move them away
+  d -= 0.3f;                  // Want some overlap though.
+
+  vecIM = i->GetVel();
+  vecJM = j->GetVel();
+  
+  viM = vecIM.length(); 
+  vjM = vecJM.length();
+
+  iM = (d-viM) / (vjM+viM);   // Calculate distance to move i and
+  jM = (d-vjM) / (vjM+viM);   // j.
+
+  vecIM *= -1 * iM;
+  vecJM *= -1 * jM;
+  fPi += vecIM;
+  fPj += vecJM;
+
+  i->SetXY(fPi);
+  j->SetXY(fPj);
 }
 
 

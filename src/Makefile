@@ -12,8 +12,8 @@ DEFINES = -DGAMEDIR=$(GDIR)
 
 
 # for debugging
-CFLAGS	 = -Wall $(INC) $(DEBUG) $(OPTS) 
-DEBUG = -g -pg
+#CFLAGS	 = -Wall $(INC) $(DEBUG) $(OPTS) 
+#DEBUG = -g -pg
 
 #LFLAGS   = -static
 
