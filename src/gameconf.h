@@ -11,7 +11,7 @@
 
 // Where do we want the game files?
 #ifndef BINDIR
-#define BINDIR "/usr/games/"
+#define BINDIR "/usr/share/sasteroids/"
 #endif
 
 // Uncomment line bellow if your using an old C++ compiler
@@ -21,7 +21,7 @@
 #define HAVE_SOUND
 
 // Double Size 320x200 displays?
-// #define DOUBLE_SIZE	
+#define DOUBLE_SIZE	
 
 // Use non original enhanced behavoir?
 #define NON_ORIGINAL 
