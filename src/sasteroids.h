@@ -73,5 +73,6 @@ extern SBitmap Gbit[NUM_BITMAPS];
 extern SBitmap extraLives;
 extern int Glevel;
 extern int ClassicMode;
+extern int numasts;
 
 #endif

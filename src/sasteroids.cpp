@@ -291,18 +291,14 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
       CreateAsteroid( px, py,
 		      FastMath::sin(rA2) * 1.0f + vx,
 		      FastMath::cos(rA2) * 1.0f + vy, ctype );
-      numasts+=2;
 
       do {
 	rA2 = rand() % 255;
       } while( abs(rA2 - rA1) < 5 && abs(rA2 - (rA1+124)) < 5);      
       rA1 = int(rA2 + 128) % 255;
-      
       CreateAsteroid( px, py,
 		      FastMath::sin(rA1) * 1.0f + vx,
 		      FastMath::cos(rA1) * 1.0f + vy, ctype );
-      numasts++;
-
       if(ctype == MEDAST && !(rand()%LevelOdds(16,4))) {
 	j = GetOpenObject();
 	ObjectList[j] = new Spinner;
@@ -313,7 +309,6 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
 	CreateAsteroid( px, py, 
 			FastMath::sin(rA2) * 1.0f + vx,
 			FastMath::cos(rA2) * 1.0f + vy, ctype );
-	numasts++;
       }
     }   
   }
@@ -374,7 +369,6 @@ void GenerateAsteroids()
 	while (PlayerShip.GetXYVec().length(temp) < START_DIST);
 
 	obj = CreateAsteroid(x, y, 0, 0, BIGAST);
-	numasts++;
 
 	if(ObjectList[obj]) {
 	  ObjectList[obj]->randomDir(0.40f);
@@ -391,7 +385,6 @@ void GenerateAsteroids()
 	  if(ObjectList[obj]) {
 	    ObjectList[obj]->randomDir(1.00f);
 	  }
-	  numasts++;
 	}
 	
 	if(!(rand()%6) && !ClassicMode) {
@@ -405,7 +398,6 @@ void GenerateAsteroids()
 	  if(ObjectList[obj]) {
 	    ObjectList[obj]->randomDir(1.40f);
 	  }
-	  numasts++;
 	}	
     }
 }

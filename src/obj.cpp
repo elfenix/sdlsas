@@ -658,6 +658,7 @@ int CreateAsteroid(float x, float y, float xv, float yv, int type)
     ScreenObject *newobject;
     int openObject;
 
+    numasts++;
     openObject = GetOpenObject();
     if (openObject == -1)
 	return -1;
