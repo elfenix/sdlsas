@@ -12,10 +12,8 @@
 
 #include "sasteroids.h"
 
-typedef float FixedPoint;
-
 // Size of trig table - should be power of 2
-#define TRIGSIZE 256
+const int TRIGSIZE = 256;
 
 // change char to match size of trig table (but always use 'unsigned' )
 typedef unsigned char Angle;

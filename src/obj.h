@@ -1,3 +1,5 @@
+// Copyright 1994 Brad Pitzel
+// Modifications Copyright 2002 Andrew M.
 //
 // Feel free to use/distribute/modify as long as credit/copyrights for myself 
 // are included.
@@ -6,15 +8,20 @@
 // * maxspeed is really the maximum speed SQUARED of the object in the class
 // * The setmaxspeed function automatically takes the sqrt or the parameter 
 
-#ifndef __BPObj__
-#define __BPObj__
+#ifndef __SDLSAS_OBJ__
+#define __SDLSAS_OBJ__
 
 #include "sasteroids.h"
 
+const int MAX_OBJECTS = 128;
 const int SHIPTURNS = 32;
 const int TURNANGLE = 256/SHIPTURNS;
-
 const int EXPLODE_TYPE = 255;
+
+class SBitmap;
+class ScreenObject;
+class Ship;
+
 
 extern SBitmap ShipBitmaps[32];
 extern SBitmap ShipThrusts[32];
@@ -23,12 +30,6 @@ extern SBitmap spinnerBitmaps[32];
 extern Vector ScreenLimits;
 
 void InitShips();
-
-const int MAX_OBJECTS = 128;
-
-
-class ScreenObject;
-class Ship;
 
 extern ScreenObject* ObjectList[MAX_OBJECTS];
 extern Ship PlayerShip;
@@ -46,29 +47,21 @@ class ScreenObject {
  public:
   ScreenObject();
   ScreenObject(int type);
-  
   virtual ~ScreenObject();
   
   inline bool alive()
     { return isAlive; }
   
-  void die()  
-    { isAlive = false; }
-  
-  void restore() 
-    { isAlive = true; }
-  
-  void SetBitmap(SBitmap* sprite) 
-    { 
-      mysprite = sprite;
-      myCenXRef = float(sprite->width())/2.0f; 
-      myCenYRef = float(sprite->height())/2.0f;
-    }	
-  
+  void die(); 
+  void restore();
+  void SetBitmap(SBitmap* sprite);
+  void randomDir(float magn);
+  void randomSpeed(float start, float stop);  
+
   virtual void draw();	// Draw the object
   virtual void tick();	// Move the object for one time tick
 
-   inline void SetWrapMoves(bool a) 
+  inline void SetWrapMoves(bool a) 
     { wrapMoves = a; }
   
   inline static void SetLimits(float x, float y) 
@@ -113,10 +106,10 @@ class ScreenObject {
   inline void SetMaxSpeed(float a) 
     { maxspeed = a*a; }
   
-  int type() 
+  inline int type() 
     { return objtype; }
   
-  void settype(int a) 
+  inline void settype(int a) 
     { objtype = a; }
   
   inline void setsize(int i) 
@@ -133,27 +126,6 @@ class ScreenObject {
   
   inline void AddVel(float x, float y)
     { velocity.SetXY(VelX()+x,VelY()+y); }
-  
-  inline void randomDir(float magn)
-    {
-      int angle = rand() % 255;
-      velocity.SetXY(FastMath::sin(angle)*magn, 
-		     FastMath::cos(angle)*magn);
-    }
-  
-  inline void randomSpeed(float start, float stop)
-    {
-      int myMod, rRet;
-      float ttmp, ttmp2;
-      myMod = int((stop - start) * 100.0f);
-      if(myMod < 0) myMod = -myMod;
-      rRet = rand() % myMod;
-      ttmp = float(rRet) / (100.0f);
-      ttmp2 = velocity.length();
-      ttmp2 = 1 / ttmp2;
-      velocity = velocity * ttmp;
-      velocity = velocity * ttmp2;
-    }
   
  protected:
   bool wrapMoves;
@@ -175,41 +147,50 @@ class Ship : public ScreenObject
 {
  public:
   
-  Ship() : ScreenObject(), shieldMax(30), shieldTimeLeft(0), 
-    Vbounce(0), shieldLives(3), lives(3), thrustcnt(0), pos(0) 
-    { deadStick = 0; SetBitmap(); wrapMoves = 1; wPower = 0; angle = 0; }
-  
-  inline void resetDirection() 
+  Ship();
+
+  virtual void draw();
+  virtual void tick();
+  virtual void SetBitmap();
+
+  void Reset();
+  void SetDeadStick(int dead);
+  void addMaxPower(int a);
+  void addRegPower(int a);
+
+  void Thrust(float rRate);  
+  void Hyper();
+  void dischargeWeapon();
+  void Brake();
+
+  void shieldOn();
+  int shielded();
+
+  inline int weaponPower() 
     { 
-      pos = 0; SetBitmap(); angle = 0; 
-      maxPower = 200;
-      wPower = maxPower;
-      rechargeRate = 2;
+      if(deadStick) return 0; return wPower; 
     }
 
-  inline void SetDeadStick(int dead) { deadStick = dead; }
-  inline int isDeadStick() { return deadStick; }
+  inline int& getAngle() 
+    { 
+      return angle; 
+    }
   
-  inline void Brake() { if(!deadStick) SetVel(0.0f, 0.0f ); }
-  
+  inline int isDeadStick() 
+    { 
+      return deadStick; 
+    }
+   
   inline int shieldPercent() const 
     {
-      return 100;
-      //return (100*(int)shieldTimeLeft)/(int)shieldMax; }
+      return (100*(int)shieldTimeLeft)/(int)shieldMax; 
     }
 
   inline int weaponPercent() const
     {
       return (100*wPower)/(maxPower);
     }
-  
-  inline void bounce(int time) 
-    { Vbounce=time; }
-  
-  virtual void draw();
-  virtual void tick();
-  virtual void SetBitmap();
-  
+ 
   inline void rotLeft( int t )
     {
       if(!deadStick) {
@@ -236,51 +217,27 @@ class Ship : public ScreenObject
     }
   
   inline int ships() 
-    { return lives; }
-  
-  inline void setships(int sships)
-    { lives = sships; }
-  
-  inline void addship()	
-    { lives++; }
-  
-  inline void death() 
-    { lives--; }
-  
-  inline void Thrust(float rRate)
     { 
-      if(!deadStick) {
-	accelleration.SetXY(FastMath::sin(angle),-FastMath::cos(angle)); 
-	accelleration = accelleration * rRate;
-	thrustcnt = 3;
-	SetBitmap();
-      }
+      return lives; 
     }
   
+  inline void setships(int sships)
+    { 
+      lives = sships; 
+    }
   
-  void shieldOn();
-  int shielded();
-  void Hyper();
+  inline void addship()	
+    { 
+      lives++; 
+    }
   
-  void SetupDrawing() {
-    //    for(int i = 0; i < SHIPTURNS; i++) {
-    //      ShipBitmaps[i].setupsurface();
-    //      ShipThrusts[i].setupsurface();
-    //      spinnerBitmaps[i].setupsurface(); // Works for the time being.
-    //    }
-  }
+  inline void death() 
+    { 
+      lives--; 
+    }
   
-  inline int weaponPower() { if(deadStick) return 0; return wPower; }
-  inline void dischargeWeapon() { wPower -= 25; }
-  
-  inline int& getAngle() 
-    { return angle; }
-  
-  inline void addMaxPower(int a) { maxPower += a; }
-  inline void addRegPower(int a) { rechargeRate += a; }
-
  protected:
-  int angle, shieldMax, shieldTimeLeft, Vbounce, shieldLives;
+  int angle, shieldMax, shieldTimeLeft, bounce, shieldLives;
   int lives, thrustcnt, wPower, pos, deadStick;
   int maxPower, rechargeRate;
 };
@@ -365,14 +322,16 @@ class PowerUp : public ScreenObject
 inline bool collide(ScreenObject b1, ScreenObject b2)
 {
   float d = (float)b1.Size() + (float)b2.Size();
-  float dx= float(fabs(b1.GetCenX() - (b2.GetCenX())));
-  float dy= float(fabs(b1.GetCenY() - (b2.GetCenY())));
+  float dx= float(b1.GetCenX() - (b2.GetCenX()));
+  float dy= float(b1.GetCenY() - (b2.GetCenY()));
   
-  if ((dx <= d) && (dy <= d)) {
-    if ( (dx*dx+dy*dy) < d*d) {	
+  d *= d;
+  dx *= dx;
+  dy *= dy;
+
+  if ( (dx+dy) < d) {	
       return true;
     }
-  }
   
   return false;
 }

@@ -10,9 +10,6 @@ OPTS = -Wall -pipe
 GDIR=\"/usr/share/sasteroids/\"
 DEFINES = -DGAMEDIR=$(GDIR)
 
-# regular use
-CFLAGS	 = -Wall $(DEFINES) $(INC) $(OPTIMIZE) $(OPTS)
-DEBUG = 
 
 # for debugging
 #CFLAGS	 = -Wall $(DEFINES) $(INC) $(DEBUG) $(OPTS) 

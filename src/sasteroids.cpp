@@ -27,8 +27,9 @@ void upscore(int upby);
 // Global variables: 
 
 // Constants. (tune game here)
-const int   GAME_CLOCK    = 27;           // Number of mseconds between ticks.
+// const int   GAME_CLOCK    = 27;           // Number of mseconds between ticks.
 // const int GAME_CLOCK = 1; // For Benchmarking...
+const int GAME_CLOCK = 50; // For tuning...
 const float START_DIST    = 70;           // Disance asteroids start from ship
 const int   MAXASTEROIDS  = 16;           // Max # Asteroids
 
@@ -43,7 +44,7 @@ const float MassSpinner   = 2.0f;
 const float BUL_SPEED     = 7.5f;
 
 // System Setup
-SBitmap Gbit[11];                          // graphics. =)
+SBitmap Gbit[NUM_BITMAPS];                // graphics. =)
 SBitmap Gbackdrop;
 SBitmap titleScreen;
 SBitmap extraLives;                       // 1/2 scale ship for extra men.
@@ -88,6 +89,7 @@ inline void PlaySound(int soundNumber)
 void LoadBitmaps()
 {
   Gbit[SMALLAST].LoadImage(BINDIR "/graphics/smallast.bmp");
+  Gbit[ESMAST].LoadImage(BINDIR "/graphics/esmallast.bmp");
   Gbit[MEDAST].LoadImage(BINDIR "/graphics/medast.bmp");
   Gbit[BIGAST].LoadImage(BINDIR "/graphics/bigast.bmp");
   Gbackdrop.LoadImage(BINDIR "/graphics/back1.bmp", false);
@@ -153,6 +155,9 @@ void HitSpinner(int number, int killedBy)
   }
 }
 
+
+//////////////////////////////////////////////////////
+// Hit the stupid enemy person.
 void HitEnemy(int number, int killedBy)
 {
   int j;
@@ -184,8 +189,6 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
     numasts -= 1;
     
     // this asteroid is dead now
-    ObjectList[number]->die();
-
     // explode the original asteroid!
     j = GetOpenObject();
     explode = new Explosion(ObjectList[number]->GetX(),
@@ -193,6 +196,30 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
 			    ObjectList[number]->VelX(),
 			    ObjectList[number]->VelY());
     ObjectList[j] = explode;
+
+    // Check if we need to do something special when the asteroid dies
+    if(ObjectList[number]->type() == ESMAST) {
+      unsigned char angle; 
+
+      for(angle = 0; angle < 220; angle += 30) {
+	float fsin = FastMath::sin(angle) * 4.0f;
+	float fcos = FastMath::cos(angle) * 4.0f;
+	int j = GetOpenObject();
+	ObjectList[j] = new ScreenObject;
+	ObjectList[j]->restore();
+	ObjectList[j]->SetVel(fsin, fcos);
+	ObjectList[j]->SetXY(ObjectList[number]->GetX(), 
+			     ObjectList[number]->GetY());
+	ObjectList[j]->SetAcc(0.0f, 0.0f);
+	ObjectList[j]->SetWrapMoves(false);
+	ObjectList[j]->SetMaxSpeed(255.0f);
+	ObjectList[j]->settype(BULLET2);
+	ObjectList[j]->SetBitmap(&Gbit[BULLET2]);
+	ObjectList[j]->setsize(5);
+      } 
+    }
+
+    ObjectList[number]->die();
 
     // up the points, but only if WE killed the asteroid
     if(killedBy != 0 && ObjectList[killedBy]) {
@@ -247,15 +274,21 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
 	ObjectList[j]->SetXY(px, py);
 	ObjectList[j]->SetVel(FastMath::sin(rA2)*1.0f + vx, 
 			      FastMath::cos(rA2)*1.0f + vy);
+      } else if(ctype == SMALLAST && !(rand()%10)) {
+	CreateAsteroid( px, py, 
+			FastMath::sin(rA2) * 1.0f + vx,
+			FastMath::cos(rA2) * 1.0f + vy, ESMAST );
+	numasts++;
       } else {
 	CreateAsteroid( px, py, 
 			FastMath::sin(rA2) * 1.0f + vx,
 			FastMath::cos(rA2) * 1.0f + vy, ctype );
 	numasts++;
-      }     
+      }
     }   
   }
 }
+
 
 ///////////////////////////////////////////////////////
 // Do the PowerUps
@@ -273,7 +306,7 @@ void PowerUpF(int i)
     PlayerShip.addMaxPower(20);
     break;
   case P_WENG:
-    PlayerShip.addRegPower(5);
+    PlayerShip.addRegPower(2);
     break;
   case P_WTHR:
     canShootThree = 1;
@@ -299,7 +332,6 @@ void GenerateAsteroids()
     float x, y;
     Vector temp;
 
-    
     for (i = 0; i <= (Glevel / 2 + 1); i++) {
 	do {
 	    x = (float) (rand() % 320);
@@ -341,17 +373,9 @@ void GenerateAsteroids()
 	    ObjectList[obj]->randomDir(1.40f);
 	  }
 	  numasts++;
-	}
-
-	
+	}	
     }
-
 }
-
-
-
-
-
 
 
 // /////////////////////////////////////////////////////////////////////////
@@ -370,13 +394,15 @@ int MoveObjects()
       // Check for ship collision....
       if (collide(*ObjectList[i], *ObjectList[0])
 	  && ObjectList[i]->type() != 254
-	  && ObjectList[i]->type() != 255) {
+	  && ObjectList[i]->type() != 255
+	  && ObjectList[i]->alive()) {
 	crash = 1;
 	if(!PlayerShip.isDeadStick() && !touched) {
 	  switch(ObjectList[i]->type()) {
 	  case SMALLAST:
 	  case MEDAST:
 	  case BIGAST:
+	  case ESMAST:
 	    KillAsteroid(i, 0);
 	    break;
 	  case SPINNER:
@@ -406,7 +432,7 @@ int MoveObjects()
 	  if (i == j)
 	    continue;	/* Don't check against self */
 	  
-	  if (ObjectList[i]->alive()
+	  if (ObjectList[i]->alive() && ObjectList[j]->alive()
 	      && (ObjectList[i]->type() == 254 || 
 		  ObjectList[i]->type() == BULLET2)
 	      && collide(*ObjectList[i], *ObjectList[j])) {
@@ -414,6 +440,7 @@ int MoveObjects()
 	    case SMALLAST:
 	    case BIGAST:
 	    case MEDAST:
+	    case ESMAST:
 	      KillAsteroid(j, i);
 	      ObjectList[i]->die();
 	      break;
@@ -443,7 +470,7 @@ int MoveObjects()
 
 
 // Utility Function.
-void eegg() 
+void CleanUpStuff() 
 {
   int i;
   for(i = 1; i < MAX_OBJECTS; i++) {
@@ -472,7 +499,7 @@ void Fire()
   float rx, ry;
   
   if(eeggL == 80 && eeggR == 160 && eeggU == 3 && eeggD == 12 ) {
-    eegg();
+    CleanUpStuff();
     eeggL = 0; eeggR = 0; eeggU = 0; eeggD = 0; eeggS = 1;
   }
 
@@ -601,23 +628,8 @@ void displayScreen(char *file)
 
 void ResetShip() 
 {
-  int x, y, width, height;
-  
-  width = ShipBitmaps[0].width(); 
-  height = ShipBitmaps[0].height();
   canShootThree = 0;
-  x = int(ScreenLimits.GetX()) - width;
-  y = int(ScreenLimits.GetY()) - height;
-  x = x / 2;
-  y = y / 2;
-
-  PlayerShip.SetDeadStick(0);
-  PlayerShip.restore();
-  PlayerShip.SetSize(5, 5);
-  PlayerShip.SetXY(x, y);
-  PlayerShip.SetupDrawing();
-  PlayerShip.SetVel(0.0f, 0.0f);
-  PlayerShip.resetDirection();
+  PlayerShip.Reset();
 }
 
 
@@ -1023,11 +1035,11 @@ void showScoringInfo()
 void LoadWavs()
 {
 #ifdef HAVE_SOUND
-  soundSamples[SND_BOOM_A] = Mix_LoadWAV(BINDIR "boom1.wav");
-  soundSamples[SND_BOOM_B] = Mix_LoadWAV(BINDIR "boom2.wav");
-  soundSamples[SND_BOOM_C] = Mix_LoadWAV(BINDIR "shipexplode.wav");
-  soundSamples[SND_FIRE]   = Mix_LoadWAV(BINDIR "zap.wav");
-  soundSamples[SND_WARP]   = Mix_LoadWAV(BINDIR "warp.wav");
+  soundSamples[SND_BOOM_A] = Mix_LoadWAV(BINDIR "sounds/boom1.wav");
+  soundSamples[SND_BOOM_B] = Mix_LoadWAV(BINDIR "sounds/boom2.wav");
+  soundSamples[SND_BOOM_C] = Mix_LoadWAV(BINDIR "sounds/shipexplode.wav");
+  soundSamples[SND_FIRE]   = Mix_LoadWAV(BINDIR "sounds/zap.wav");
+  soundSamples[SND_WARP]   = Mix_LoadWAV(BINDIR "sounds/warp.wav");
 #endif
 }
 

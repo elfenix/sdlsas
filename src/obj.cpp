@@ -115,8 +115,69 @@ void ScreenObject::tick()
 }
 
 
+void ScreenObject::die() 
+{
+  isAlive = false;
+}
+
+
+void ScreenObject::restore()
+{
+  isAlive = true;
+}
+
+void ScreenObject::SetBitmap(SBitmap* sprite)
+{
+  mysprite = sprite;
+  myCenXRef = float(sprite->width())/2.0f; 
+  myCenYRef = float(sprite->height())/2.0f; 
+}
+
+
+void ScreenObject::randomSpeed(float start, float stop)
+{
+  int myMod, rRet;
+  float ttmp, ttmp2;
+  myMod = int((stop - start) * 100.0f);
+  if(myMod < 0) myMod = -myMod;
+  rRet = rand() % myMod;
+  ttmp = float(rRet) / (100.0f);
+  ttmp2 = velocity.length();
+  ttmp2 = 1 / ttmp2;
+  velocity = velocity * ttmp;
+  velocity = velocity * ttmp2;
+}
+
+
+void ScreenObject::randomDir(float magn)
+{
+  int angle = rand() % 255;
+  velocity.SetXY(FastMath::sin(angle)*magn, 
+		 FastMath::cos(angle)*magn);
+}
+
+
+
 // ///////////////////////////////////////////////////////////////////////
 // Ship Class....
+Ship::Ship() : ScreenObject()
+{
+  shieldMax = 30;
+  shieldTimeLeft = 0;
+  bounce = 0;
+  shieldLives = 3;
+  lives = 3;
+  thrustcnt = 0;
+  pos = 0;
+  deadStick = 0;
+  wrapMoves = 1;
+  wPower = 0;
+  angle = 0;
+
+  setsize(8);
+  SetBitmap();
+}
+
 void Ship::SetBitmap()
 {
     if (thrustcnt)
@@ -128,17 +189,7 @@ void Ship::SetBitmap()
 void Ship::draw()
 {
   if(!deadStick) {
-
     Gbit[SHIELD].put( int(position.GetX()), int(position.GetY()) );
-
-    /* TODO: Implement this as part of the shield.
-    for(i = 0; i < 255; i++) {
-      Ui::setpixel(
-		int(GetCenX()*2.0f+FastMath::sin(i)*25),
-		int(GetCenY()*2.0f+FastMath::cos(i)*25),
-		255, 255, 0);
-		} */
-
     ScreenObject::draw();	
   }
 }
@@ -179,6 +230,63 @@ void Ship::Hyper()
 }
 
 
+void Ship::Reset() 
+{ 
+  pos = 0; SetBitmap(); angle = 0; 
+  maxPower = 200;
+  wPower = maxPower;
+  rechargeRate = 1;
+  
+  restore();
+  SetDeadStick(0);
+
+  int width = ShipBitmaps[0].width();
+  int height = ShipBitmaps[0].height();
+  int x = int(ScreenLimits.GetX()) - width;
+  int y = int(ScreenLimits.GetY()) - height;
+  x = x / 2; y = y / 2;
+  SetXY(x, y);
+  SetVel(0.0f, 0.0f);
+}
+
+
+
+void Ship::Brake()
+{
+  if(!deadStick) 
+    SetVel(0.0f, 0.0f );
+}
+ 
+void Ship::SetDeadStick(int dead)
+{
+  deadStick = dead;
+}
+
+
+void Ship::Thrust(float rRate)
+{ 
+  if(!deadStick) {
+    accelleration.SetXY(FastMath::sin(angle),-FastMath::cos(angle)); 
+    accelleration = accelleration * rRate;
+    thrustcnt = 3;
+    SetBitmap();
+  }
+}
+
+void Ship::addMaxPower(int a) 
+{ 
+  maxPower += a; 
+}
+
+void Ship::addRegPower(int a) 
+{ 
+  rechargeRate += a; 
+}
+
+void Ship::dischargeWeapon()
+{
+  wPower -= 25;
+}
 
 
 /////////////////////////////////////////////
@@ -378,7 +486,7 @@ PowerUp::PowerUp()
   SetAcc(0.0f, 0.0f);
   SetXY(float(DDIVCONST(rand()%Ui::HEIGHT())), 
 	float(DDIVCONST(rand()%Ui::WIDTH())));
-  setsize(10);
+  setsize(5);
   settype(P_TYPE);
   SetBitmap(&Gbit[ptype]);
   restore();
@@ -534,16 +642,17 @@ int CreateAsteroid(float x, float y, float xv, float yv, int type)
 
     switch(type) {
     case BIGAST:
-      newobject->SetSize(10, 10);
-      newobject->setsize(30);
+      newobject->SetSize(40, 40);
+      newobject->setsize(20);
       break;
     case SMALLAST:
+    case ESMAST:
       newobject->SetSize(10, 10);
-      newobject->setsize(10);
+      newobject->setsize(7);
       break;
     case MEDAST:
-      newobject->setsize(20);
-      newobject->SetSize(10,10);
+      newobject->setsize(10);
+      newobject->SetSize(20,20);
       break;
     }
 

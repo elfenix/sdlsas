@@ -21,7 +21,7 @@
 // #define _OLD_CPP_HEADERS
 
 // Use Sound?
-// #define HAVE_SOUND
+#define HAVE_SOUND
 
 // Double Size 320x200 displays?
 #define DOUBLE_SIZE	
