@@ -51,6 +51,10 @@ int eeggS = 1;
 char HiScoreStrings[10][10];
 int HiScoreNumbers[10];
 
+// Store the current volume!
+int MainVolume = 100;
+int DispVolume = 0;
+
 
 ///////////////////////////////////////////////////////////
 // Initialize HiScores list - TODO: Load Hi Score List
@@ -445,6 +449,21 @@ void PlayGame()
 	  }
 	}
 
+	if(event.key.keysym.sym == SDLK_PLUS) {
+	  if(MainVolume < 128) MainVolume++;
+	  DispVolume = 64;
+#ifdef HAVE_SOUND
+	  Mix_Volume( -1, MainVolume);
+#endif
+	}
+
+	if(event.key.keysym.sym == SDLK_MINUS) {
+	  if(MainVolume > 0) MainVolume--;
+	  DispVolume = 64;
+#ifdef HAVE_SOUND
+	  Mix_Volume( -1, MainVolume );
+#endif	 
+	}
 
 #ifdef SAS_EXTRAS	
 	if(!dead && !pause) {
