@@ -88,12 +88,12 @@ class SBitmap : public Bitmap {
   inline void put(int x, int y) {
     SDL_Rect b;
     if(mysurface) {
-      b.x = x*2; b.y = y*2;
+      b.x = DMULTCONST(x); b.y = DMULTCONST(y);
       SDL_BlitSurface(mysurface, NULL, Ui::myscreen, &b);  
     } else {
       setupsurface();
       if(mysurface) {
-	b.x = x; b.y = y;
+	b.x = DMULTCONST(x); b.y = DMULTCONST(y);
 	SDL_BlitSurface(mysurface, NULL, Ui::myscreen, &b);  
       }
     }

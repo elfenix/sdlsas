@@ -17,11 +17,6 @@
 // Uncomment line bellow if your using an old C++ compiler
 // #define _OLD_CPP_HEADERS
 
-// Screen Resolutions
-// TODO: Make this configurable in game
-#define SCREEN_X	640
-#define SCREEN_Y	400
-
 // Double Size 320x200 displays?
 #define DOUBLE_SIZE	
 
@@ -38,9 +33,19 @@
 // Don't Edit bellow this line for standard configuration
 
 #ifdef DOUBLE_SIZE
-	#define PLAY_X (SCREEN_X/2)
-	#define PLAY_Y	(SCREEN_Y/2)
+
+#define PLAY_X (SCREEN_X/2)
+#define PLAY_Y (SCREEN_Y/2)
+#define DMULTCONST(a) (a*2)
+#define SCREEN_X 640
+#define SCREEN_Y 400
+   
 #else
-	#define PLAY_X SCREEN_X
-	#define PLAY_Y	SCREEN_Y
+
+#define PLAY_X SCREEN_X
+#define PLAY_Y	SCREEN_Y
+#define DMULTCONST(a) (a)
+#define SCREEN_X 320
+#define SCREEN_Y 200
+
 #endif

@@ -11,94 +11,79 @@
 
 #include "sasteroids.h"
 
-/*
- * Setup the palette 
- */
-char
- SBitmap::Vpal[256][3] = { {0, 0, 0} };
+// Setup the palette 
+char SBitmap::Vpal[256][3] = { {0, 0, 0} };
 
-/*
- * Setup the palette 
- */
-void
- SBitmap::SetPalette(int num, char r, char g, char b)
-{
-
-    if (num >= 0 && num < 256) {
-	Vpal[num][0] = r;
-	Vpal[num][1] = g;
-	Vpal[num][2] = b;
-    }
+// Setup the palette 
+void SBitmap::SetPalette(int num, char r, char g, char b)
+{  
+  if (num >= 0 && num < 256) {
+    Vpal[num][0] = r;
+    Vpal[num][1] = g;
+    Vpal[num][2] = b;
+  }
 }
 
 
 
 void setpixel(SDL_Surface * screen, int x, int y, char r, char g, char b)
 {
-    Uint8 *ubuff8;
-    Uint16 *ubuff16;
-    Uint32 *ubuff32;
-    Uint32 color;
-
-    if(x < 0 || y < 0) return;
-    if(x > Ui::WIDTH() || y > Ui::HEIGHT()) return; 
-
-    /*
-     * Lock the screen, if needed 
-     */
-    if (SDL_MUSTLOCK(screen)) {
-	if (SDL_LockSurface(screen) < 0)
-	    return;
-    }
-
-    /*
-     * Get the color 
-     */
-    color = SDL_MapRGB(screen->format, r, g, b);
-
-    /*
-     * How we draw the pixel depends on the bitdepth 
-     */
-
-    switch (screen->format->BytesPerPixel) {
-    case 1:
-	ubuff8 = (Uint8 *) screen->pixels;
-	ubuff8 += (y * screen->pitch) + x;
-	*ubuff8 = (Uint8) color;
-	break;
-    case 2:
-	ubuff8 = (Uint8 *) screen->pixels;
-	ubuff8 +=
-	    (y * screen->pitch) + (x * screen->format->BytesPerPixel);
-	ubuff16 = (Uint16 *) ubuff8;
-	*ubuff16 = (Uint16) color;
-	break;
-    case 3:
-	ubuff8 = (Uint8 *) screen->pixels;
-	ubuff8 += (y * screen->pitch) + (x * 3);
-	r = (color >> screen->format->Rshift) & 0xFF;
-	g = (color >> screen->format->Gshift) & 0xFF;
-	b = (color >> screen->format->Bshift) & 0xFF;
-	ubuff8[0] = r;
-	ubuff8[1] = g;
-	ubuff8[2] = b;
-	break;
-    case 4:
-	ubuff32 = (Uint32 *) screen->pixels;
-	ubuff32 += ((y * screen->pitch) >> 2) + x;
-	*ubuff32 = color;
-	break;
-    default:
-	fprintf(stderr, "Error: Unknown bitdepth!\n");
-    }
-
-
-    /*
-     * Unlock the screen if needed 
-     */
-    if (SDL_MUSTLOCK(screen)) {
-	SDL_UnlockSurface(screen);
-    }
+  Uint8 *ubuff8;
+  Uint16 *ubuff16;
+  Uint32 *ubuff32;
+  Uint32 color;
+  
+  if(x < 0 || y < 0) return;
+  if(x > Ui::WIDTH() || y > Ui::HEIGHT()) return; 
+  
+  // Lock the screen/image, if needed.
+  if (SDL_MUSTLOCK(screen)) {
+    if (SDL_LockSurface(screen) < 0)
+      return;
+  }
+  
+  // Get the color 
+  color = SDL_MapRGB(screen->format, r, g, b);
+  
+  // How we draw the pixel depends on the bitdepth 
+  
+  
+  switch (screen->format->BytesPerPixel) {
+  case 1:
+    ubuff8 = (Uint8 *) screen->pixels;
+    ubuff8 += (y * screen->pitch) + x;
+    *ubuff8 = (Uint8) color;
+    break;
+  case 2:
+    ubuff8 = (Uint8 *) screen->pixels;
+    ubuff8 +=
+      (y * screen->pitch) + (x * screen->format->BytesPerPixel);
+    ubuff16 = (Uint16 *) ubuff8;
+    *ubuff16 = (Uint16) color;
+    break;
+  case 3:
+    ubuff8 = (Uint8 *) screen->pixels;
+    ubuff8 += (y * screen->pitch) + (x * 3);
+    r = (color >> screen->format->Rshift) & 0xFF;
+    g = (color >> screen->format->Gshift) & 0xFF;
+    b = (color >> screen->format->Bshift) & 0xFF;
+    ubuff8[0] = r;
+    ubuff8[1] = g;
+    ubuff8[2] = b;
+    break;
+  case 4:
+    ubuff32 = (Uint32 *) screen->pixels;
+    ubuff32 += ((y * screen->pitch) >> 2) + x;
+    *ubuff32 = color;
+    break;
+  default:
+    fprintf(stderr, "Error: Unknown bitdepth!\n");
+  }
+    
+  // Unlock the screen if needed 
+  if (SDL_MUSTLOCK(screen)) {
+    SDL_UnlockSurface(screen);
+  }
 }
 
 
@@ -116,18 +101,21 @@ void SBitmap::setupsurface()
 
     if (Vimage) {
 	mysurface =
-	    SDL_CreateRGBSurface(SDL_SWSURFACE, Vwidth * 2, Vheight * 2,
+	    SDL_CreateRGBSurface(SDL_SWSURFACE, 
+				 DMULTCONST(Vwidth),
+				 DMULTCONST(Vheight),
 				 24, 0x000000ff, 0x0000ff00, 0x00ff0000,
 				 0x00000000);
 
-	for (y = 0, ry = 0; y < Vheight * 2; y += 2, ry++) {
-	    for (x = 0, rx = 0; x < Vwidth * 2; x += 2, rx++) {
+	for (y = 0, ry = 0; y < DMULTCONST(Vheight); y += DMULTCONST(1), ry++) {
+	    for (x = 0, rx = 0; x < DMULTCONST(Vwidth); x += DMULTCONST(1), rx++) {
 
 		setpixel(mysurface, x, y,
 			 Vpal[Vimage[ry * Vwidth + rx]][0],
 			 Vpal[Vimage[ry * Vwidth + rx]][1],
 			 Vpal[Vimage[ry * Vwidth + rx]][2]);
 
+#ifdef DOUBLE_SIZE
 		setpixel(mysurface, x + 1, y,
 			 Vpal[Vimage[ry * Vwidth + rx]][0],
 			 Vpal[Vimage[ry * Vwidth + rx]][1],
@@ -142,6 +130,7 @@ void SBitmap::setupsurface()
 			 Vpal[Vimage[ry * Vwidth + rx]][0],
 			 Vpal[Vimage[ry * Vwidth + rx]][1],
 			 Vpal[Vimage[ry * Vwidth + rx]][2]);
+#endif
 	    }
 
 	}

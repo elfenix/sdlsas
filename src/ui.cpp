@@ -55,7 +55,7 @@ void Ui::drawToVirtual()
 // Initialize SDL Library and User Interface 
 void Ui::init()
 {
-    myscreen = SDL_SetVideoMode(640, 400, 16, SDL_HWSURFACE);
+    myscreen = SDL_SetVideoMode(SCREEN_X, SCREEN_Y, 16, SDL_HWSURFACE);
     if (!myscreen) {
 	cerr << "Couldn't Grab a Visual: ERROR!" << endl;
 	exit(-1);

@@ -9,7 +9,7 @@
 // Status : proposed
 // Changed: Sun Jun 12 22:19:27 1994
 // 
-// (Merlin: this code is original)
+// (Merlin: this code is (mostly) original)
 // 
 
 #include "riloader.h"

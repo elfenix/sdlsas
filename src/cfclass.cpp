@@ -13,22 +13,7 @@
  * the filesystem. 
  */
 
-
-// #include <stdio.h>
-// #include <stdlib.h>
-// #include <string.h>
-// #include <fcntl.h>
-// #include <unistd.h>
-// #include <ctype.h>
-// #include <glob.h>
-// #include <iostream>
-
-// using namespace std;
-
 #include "sasteroids.h"
-
-
-// #include "cfclass.h"
 
 #define SIGLEN 12
 

@@ -254,7 +254,7 @@ Explosion::Explosion()
 Explosion::Explosion(float gx, float gy, float vx, float vy)
 {
     velocity.SetXY(vx, vy);
-    position.SetXY(gx * 2, gy * 2);
+    position.SetXY(DMULTCONST(gx), DMULTCONST(gy));
     size = 3;
     accelleration.SetXY(0.0f, 0.0f);
     isAlive = true;
@@ -283,13 +283,11 @@ void Explosion::draw()
     if (y >= 399)
       y = 398;
     
-    if (status[i] > 200) {
-      Ui::setpixel(x, y, 255, 255, status[i]);
-      Ui::setpixel(x + 1, y + 1, 255, 255, status[i]);
-      Ui::setpixel(x, y + 1, 255, 255, 0);
-    } else if (status[i] > 128) {
-      Ui::setpixel(x, y, 255, 255, status[i] / 10);
-    }
+    Ui::setpixel(x, y, 255, 255, status[i]);
+#ifdef DOUBLE_SIZE
+    Ui::setpixel(x + 1, y + 1, 255, 255, status[i]);
+    Ui::setpixel(x, y + 1, 255, 255, 0);
+#endif
   }
 }
 
@@ -318,9 +316,9 @@ void Explosion::initExplosion()
   int i;
   
   for (i = 0; i < numPTS; i++) {
-    pts[i].SetXY(float (rand() % 10), float (rand() % 10));
-    vel[i].SetXY(10.0f - float (rand() % 20),
-		 10.0f - float (rand() % 20));
+    pts[i].SetXY(float (rand() % DMULTCONST(5)), float (rand() % DMULTCONST(5)));
+    vel[i].SetXY(DMULTCONST(5.0f) - float (rand() % DMULTCONST(10)),
+		 DMULTCONST(5.0f) - float (rand() % DMULTCONST(10)));
     
     vel[i] += velocity;
     status[i] = 255;
