@@ -27,9 +27,9 @@ void upscore(int upby);
 // Global variables: 
 
 // Constants. (tune game here)
-// const int   GAME_CLOCK    = 27;           // Number of mseconds between ticks.
+const int   GAME_CLOCK    = 27;           // Number of mseconds between ticks.
 // const int GAME_CLOCK = 1; // For Benchmarking...
-const int GAME_CLOCK = 50; // For tuning...
+// const int GAME_CLOCK = 50; // For tuning...
 const float START_DIST    = 70;           // Disance asteroids start from ship
 const int   MAXASTEROIDS  = 16;           // Max # Asteroids
 
@@ -70,7 +70,17 @@ int deathTimer;                           // Mwahahahahahahh
 int eeggU = 0, eeggD = 0, eeggL = 0, eeggR = 0;
 int eeggS = 1;
 
-
+//////////////////////////////////////////////////////////
+// level odds - return an integer based on a level
+inline int LevelOdds(int lvlMax, int maxChance = 1, int lvlStep = 5)
+{
+  int lvlDifference;
+  lvlDifference = lvlMax - Glevel;
+  lvlDifference = (lvlDifference-1)*lvlStep;
+  if(lvlDifference < maxChance) lvlDifference = maxChance;
+  if(lvlDifference < 1) lvlDifference = 1;
+  return lvlDifference;
+}
 
 /////////////////////////////////////////////////////////////////////////
 // play sound function (just to help with the #ifdef's not being everywhere
@@ -268,13 +278,13 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
 		      FastMath::cos(rA1) * 1.0f + vy, ctype );
       numasts++;
 
-      if(ctype == MEDAST && !(rand()%10)) {
+      if(ctype == MEDAST && !(rand()%LevelOdds(16,4))) {
 	j = GetOpenObject();
 	ObjectList[j] = new Spinner;
 	ObjectList[j]->SetXY(px, py);
 	ObjectList[j]->SetVel(FastMath::sin(rA2)*1.0f + vx, 
 			      FastMath::cos(rA2)*1.0f + vy);
-      } else if(ctype == SMALLAST && !(rand()%10) && !ClassicMode) {
+      } else if(ctype == SMALLAST && !(rand()%LevelOdds(32)) && !ClassicMode) {
 	CreateAsteroid( px, py, 
 			FastMath::sin(rA2) * 1.0f + vx,
 			FastMath::cos(rA2) * 1.0f + vy, ESMAST );
