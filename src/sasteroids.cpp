@@ -43,7 +43,6 @@ const float MassSpinner   = 2.0f;
 const float BUL_SPEED     = 7.5f;
 
 // System Setup
-// cfc Gcf;                                  // graphics interface and
 SBitmap Gbit[8];                          // graphics. =)
 SBitmap Gbackdrop;
 SBitmap titleScreen;
@@ -59,6 +58,16 @@ Ship PlayerShip;	                  // Info about player's ship.
 int score, Glevel, numasts, oldscore;     // scoring and level info
 int ClassicMode = 0;                      // classic mode?
 int BackdropOn = 1;                       // is the backdrop on?
+
+// Power Ups, etc...
+int canShootThree = 1;                    // Has the three shooter powerup?
+int smartZapper;                          // smart teleport
+int deathTimer;                           // Mwahahahahahahh
+
+// These do something.... :D
+int eeggU = 0, eeggD = 0, eeggL = 0, eeggR = 0;
+int eeggS = 1;
+
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -156,7 +165,7 @@ void HitEnemy(int number, int killedBy)
 
 ///////////////////////////////////////////////////////
 // Kill an asteroid - and create new ones if needed.
-void KillAsteroid(int number, int killedBy)
+void KillAsteroid(int number, int killedBy, bool killChildren = false)
 {
   int j, ctype;
   Explosion* explode;
@@ -179,10 +188,12 @@ void KillAsteroid(int number, int killedBy)
     ObjectList[j] = explode;
 
     // up the points, but only if WE killed the asteroid
-    if(ObjectList[killedBy]->type() == SHIP_BUL) {
-      if(ObjectList[number]->type() == BIGAST) upscore(500);
-      if(ObjectList[number]->type() == MEDAST) upscore(250);
-      if(ObjectList[number]->type() == SMALLAST) upscore(100);
+    if(killedBy != 0 && ObjectList[killedBy]) {
+      if(ObjectList[killedBy]->type() == SHIP_BUL) {
+	if(ObjectList[number]->type() == BIGAST) upscore(500);
+	if(ObjectList[number]->type() == MEDAST) upscore(250);
+	if(ObjectList[number]->type() == SMALLAST) upscore(100);
+      }
     }
     
     // figure out the new type of asteroids to create.
@@ -193,7 +204,7 @@ void KillAsteroid(int number, int killedBy)
     // create the asteroids
     // when creating the asteroid we blast 2 at a time in opposite
     // directions. TODO: Make this a more correct in terms of physics.
-    if(ctype != 255) {
+    if(ctype != 255 && !killChildren) {
       char rA1, rA2;
       float px, py, vx, vy;
       
@@ -256,6 +267,7 @@ void GenerateAsteroids()
     float x, y;
     Vector temp;
 
+    
     for (i = 0; i <= (Glevel / 2 + 1); i++) {
 	do {
 	    x = (float) (rand() % 320);
@@ -265,14 +277,43 @@ void GenerateAsteroids()
 	while (PlayerShip.GetXYVec().length(temp) < START_DIST);
 
 	obj = CreateAsteroid(x, y, 0, 0, BIGAST);
+	numasts++;
 
 	if(ObjectList[obj]) {
 	  ObjectList[obj]->randomDir(0.40f);
 	}
+
+	if(!(rand()%3)) {
+	  do {
+	    x = (float) (rand() % 320);
+	    y = (float) (rand() % 200);
+	    temp.SetXY(x, y);
+	  }
+	  while (PlayerShip.GetXYVec().length(temp) < START_DIST);
+	  obj = CreateAsteroid(x, y, 0, 0, MEDAST);
+	  if(ObjectList[obj]) {
+	    ObjectList[obj]->randomDir(1.00f);
+	  }
+	  numasts++;
+	}
+	
+	if(!(rand()%6)) {
+	  do {
+	    x = (float) (rand() % 320);
+	    y = (float) (rand() % 200);
+	    temp.SetXY(x, y);
+	  }
+	  while (PlayerShip.GetXYVec().length(temp) < START_DIST);
+	  obj = CreateAsteroid(x, y, 0, 0, SMALLAST);
+	  if(ObjectList[obj]) {
+	    ObjectList[obj]->randomDir(1.40f);
+	  }
+	  numasts++;
+	}
+
 	
     }
 
-    numasts = i;
 }
 
 
@@ -364,49 +405,108 @@ int MoveObjects()
 }
 
 
+// Utility Function.
+void eegg() 
+{
+  int i;
+  for(i = 1; i < MAX_OBJECTS; i++) {
+    if(!ObjectList[i]) continue;
+    if(ObjectList[i]->type() == MEDAST ||
+       ObjectList[i]->type() == SMALLAST ||
+       ObjectList[i]->type() == BIGAST) {
+      if(numasts > 1) { 
+	KillAsteroid(i, 0);
+      } 
+    }
+  } 
+  
+  canShootThree = 1;
+  deathTimer = 128;
+}
+
+
+
 ////////////////////////////////////////////////////////////////////////////
 // fire a bullet for player ship
 void Fire()
 {
-  int bullet;
+ int bullet;
   float fcos, fsin;
   float rx, ry;
   
+  if(eeggL == 80 && eeggR == 160 && eeggU == 3 && eeggD == 12 ) {
+    eegg();
+    eeggL = 0; eeggR = 0; eeggU = 0; eeggD = 0; eeggS = 1;
+  }
+
   
   if (PlayerShip.weaponPower() > 0) {
     PlaySound(SND_FIRE);
-    
+
+    rx = PlayerShip.GetX() + (PlayerShip.GetWidth() / 2);
+    ry = PlayerShip.GetY() + (PlayerShip.GetHeight() / 2);
+     
+    fsin = -FastMath::cos(PlayerShip.getAngle());
+    fcos = FastMath::sin(PlayerShip.getAngle());
+    // Give it a bit of a kick back... ehehehheeheh
+    if(!ClassicMode)
+      PlayerShip.AddVel(-fcos / 10.0f, -fsin / 10.0f);
+    PlayerShip.dischargeWeapon();
+
     bullet = GetOpenObject();
-    
     ObjectList[bullet] = new ScreenObject;
     ObjectList[bullet]->restore();
     fsin = -FastMath::cos(PlayerShip.getAngle());
     fcos = FastMath::sin(PlayerShip.getAngle());
-    rx = PlayerShip.GetX() + (PlayerShip.GetWidth() / 2);
-    ry = PlayerShip.GetY() + (PlayerShip.GetHeight() / 2);
-    
     ObjectList[bullet]->SetXY(rx + PlayerShip.Size() * fcos,
 				  ry + PlayerShip.Size() * fsin);
-    
     ObjectList[bullet]->SetVel(PlayerShip.VelX() + BUL_SPEED * fcos,
 			       PlayerShip.VelY() + BUL_SPEED * fsin);
-    
-    // Give it a bit of a kick back... ehehehheeheh
-    if(!ClassicMode)
-      PlayerShip.AddVel(-fcos / 10.0f, -fsin / 10.0f);
-    
     ObjectList[bullet]->SetAcc(0.0f, 0.0f);
     ObjectList[bullet]->SetBitmap(&Gbit[BULLET]);
     ObjectList[bullet]->SetWrapMoves(false);
     ObjectList[bullet]->SetMaxSpeed(255.0f);
-    ObjectList[bullet]->settype(SHIP_BUL);	/* SHIP_BUL(254) is bullet */
-    
-    PlayerShip.dischargeWeapon();
+    ObjectList[bullet]->settype(SHIP_BUL);     
+ 
+    if(canShootThree) {
+      // Fire 2
+      bullet = GetOpenObject();
+      ObjectList[bullet] = new ScreenObject;
+      ObjectList[bullet]->restore();
+      fsin = -FastMath::cos(PlayerShip.getAngle()+5);
+      fcos = FastMath::sin(PlayerShip.getAngle()+5);
+      ObjectList[bullet]->SetXY(rx + PlayerShip.Size() * fcos,
+				ry + PlayerShip.Size() * fsin);
+      ObjectList[bullet]->SetVel(PlayerShip.VelX() + BUL_SPEED * fcos,
+				 PlayerShip.VelY() + BUL_SPEED * fsin);
+      ObjectList[bullet]->SetAcc(0.0f, 0.0f);
+      ObjectList[bullet]->SetBitmap(&Gbit[BULLET]);
+      ObjectList[bullet]->SetWrapMoves(false);
+      ObjectList[bullet]->SetMaxSpeed(255.0f);
+      ObjectList[bullet]->settype(SHIP_BUL);  
+      
+      // Fire 3
+      bullet = GetOpenObject();
+      ObjectList[bullet] = new ScreenObject;
+      ObjectList[bullet]->restore();
+      fsin = -FastMath::cos(PlayerShip.getAngle()-5);
+      fcos = FastMath::sin(PlayerShip.getAngle()-5);
+      ObjectList[bullet]->SetXY(rx + PlayerShip.Size() * fcos,
+				ry + PlayerShip.Size() * fsin);
+      ObjectList[bullet]->SetVel(PlayerShip.VelX() + BUL_SPEED * fcos,
+				 PlayerShip.VelY() + BUL_SPEED * fsin);
+      ObjectList[bullet]->SetAcc(0.0f, 0.0f);
+      ObjectList[bullet]->SetBitmap(&Gbit[BULLET]);
+      ObjectList[bullet]->SetWrapMoves(false);
+      ObjectList[bullet]->SetMaxSpeed(255.0f);
+      ObjectList[bullet]->settype(SHIP_BUL); 
+
+      PlayerShip.dischargeWeapon(); // Weapon discharges 2x as fast when shooting 3...
+    }
   } else {
     // TODO: Do something interesting.
   }
 }
-
 
 ////////////////////////////////////////////////////////////////////////////
 // botline - modified from xasteroids
@@ -439,6 +539,7 @@ void ResetShip()
   
   width = ShipBitmaps[0].width(); 
   height = ShipBitmaps[0].height();
+  canShootThree = 0;
   x = int(ScreenLimits.GetX()) - width;
   y = int(ScreenLimits.GetY()) - height;
   x = x / 2;
@@ -528,6 +629,7 @@ void PlayGame()
   cReq = 0;
   sastWantTicks = 1;
   FinishedLastCall = 1;
+  deathTimer = -1;
 
   while (!GameOver) {
     while (SDL_PollEvent(&event)) {
@@ -596,7 +698,34 @@ void PlayGame()
 	  }
 	}
 
-	
+
+#ifdef SAS_EXTRAS	
+	if(!dead && !pause) {
+	  if(event.key.keysym.sym == SDLK_UP) {
+	    if(eeggU != 1 || eeggS != 2) {
+	      eeggU = 0; eeggD = 0; eeggL = 0; eeggR = 0; eeggS = 1;
+	    }
+	    eeggU |= eeggS;
+	    eeggS = eeggS << 1;
+	  }
+
+	  if(event.key.keysym.sym == SDLK_DOWN) {
+	    eeggD |= eeggS; eeggS = eeggS << 1;
+	  }
+	  
+	  if(event.key.keysym.sym == SDLK_LEFT) {
+	    eeggL |= eeggS; eeggS = eeggS << 1;
+	  }
+
+	  if(event.key.keysym.sym == SDLK_RIGHT) {
+	    eeggR |= eeggS; eeggS = eeggS << 1;
+	  }
+
+	  if(eeggS > 512) {
+	    eeggS = 1; eeggU = 0; eeggD = 0; eeggL = 0; eeggR = 0;
+	  }
+	}
+#endif
 	
 	break;
       case SDL_ACTIVEEVENT:
@@ -609,7 +738,9 @@ void PlayGame()
       
       case SDL_USEREVENT:	      
 	// This only gets called while the GAME CLOCK ITSELF is ticking =)
-	
+	deathTimer--;
+	if(deathTimer < -128) deathTimer = -1;
+
 	if (keystatebuffer[SDLK_RIGHT])
 	  PlayerShip.rotRight(1);
 	
@@ -640,6 +771,8 @@ void PlayGame()
 
 	
 	dead += MoveObjects();
+	if(deathTimer == 0) { dead = 1; deathTimer = -1; }
+
 	if(dead == 1) {
 	  PlaySound(SND_BOOM_C);
 	  int j;

@@ -31,13 +31,16 @@
 
 // If the game runs slow this might help speed it up,
 // turns off font Anti Aliasing
-#define QUICK_FONTS
+// #define QUICK_FONTS
 
 // Cheatcodes?
 #define CHEAT_CODES	
 
 // Print some diagnostics here and there(not recommended)
 // #define PRINT_DIAG
+
+// Extras that you might want to turn off on slower systems
+#define SAS_EXTRAS
 
 ///////////////////////////////////////////////////////
 // Don't Edit bellow this line for standard configuration

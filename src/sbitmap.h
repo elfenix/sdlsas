@@ -35,7 +35,7 @@ class SBitmap
     { if(mySurface) SDL_FreeSurface(mySurface); }
   
   // Image functions. :)
-  void LoadImage(char* path, bool setTrans = true, int sF = 2);
+  void LoadImage(char* path, bool setTrans = true, int sF = DMULTCONST(1));
   void copy(SBitmap& b);
   void rotc90();
   void rot(Angle degrees);
