@@ -508,10 +508,19 @@ void displayScreen(char *file)
 
 void ResetShip() 
 {
+  int x, y, width, height;
+  
+  width = ShipBitmaps[0].width(); 
+  height = ShipBitmaps[0].height();
+  x = PLAY_X - width;
+  y = PLAY_Y - height;
+  x = x / 2;
+  y = y / 2;
+
   PlayerShip.SetDeadStick(0);
   PlayerShip.restore();
   PlayerShip.SetSize(5, 5);
-  PlayerShip.SetXY(320 / 2 - 3, 200 / 2 - 3);
+  PlayerShip.SetXY(x, y);
   PlayerShip.SetupDrawing();
   PlayerShip.SetVel(0.0f, 0.0f);
 }
@@ -553,7 +562,7 @@ void PlayGame()
   
   Uint8 *keystatebuffer;
   
-  char GameOver = 0, cReq;
+  char GameOver = 0, cReq, flashShip = 0;
   
   // get starting skill level, <DELETED>
   Glevel = 0;
@@ -718,6 +727,22 @@ void PlayGame()
       botline();
 
       if(dead) {
+	int x, y, width, height;
+
+	width = ShipBitmaps[0].width(); 
+	height = ShipBitmaps[0].height();
+	x = PLAY_X - width;
+	y = PLAY_Y - height;
+	x = x / 2;
+	y = y / 2;
+	
+	if(flashShip > 24 || flashShip < 0) flashShip = 0;
+	flashShip++;
+	
+	if(flashShip >  12) {
+	  ShipBitmaps[0].put(x, y);
+	}
+	
 	Ui::CenterXText(180, pstr);
       }
 
@@ -930,24 +955,34 @@ int main(int argc, char *argv[])
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
       case SDL_KEYDOWN:
-	if (event.key.keysym.sym == SDLK_h)
+	if (event.key.keysym.sym == SDLK_h) {
 	  c = 'h';
-	if (event.key.keysym.sym == SDLK_i)
+	  PlaySound(SND_BOOM_C);
+	}
+
+	if (event.key.keysym.sym == SDLK_i) {
 	  c = 'i';
-	if (event.key.keysym.sym == SDLK_q)
+	  PlaySound(SND_BOOM_C);
+	}
+
+	if (event.key.keysym.sym == SDLK_q) {
 	  c = 'q';
-	if (event.key.keysym.sym == SDLK_s)
+	  PlaySound(SND_BOOM_C);
+	}
+
+	if (event.key.keysym.sym == SDLK_s) {
 	  c = 's';
+	  PlaySound(SND_BOOM_C);
+	}
 
-	if (event.key.keysym.sym == SDLK_RETURN)
-	  {
-	    PlaySound(SND_BOOM_C);
-	    if(menu == 1) c = 'i';
-	    if(menu == 2) c = 'h';
-	    if(menu == 3) c = 's';
-	    if(menu == 4) c = 'q';
-	  }
-
+	if (event.key.keysym.sym == SDLK_RETURN) {
+	  PlaySound(SND_BOOM_C);
+	  if(menu == 1) c = 'i';
+	  if(menu == 2) c = 'h';
+	  if(menu == 3) c = 's';
+	  if(menu == 4) c = 'q';
+	}
+	
 	if (event.key.keysym.sym == SDLK_DOWN) 
 	  if(menu < 4 && mode == 1) {
 	    PlaySound(SND_FIRE);
