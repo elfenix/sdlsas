@@ -28,7 +28,7 @@ void upscore(int upby);
 
 // Constants. (tune game here)
 const int   GAME_CLOCK    = 27;           // Number of mseconds between ticks.
-
+// const int GAME_CLOCK = 1; // For Benchmarking...
 const float START_DIST    = 70;           // Disance asteroids start from ship
 const int   MAXASTEROIDS  = 16;           // Max # Asteroids
 
@@ -254,8 +254,6 @@ void GenerateAsteroids()
     float x, y;
     Vector temp;
 
-    //    FreeObjArray();
-
     for (i = 0; i <= (Glevel / 2 + 1); i++) {
 	do {
 	    x = (float) (rand() % 320);
@@ -471,6 +469,10 @@ Uint32 TimerTick(Uint32 interval, void* param)
     FinishedLastCall = 0;
     myEvent.type = SDL_USEREVENT;
     SDL_PushEvent(&myEvent);
+  } else if(!FinishedLastCall) {
+#ifdef PRINT_DIAG
+    cerr << "[Diag] Dropped Frame!" << endl;
+#endif
   }
 
   return GAME_CLOCK;
@@ -860,15 +862,14 @@ int main(int argc, char *argv[])
 
   Mix_AllocateChannels(16);
 #endif
-  
 
-  FastMath::init(1);
-  SetupObjArray();
-  LoadBitmaps();	      
+  FastMath::init(1); 
   Ui::init();
+  SetupObjArray();
+  LoadBitmaps();
   ShowTitle(menu);
   LoadWavs();
-  
+
   while (!done) {
     dirty = 0;
     c = 0;

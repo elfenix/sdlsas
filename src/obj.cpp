@@ -383,18 +383,18 @@ void InitShips()
    angle = j * 64 / k;;
    
    if (angle != 0) {
-      //      ShipBitmaps[j].rot(angle);
-      //      ShipThrusts[j].rot(angle);
-      //      spinnerBitmaps[j].rot(angle);
+     ShipBitmaps[j].rot(angle);
+     ShipThrusts[j].rot(angle);
+     spinnerBitmaps[j].rot(angle);
    }
    
    for (i = 1; i < 4; i++) {
      ShipBitmaps[j + i * k].copy(ShipBitmaps[j + (i - 1) * k]);
-     //     ShipBitmaps[j + i * k].rotc90();
+     ShipBitmaps[j + i * k].rotc90();
      ShipThrusts[j + i * k].copy(ShipThrusts[j + (i - 1) * k]);
-     //      ShipThrusts[j + i * k].rotc90();
+     ShipThrusts[j + i * k].rotc90();
      spinnerBitmaps[j + i * k].copy(spinnerBitmaps[j + (i - 1) * k]);
-     //      spinnerBitmaps[j + i * k].rotc90();
+     spinnerBitmaps[j + i * k].rotc90();
    }
   }
 }

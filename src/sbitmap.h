@@ -37,9 +37,11 @@ class SBitmap
   // Image functions. :)
   void LoadImage(char* path, bool setTrans = true);
   void copy(SBitmap& b);
+  void rotc90();
   void rot(Angle degrees);
   void SetTrans(bool wantTrans);
   void scaleCopy( const Bitmap& b, int w, int h );
+  void compile();
     
   // Inline (speed critical) functions bellow:
   inline void put(int x, int y) {

@@ -314,3 +314,16 @@ void setpixel(SDL_Surface *visual, int x, int y, char r, char g, char b)
     cerr << "[Warning] setpixel called with unknown bitdepth" << endl;
   }
 }
+
+
+void GraphicsStartDraw(SDL_Surface* visual)
+{
+  if(SDL_MUSTLOCK(visual))
+     SDL_LockSurface(visual);
+}
+
+void GraphicsStopDraw(SDL_Surface* visual)
+{
+  if(SDL_MUSTLOCK(visual))
+    SDL_UnlockSurface(visual);
+}
