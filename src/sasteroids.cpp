@@ -19,7 +19,8 @@ void upscore(int upby);
 
 #define SND_BOOM_A     0
 #define SND_BOOM_B     1
-#define SND_FIRE       2
+#define SND_BOOM_C     2
+#define SND_FIRE       3
 
 /////////////////////////////////////////////////////////////////////////////
 // Global variables: 
@@ -674,6 +675,7 @@ void PlayGame()
 	
 	dead += MoveObjects();
 	if(dead == 1) {
+	  Mix_PlayChannel(-1, soundSamples[SND_BOOM_C], 0);
 	  int j;
 	  
 	  strcpy(pstr, "Press s to start");
@@ -822,6 +824,7 @@ void LoadWavs()
 {
   soundSamples[SND_BOOM_A] = Mix_LoadWAV(BINDIR "boom1.wav");
   soundSamples[SND_BOOM_B] = Mix_LoadWAV(BINDIR "boom2.wav");
+  soundSamples[SND_BOOM_C] = Mix_LoadWAV(BINDIR "shipexplode.wav");
   soundSamples[SND_FIRE]   = Mix_LoadWAV(BINDIR "zap.wav");
 }
 
