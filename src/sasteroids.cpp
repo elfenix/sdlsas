@@ -27,7 +27,7 @@ void upscore(int upby);
 // Global variables: 
 
 // Constants. (tune game here)
-const int   GAME_CLOCK    = 27;           // Number of mseconds between ticks.
+const int   GAME_CLOCK    = 33;           // Number of mseconds between ticks.
 // const int GAME_CLOCK = 1; // For Benchmarking...
 // const int GAME_CLOCK = 50; // For tuning...
 const float START_DIST    = 70;           // Disance asteroids start from ship
@@ -70,9 +70,32 @@ int deathTimer;                           // Mwahahahahahahh
 int eeggU = 0, eeggD = 0, eeggL = 0, eeggR = 0;
 int eeggS = 1;
 
+// High Score List
+char HiScoreStrings[10][10];
+int HiScoreNumbers[10];
+
+///////////////////////////////////////////////////////////
+// Initialize HiScores list - TODO: Load Hi Score List
+void InitializeHiScores()
+{
+  int i;
+  for(i = 0; i < 10; i++) {
+    strcpy(HiScoreStrings[i], "");
+    HiScoreNumbers[i] = 0;
+  }
+}
+
+//////////////////////////////////////////////////////////
+// Save Hi Score list - TODO: Save Hi Score List
+void SaveHiScores()
+{
+  // TODO: Save hiscore list.
+}
+
+
 //////////////////////////////////////////////////////////
 // level odds - return an integer based on a level
-inline int LevelOdds(int lvlMax, int maxChance = 1, int lvlStep = 5)
+int LevelOdds(int lvlMax, int maxChance, int lvlStep)
 {
   int lvlDifference;
   lvlDifference = lvlMax - Glevel;
@@ -81,6 +104,7 @@ inline int LevelOdds(int lvlMax, int maxChance = 1, int lvlStep = 5)
   if(lvlDifference < 1) lvlDifference = 1;
   return lvlDifference;
 }
+
 
 /////////////////////////////////////////////////////////////////////////
 // play sound function (just to help with the #ifdef's not being everywhere
@@ -112,6 +136,7 @@ void LoadBitmaps()
   Gbit[P_WMAX].LoadImage(BINDIR "/graphics/wMaxPowerUp.bmp");
   Gbit[P_WENG].LoadImage(BINDIR "/graphics/wRechargePowerUp.bmp");
   Gbit[P_WTHR].LoadImage(BINDIR "/graphics/wThreePowerUp.bmp");
+  Gbit[P_SHLD].LoadImage(BINDIR "/graphics/wShieldPowerUp.bmp");
   extraLives.LoadImage(BINDIR "/graphics/ship0.bmp");
   extraLives.scalep5();
   extraLives.SetTrans(true);
@@ -284,11 +309,6 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
 	ObjectList[j]->SetXY(px, py);
 	ObjectList[j]->SetVel(FastMath::sin(rA2)*1.0f + vx, 
 			      FastMath::cos(rA2)*1.0f + vy);
-      } else if(ctype == SMALLAST && !(rand()%LevelOdds(32)) && !ClassicMode) {
-	CreateAsteroid( px, py, 
-			FastMath::sin(rA2) * 1.0f + vx,
-			FastMath::cos(rA2) * 1.0f + vy, ESMAST );
-	numasts++;
       } else {
 	CreateAsteroid( px, py, 
 			FastMath::sin(rA2) * 1.0f + vx,
@@ -321,6 +341,9 @@ void PowerUpF(int i)
   case P_WTHR:
     canShootThree = 1;
     break;
+  case P_SHLD:
+    PlayerShip.shieldAdd(50);
+    break;
   }
 }
 
@@ -342,7 +365,7 @@ void GenerateAsteroids()
     float x, y;
     Vector temp;
 
-    for (i = 0; i <= (Glevel / 2 + 1); i++) {
+    for (i = 0; i <= (Glevel / 2 + 1) && i <= MAXASTEROIDS; i++) {
 	do {
 	    x = (float) (rand() % 320);
 	    y = (float) (rand() % 200);
@@ -407,7 +430,10 @@ int MoveObjects()
 	  && ObjectList[i]->type() != 255
 	  && ObjectList[i]->alive()) {
 	crash = 1;
-	if(!PlayerShip.isDeadStick() && !touched) {
+	if(PlayerShip.shielded()) {
+	  PlayerShip.SetBounce();
+	  crash = 0; touched--;
+	} else	if(!PlayerShip.isDeadStick() && !touched) {
 	  switch(ObjectList[i]->type()) {
 	  case SMALLAST:
 	  case MEDAST:
@@ -738,8 +764,21 @@ void PlayGame()
 	  PlaySound(SND_WARP);
 	  PlayerShip.Hyper();
 	}
+
+	// I hate cheaters... Do something fun with the old cheat code. :D
+	if (event.key.keysym.sym == SDLK_o && 
+	    (keystatebuffer[SDLK_LSHIFT] || keystatebuffer[SDLK_RSHIFT])  &&
+	    !pause) deathTimer = 3; 
+
+	// Leave this cheat code in, nice for debugging.
+	if (event.key.keysym.sym == SDLK_n && !pause) Glevel++;
 	
+	// I prefer space
 	if (event.key.keysym.sym == SDLK_SPACE && !pause)
+	  Fire();
+
+	// but CTRL is the default
+	if (event.key.keysym.sym == SDLK_LCTRL && !pause)
 	  Fire();
 	
 	if (event.key.keysym.sym == SDLK_f)
@@ -835,15 +874,18 @@ void PlayGame()
 	if (keystatebuffer[SDLK_LEFT])
 	  PlayerShip.rotLeft(1);
 	
-	// Maybe ill just leave these alone... mwahahahahahhahahh
-	if (keystatebuffer[SDLK_0]);	// TODO: CHEAT(for authenticity)
-	if (keystatebuffer[SDLK_n]);	// TODO: next level
-	
 	if (keystatebuffer[SDLK_UP])
 	  PlayerShip.Thrust(0.1f);
+
+	if (keystatebuffer[SDLK_DOWN])
+	  PlayerShip.shieldOn();
+	else
+	  PlayerShip.shieldOff();
 	
 	if (keystatebuffer[SDLK_b])
 	  PlayerShip.Brake();
+
+	
 	
 	if (numasts <= 0) {
 	  Glevel++;
@@ -994,7 +1036,7 @@ void ShowTitle(int selected)
   char *tStringList[] =
     { "SDL Sasteroids Version " VERSION,
       "(I) INFORMATION",
-      "(H) HIGH SCORES",
+      //      "(H) HIGH SCORES",
       "(S) START GAME",
       "(Q) QUIT",
       NULL
@@ -1099,6 +1141,7 @@ int main(int argc, char *argv[])
   
   InitializeSDL();
   HandleCommandLine(argc, argv);
+  InitializeHiScores();
 
 
 #ifdef HAVE_SOUND
@@ -1135,6 +1178,10 @@ int main(int argc, char *argv[])
 	break;
 
       case SDL_KEYDOWN:
+	if (event.key.keysym.sym == SDLK_f) {
+	  Ui::FullScreen(); dirty = 1;
+	}
+
 	if (event.key.keysym.sym == SDLK_h) {
 	  c = 'h';
 	  PlaySound(SND_BOOM_C);
@@ -1158,21 +1205,27 @@ int main(int argc, char *argv[])
 	if (event.key.keysym.sym == SDLK_RETURN) {
 	  PlaySound(SND_BOOM_C);
 	  if(menu == 1) c = 'i';
-	  if(menu == 2) c = 'h';
-	  if(menu == 3) c = 's';
-	  if(menu == 4) c = 'q';
+	  //	  if(menu == 2) c = 'h';
+	  if(menu == 2) c = 's';
+	  if(menu == 3) c = 'q';
 	}
 	
 	if (event.key.keysym.sym == SDLK_DOWN) 
-	  if(menu < 4 && mode == 1) {
+	  if(menu < 3 && mode == 1) {
 	    PlaySound(SND_FIRE);
 	    menu++, dirty = 1;
+	  } else if(mode == 1) {
+	    PlaySound(SND_FIRE);
+	    menu = 1, dirty = 1;
 	  }
 	
 	if (event.key.keysym.sym == SDLK_UP) 
 	  if(menu > 1 && mode == 1) {
 	    PlaySound(SND_FIRE);
 	    menu--, dirty = 1;
+	  } else if(mode == 1) {
+	    PlaySound(SND_FIRE);
+	    menu = 3; dirty = 1;
 	  }
 	
 	if (mode != 1)
@@ -1198,8 +1251,8 @@ int main(int argc, char *argv[])
     case 's':
       mode = 1;
       dirty = 1;
-      //      SetGamePalette();
       PlayGame();
+      SaveHiScores();
       break;
       
     case 'q':

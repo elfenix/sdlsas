@@ -38,7 +38,7 @@ using namespace std;
 #include <glob.h>
 #endif
 
-#define NUM_BITMAPS 12
+#define NUM_BITMAPS 13
 #define SMALLAST 0
 #define MEDAST   1
 #define BIGAST   2
@@ -51,6 +51,7 @@ using namespace std;
 #define P_WENG   9
 #define P_WTHR   10
 #define ESMAST   11
+#define P_SHLD   12
 #define SHIP_BUL 254
 
 #define P_TYPE   8
@@ -66,8 +67,11 @@ using namespace std;
 
 // load 'file' from Gcf into bitmap b.
 void LoadBitmap( SBitmap &b, const char* file);
+int LevelOdds(int lvlMax, int maxChance = 1, int lvlStep = 1);
 
 extern SBitmap Gbit[NUM_BITMAPS];
 extern SBitmap extraLives;
+extern int Glevel;
+extern int ClassicMode;
 
 #endif

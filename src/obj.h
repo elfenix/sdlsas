@@ -162,8 +162,11 @@ class Ship : public ScreenObject
   void Hyper();
   void dischargeWeapon();
   void Brake();
+  void SetBounce();
 
   void shieldOn();
+  void shieldOff();
+  void shieldAdd(int a);
   int shielded();
 
   inline int weaponPower() 
@@ -239,7 +242,7 @@ class Ship : public ScreenObject
  protected:
   int angle, shieldMax, shieldTimeLeft, bounce, shieldLives;
   int lives, thrustcnt, wPower, pos, deadStick;
-  int maxPower, rechargeRate;
+  int maxPower, rechargeRate, shieldStatus;
 };
 
 

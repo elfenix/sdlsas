@@ -162,7 +162,7 @@ void ScreenObject::randomDir(float magn)
 // Ship Class....
 Ship::Ship() : ScreenObject()
 {
-  shieldMax = 30;
+  shieldMax = 100;
   shieldTimeLeft = 0;
   bounce = 0;
   shieldLives = 3;
@@ -189,10 +189,12 @@ void Ship::SetBitmap()
 void Ship::draw()
 {
   if(!deadStick) {
-    Gbit[SHIELD].put( int(position.GetX()), int(position.GetY()) );
-    ScreenObject::draw();	
+    ScreenObject::draw();
+    if(shielded())
+      Gbit[SHIELD].put( int(position.GetX()), int(position.GetY()) );
   }
 }
+
 
 void Ship::tick()
 {
@@ -202,12 +204,21 @@ void Ship::tick()
 	thrustcnt--;
     if (!thrustcnt)
 	accelleration.SetXY(0, 0);
+    if (shieldStatus) {
+      shieldTimeLeft--;
+      if(shieldTimeLeft<=0) shieldStatus = 0;
+    } 
+
+    if (bounce > 0) {
+	accelleration.SetXY(0,0);
+	velocity.SetXY(1.0f - float(rand()%10)/5.0f,
+		       1.0f - float(rand()%10)/5.0f);		
+	bounce--;
+    }
+      
     SetBitmap();
     ScreenObject::tick();
-    if (shieldTimeLeft > 0 && shieldLives)
-	shieldTimeLeft--;
-    if (shieldTimeLeft <= 0)
-	shieldLives = 0;
+
     if (wPower < maxPower)
 	wPower+=rechargeRate;
 }
@@ -215,12 +226,18 @@ void Ship::tick()
 void Ship::shieldOn()
 {
     if (shieldTimeLeft > 0)
-	shieldLives = 1;
+      shieldStatus = 1;
 }
+
+void Ship::shieldOff()
+{
+  shieldStatus = 0;
+}
+
 
 int Ship::shielded()
 {
-    return shieldLives;
+    return shieldStatus;
 }
 
 void Ship::Hyper()
@@ -232,10 +249,14 @@ void Ship::Hyper()
 
 void Ship::Reset() 
 { 
-  pos = 0; SetBitmap(); angle = 0; 
-  maxPower = 200;
+  pos = 0; SetBitmap(); angle = 0; bounce = 0;
+  maxPower = 220;
   wPower = maxPower;
-  rechargeRate = 1;
+  rechargeRate = 2;
+  shieldMax = 100;
+  shieldTimeLeft = shieldMax;
+  shieldStatus = 0;
+  
   
   restore();
   SetDeadStick(0);
@@ -288,6 +309,16 @@ void Ship::dischargeWeapon()
   wPower -= 25;
 }
 
+void Ship::shieldAdd(int a)
+{
+  shieldTimeLeft += a;
+  if(shieldTimeLeft > shieldMax) shieldTimeLeft = shieldMax;
+}
+
+void Ship::SetBounce()
+{
+  bounce = 15;
+}
 
 /////////////////////////////////////////////
 // Spinner Class (works a lot like ship class )
@@ -477,8 +508,11 @@ void Enemy::tick()
 // Powerup Screen Object
 PowerUp::PowerUp()
 {
-  const int MaxSlots = 4;
-  int SlotMachine[MaxSlots] = { P_WMAX, P_WENG, P_WENG, P_WTHR };
+  const int MaxSlots = 7;
+  int SlotMachine[MaxSlots] = 
+    { 
+      P_WMAX, P_WMAX, P_WENG, P_WENG, P_WENG, P_WTHR, P_SHLD 
+    };
 
   ptype = SlotMachine[rand()%MaxSlots];
   
@@ -631,6 +665,11 @@ int CreateAsteroid(float x, float y, float xv, float yv, int type)
     newobject = new ScreenObject(type);
     if (!newobject)
 	return -1;
+
+    if(type == SMALLAST && !(rand()%LevelOdds(30,3)&&!ClassicMode))
+      {
+	type = ESMAST;
+      }
 
     newobject->SetXY(x, y);
     newobject->SetAcc(0.0f, 0.0f);
