@@ -534,6 +534,9 @@ void PowerUpF(int i)
   case P_SHLD:
     PlayerShip.shieldAdd(50);
     break;
+  case P_SRCG:
+    shieldRecharge = 1;
+    break;
   }
 }
 
@@ -643,17 +646,26 @@ void ObjectsHit(int i, int j, int& touched, int& crash)
     }
     break; 
   case ENEMY:	
-    if(ObjectList[j]->type() == BULLET2) break;
-    if(ObjectList[j]->type() == P_TYPE) break;
-    BounceObjects(i, j);
-    break;
+    {
+      Enemy* t = (Enemy*)ObjectList[i];
+      if(ObjectList[j]->type() == BULLET2) break;
+      if(ObjectList[j]->type() == P_TYPE) break;
+      if(!(t->bounceStat() > 1)) {
+	BounceObjects(i, j);
+	t->setbounce();
+      }
+      break;
+    }
   case SPINNER:
-    Spinner* t = (Spinner*)ObjectList[i];
-    if(t->morph()!=-1) break;
-    if(ObjectList[j]->type() == P_TYPE) break;
-    if(!(t->bounceStat() > 1)) {
-      BounceObjects(i, j);
-      t->setbounce();
+    {
+      Spinner* t = (Spinner*)ObjectList[i];
+      if(t->morph()!=-1) break;
+      if(ObjectList[j]->type() == P_TYPE) break;
+      if(!(t->bounceStat() > 1)) {
+	BounceObjects(i, j);
+	t->setbounce();
+      }
+      break;
     }
   }
 }
@@ -734,6 +746,7 @@ void LoadBitmaps()
   Gbit[P_WENG].LoadImage(BINDIR "/graphics/wRechargePowerUp.bmp");
   Gbit[P_WTHR].LoadImage(BINDIR "/graphics/wThreePowerUp.bmp");
   Gbit[P_SHLD].LoadImage(BINDIR "/graphics/wShieldPowerUp.bmp");
+  Gbit[P_SRCG].LoadImage(BINDIR "/graphics/wShieldRecharge.bmp");
   extraLives.LoadImage(BINDIR "/graphics/ship0.bmp");
   extraLives.scalep5();
   extraLives.SetTrans(true);

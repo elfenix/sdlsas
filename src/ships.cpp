@@ -59,6 +59,10 @@ void Ship::tick()
       shieldTimeLeft--;
       if(shieldTimeLeft<=0) shieldStatus = 0;
     } 
+    
+    if(shieldRecharge) {
+      if(shieldTimeLeft<shieldMax && rand()%2) shieldTimeLeft++;
+    }
 
     if (bounce > 0) {
 	accelleration.SetXY(0,0);
@@ -392,8 +396,12 @@ PowerUp::PowerUp()
       P_WMAX, P_WMAX, P_WENG, P_WENG, P_WENG, P_WTHR, P_SHLD 
     };
 
-  ptype = SlotMachine[rand()%MaxSlots];
-  
+  if(Glevel > 5 && !(rand()%7)) {
+    ptype = P_SRCG;
+  } else {
+    ptype = SlotMachine[rand()%MaxSlots];
+  }
+
   SetVel(0.0f, 0.0f);
   SetAcc(0.0f, 0.0f);
   SetXY(float(DDIVCONST(rand()%Ui::HEIGHT())), 

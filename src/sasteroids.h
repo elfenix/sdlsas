@@ -38,7 +38,7 @@ using namespace std;
 #include <glob.h>
 #endif
 
-#define NUM_BITMAPS 13
+#define NUM_BITMAPS 14
 #define SMALLAST 0
 #define MEDAST   1
 #define BIGAST   2
@@ -52,6 +52,7 @@ using namespace std;
 #define P_WTHR   10
 #define ESMAST   11
 #define P_SHLD   12
+#define P_SRCG   13
 #define PLAYERSHIP 253
 #define SHIP_BUL 254
 #define P_TYPE   8
@@ -114,7 +115,7 @@ extern PShip PlayerShip;
 extern int score, Glevel, numasts, oldscore;
 extern int BackdropOn, wantFullScreen;
 
-extern int canShootThree;
+extern int canShootThree, shieldRecharge;
 extern int smartZapper;
 extern int deathTimer;
 

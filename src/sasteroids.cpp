@@ -39,7 +39,7 @@ int ClassicMode = 0;                      // classic mode?
 int BackdropOn = 1, wantFullScreen = 0;   // is the backdrop on?
 
 // Power Ups, etc...
-int canShootThree = 1;                    // Has the three shooter powerup?
+int canShootThree = 1, shieldRecharge = 0;// Has the three shooter powerup?
 int smartZapper;                          // smart teleport
 int deathTimer;                           // Mwahahahahahahh
 
@@ -294,6 +294,7 @@ void displayScreen(char *file)
 void ResetShip() 
 {
   canShootThree = 0;
+  shieldRecharge = 0;
   PlayerShip.Reset();
 }
 
@@ -344,6 +345,7 @@ void PlayGame()
   int finalDead = 0;
   int aegg = 0;
   int chOn;
+  int shipInvasion = 0;
   SDL_Event event;
   SDL_TimerID timer;
   
@@ -387,6 +389,7 @@ void PlayGame()
   deathTimer = -1;
   gMsgTimeLeft = 0;
   chOn = 1;
+  shipInvasion = 0;
   
 #ifdef HAVE_SOUND
   Mix_ExpireChannel(0, 0);
@@ -590,7 +593,10 @@ void PlayGame()
 	}
 
 
-	if(!(rand()%LevelOdds(32, 2050, 1))) {
+	if(!(rand()%LevelOdds(32, 4050, 1)) || (shipInvasion && !(rand()%50))) {
+	  if(Glevel > 6 && !(rand()%15) && !shipInvasion) shipInvasion = 11;
+	  if(shipInvasion) shipInvasion--;
+	  if(shipInvasion < 0) shipInvasion = 0;
 	  int j;
 	  j = GetOpenObject();
 	  ObjectList[j] = new Enemy;
@@ -626,6 +632,7 @@ void PlayGame()
 					 PlayerShip.VelY());
 	  dead++;
 	  ResetShip();
+	  shipInvasion = 0;
 	  PlayerShip.SetDeadStick(1);
 	} else if(dead > 1) { 
 	  strcpy(pstr, "Press s to start");
@@ -710,7 +717,7 @@ int selectGame()
 // //////////////////////////////////////////////////////////////////////////
 void ShowInfo()
 {
-    displayScreen(BINDIR "graphics/back.bmp");
+    displayScreen(BINDIR "/graphics/back.bmp");
     int x, y;
 
     x = 0;
@@ -720,15 +727,17 @@ void ShowInfo()
     Ui::CenterXText( y + 40, "TO PLAY THE GAME");
    
     Ui::CenterXText( y + 80, "-------------------------");
-    Ui::CenterXText( y + 100, " LEFT ARROW - Turn ship Left");
-    Ui::CenterXText( y + 120, " RIGHT ARRW - Turn ship Right");
-    Ui::CenterXText( y + 140, " SPACE - Fire");
-    Ui::CenterXText( y + 160, " UP ARROW - Thrust ");
-    Ui::CenterXText( y + 180, " DOWN ARROW - Shield");
-    Ui::CenterXText( y + 200, " LEFT ALT - Hyperspace");
-    Ui::CenterXText( y + 220, " F - Toggle Full Screen");
-    Ui::CenterXText( y + 240, " P - Pause");
+    Ui::CenterXText( y + 100, " LEFT ARROW Turn ship Left");
+    Ui::CenterXText( y + 120, " RIGHT ARRW Turn ship Right");
+    Ui::CenterXText( y + 140, " SPACE Fire");
+    Ui::CenterXText( y + 160, " UP ARROW Thrust ");
+    Ui::CenterXText( y + 180, " DOWN ARROW Shield");
+    Ui::CenterXText( y + 200, " LEFT ALT Hyperspace");
+    Ui::CenterXText( y + 220, " F Toggle Full Screen");
+    Ui::CenterXText( y + 240, " P Pause");
+    Ui::CenterXText( y + 260, " -/+ Volume Down/Up");
     Ui::CenterXText( y + 280, " Q - Quit");
+
     Ui::updateScreen();
 }
 
@@ -773,7 +782,7 @@ void ShowTitle(int selected)
 // ///////////////////////////////////////////////////////////////////////////
 void showScoringInfo()
 {
-    displayScreen(BINDIR "graphics/back.bmp");	// TODO, rewrite this screen
+    displayScreen(BINDIR "/graphics/back.bmp");	// TODO, rewrite this screen
 }
 
 
@@ -791,14 +800,14 @@ void showScoringInfo()
 void LoadWavs()
 {
 #ifdef HAVE_SOUND
-  soundSamples[SND_BOOM_A] = Mix_LoadWAV(BINDIR "sounds/boom1.wav");
-  soundSamples[SND_BOOM_B] = Mix_LoadWAV(BINDIR "sounds/boom2.wav");
-  soundSamples[SND_BOOM_C] = Mix_LoadWAV(BINDIR "sounds/shipexplode.wav");
-  soundSamples[SND_FIRE]   = Mix_LoadWAV(BINDIR "sounds/zap.wav");
-  soundSamples[SND_WARP]   = Mix_LoadWAV(BINDIR "sounds/warp.wav");
-  soundSamples[SND_ENEMY]  = Mix_LoadWAV(BINDIR "sounds/flash.wav");
-  soundSamples[SND_POWERUP] = Mix_LoadWAV(BINDIR "sounds/powerup.wav");
-  soundSamples[SND_ENGINE] = Mix_LoadWAV(BINDIR "sounds/engine.wav");
+  soundSamples[SND_BOOM_A] = Mix_LoadWAV(BINDIR "/sounds/boom1.wav");
+  soundSamples[SND_BOOM_B] = Mix_LoadWAV(BINDIR "/sounds/boom2.wav");
+  soundSamples[SND_BOOM_C] = Mix_LoadWAV(BINDIR "/sounds/shipexplode.wav");
+  soundSamples[SND_FIRE]   = Mix_LoadWAV(BINDIR "/sounds/zap.wav");
+  soundSamples[SND_WARP]   = Mix_LoadWAV(BINDIR "/sounds/warp.wav");
+  soundSamples[SND_ENEMY]  = Mix_LoadWAV(BINDIR "/sounds/flash.wav");
+  soundSamples[SND_POWERUP] = Mix_LoadWAV(BINDIR "/sounds/powerup.wav");
+  soundSamples[SND_ENGINE] = Mix_LoadWAV(BINDIR "/sounds/engine.wav");
 #endif
 }
 

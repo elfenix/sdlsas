@@ -383,6 +383,14 @@ class Enemy : public ScreenObject
  public:
   Enemy();
   virtual void tick();
+
+  inline void setBounceStat(int i) {
+    bounce = i;
+  }
+
+  inline int bounceStat() {
+    return bounce;
+  }
   
  private:
   int lastFire, cBitmap, vChange;

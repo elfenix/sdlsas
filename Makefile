@@ -5,9 +5,11 @@ GAMEDIR=/usr/share/sasteroids/
 BINDIR=/usr/bin/
 MANDIR=/usr/man
 
-all: src/sasteroids
+all: 
+	make GAMEDIR=$(GAMEDIR) -C src
 
-install: src/sasteroids
+install: 
+	make GAMEDIR=$(GAMEDIR) -C src
 	install -d $(GAMEDIR)
 	install -d $(GAMEDIR)/graphics
 	install -d $(GAMEDIR)/sounds
@@ -20,7 +22,6 @@ install: src/sasteroids
 	install --mode=644 graphics/*.bmp $(GAMEDIR)/graphics
 	install --mode=644 graphics/sprite/*.bmp $(GAMEDIR)/graphics
 
-src/sasteroids:
 	make GAMEDIR=$(GAMEDIR) -C src
 
 clean:
