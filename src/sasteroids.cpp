@@ -22,7 +22,7 @@ void upscore(int upby);
 // Global variables: 
 
 // Constants. (tune game here)
-const int   GAME_CLOCK    = 9;           // Number of mseconds between ticks.
+const int   GAME_CLOCK    = 27;           // Number of mseconds between ticks.
 
 const float START_DIST    = 70;           // Disance asteroids start from ship
 const int   MAXASTEROIDS  = 16;           // Max # Asteroids
@@ -246,7 +246,7 @@ void KillAsteroid(int number, int killedBy)
 		      FastMath::cos(rA1) * 1.0f + vy, ctype );
       numasts++;
 
-      if(ctype == MEDAST ) { //  && !(rand()%10)) {
+      if(ctype == MEDAST && !(rand()%10)) {
 	j = GetOpenObject();
 	ObjectList[j] = new Spinner;
 	ObjectList[j]->SetXY(px, py);
@@ -654,7 +654,7 @@ void PlayGame()
 	  GenerateAsteroids();
 	}
 
-	if (!(rand()%1000)) {
+	if (!(rand()%10000)) {
 	  int j;
 	  j = GetOpenObject();
 	  ObjectList[j] = new Enemy;
@@ -704,7 +704,6 @@ void PlayGame()
 	Ui::updateScreen();
 	SetGamePalette();
 	FinishedLastCall = 1;
-	//	SetupObjects();
       }
     }
   }
