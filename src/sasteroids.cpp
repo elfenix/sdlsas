@@ -274,7 +274,7 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
 	ObjectList[j]->SetXY(px, py);
 	ObjectList[j]->SetVel(FastMath::sin(rA2)*1.0f + vx, 
 			      FastMath::cos(rA2)*1.0f + vy);
-      } else if(ctype == SMALLAST && !(rand()%10)) {
+      } else if(ctype == SMALLAST && !(rand()%10) && !ClassicMode) {
 	CreateAsteroid( px, py, 
 			FastMath::sin(rA2) * 1.0f + vx,
 			FastMath::cos(rA2) * 1.0f + vy, ESMAST );
