@@ -46,7 +46,13 @@ using namespace std;
 #define BULLET2  5
 #define SPINNER  6
 #define SHIELD   7
+#define P_WMAX   8
+#define P_WENG   9
+#define P_WTHR   10
 #define SHIP_BUL 254
+
+#define P_TYPE   8
+
 
 #include "fastmath.h"
 #include "vector.h"
@@ -59,6 +65,7 @@ using namespace std;
 // load 'file' from Gcf into bitmap b.
 void LoadBitmap( SBitmap &b, const char* file);
 
-extern SBitmap Gbit[8];
+extern SBitmap Gbit[11];
+extern SBitmap extraLives;
 
 #endif

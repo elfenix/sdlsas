@@ -67,8 +67,8 @@ class ScreenObject {
   
   virtual void draw();	// Draw the object
   virtual void tick();	// Move the object for one time tick
-  
-  inline void SetWrapMoves(bool a) 
+
+   inline void SetWrapMoves(bool a) 
     { wrapMoves = a; }
   
   inline static void SetLimits(float x, float y) 
@@ -179,7 +179,13 @@ class Ship : public ScreenObject
     Vbounce(0), shieldLives(3), lives(3), thrustcnt(0), pos(0) 
     { deadStick = 0; SetBitmap(); wrapMoves = 1; wPower = 0; angle = 0; }
   
-  inline void resetDirection() { pos = 0; SetBitmap(); angle = 0; }
+  inline void resetDirection() 
+    { 
+      pos = 0; SetBitmap(); angle = 0; 
+      maxPower = 200;
+      wPower = maxPower;
+      rechargeRate = 2;
+    }
 
   inline void SetDeadStick(int dead) { deadStick = dead; }
   inline int isDeadStick() { return deadStick; }
@@ -187,7 +193,15 @@ class Ship : public ScreenObject
   inline void Brake() { if(!deadStick) SetVel(0.0f, 0.0f ); }
   
   inline int shieldPercent() const 
-    { return (100*(int)shieldTimeLeft)/(int)shieldMax; }
+    {
+      return 100;
+      //return (100*(int)shieldTimeLeft)/(int)shieldMax; }
+    }
+
+  inline int weaponPercent() const
+    {
+      return (100*wPower)/(maxPower);
+    }
   
   inline void bounce(int time) 
     { Vbounce=time; }
@@ -257,15 +271,18 @@ class Ship : public ScreenObject
   }
   
   inline int weaponPower() { if(deadStick) return 0; return wPower; }
-  inline void dischargeWeapon() { wPower += 15; }
+  inline void dischargeWeapon() { wPower -= 25; }
   
   inline int& getAngle() 
     { return angle; }
   
+  inline void addMaxPower(int a) { maxPower += a; }
+  inline void addRegPower(int a) { rechargeRate += a; }
+
  protected:
   int angle, shieldMax, shieldTimeLeft, Vbounce, shieldLives;
   int lives, thrustcnt, wPower, pos, deadStick;
-  
+  int maxPower, rechargeRate;
 };
 
 
@@ -324,6 +341,20 @@ class Enemy : public ScreenObject
   int lastFire, cBitmap;
 };
 
+
+class PowerUp : public ScreenObject
+{
+ public:
+  PowerUp();
+  virtual void tick();
+
+  inline int effect()
+    {
+      return ptype;
+    }
+ private:
+  int ptype, timeLeft;
+};
 
 
 

@@ -23,6 +23,28 @@ v1.96.1 to v1.97
 	
 	Low CPU systems, and hi latency no longer locks up game(thanks LIM,
 	#sdl)
+
+	Convered from .cf format, raw images, and pallete emulation to
+	full SDL_Surfaces, and bitmap(bmp) files.
+
+	Moved from old installation system to more standard make, make install
+	installation.
+
+	Added Copyright document(this game really needs one).
+
+	Added new sounds.
+
+	Misc. bug fixes to the firing system. :D
+
+	Powerups! (Only 3 right now.)
+
+	Added a new enemy. 
+
+	Draw bars showing current weapon and shield power.
+
+	Actually draw shield(and turn it on).
+
+	
 	
 v1.96 to v1.96.1
 ===========

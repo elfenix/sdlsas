@@ -38,6 +38,46 @@ void SBitmap::compile()
 }
 
 
+// scale this bitmap(in half)
+void SBitmap::scalep5()
+{
+  int x, y;
+  char r, g, b;
+  SDL_Surface* newSurface;
+  
+  if(!mySurface) return;
+ 
+  newSurface = SDL_CreateRGBSurface(mySurface->flags,
+				    mySurface->w/2, mySurface->h/2,
+				    mySurface->format->BitsPerPixel,
+				    mySurface->format->Rmask,
+				    mySurface->format->Gmask,
+				    mySurface->format->Bmask,
+				    mySurface->format->Amask);
+  if(!newSurface) {
+    cerr << "[Warning] Scaling Failed: " << SDL_GetError() << endl;
+    return;
+  } 
+  
+  GraphicsStartDraw(newSurface);
+  GraphicsStartDraw(mySurface);
+
+  for( x = 0; x < mySurface->w; x++) {
+    for( y = 0; y < mySurface->h; y++) {           
+      getpixel(mySurface, x, y, &r, &g, &b);
+      setpixel(newSurface, x/2, y/2, r, g, b);
+    }
+  } 
+
+  GraphicsStopDraw(mySurface);
+  GraphicsStopDraw(newSurface);
+
+  SDL_FreeSurface(mySurface);
+  mySurface = newSurface;
+  
+  compile();
+}
+
 // scale this bitmap
 void SBitmap::scale2x()
 {

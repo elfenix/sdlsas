@@ -41,6 +41,7 @@ class SBitmap
   void rot(Angle degrees);
   void SetTrans(bool wantTrans);
   void scale2x();
+  void scalep5();
   void compile();
     
   // Inline (speed critical) functions bellow:

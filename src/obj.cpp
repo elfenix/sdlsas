@@ -157,8 +157,8 @@ void Ship::tick()
 	shieldTimeLeft--;
     if (shieldTimeLeft <= 0)
 	shieldLives = 0;
-    if (wPower < 10)
-	wPower++;
+    if (wPower < maxPower)
+	wPower+=rechargeRate;
 }
 
 void Ship::shieldOn()
@@ -364,6 +364,35 @@ void Enemy::tick()
   }
 }
 
+
+///////////////////////////////////////////////////////
+// Powerup Screen Object
+PowerUp::PowerUp()
+{
+  const int MaxSlots = 4;
+  int SlotMachine[MaxSlots] = { P_WMAX, P_WENG, P_WENG, P_WTHR };
+  int rX, rY;
+
+  ptype = SlotMachine[rand()%MaxSlots];
+  
+  SetVel(0.0f, 0.0f);
+  SetAcc(0.0f, 0.0f);
+  SetXY(float(DDIVCONST(rand()%Ui::HEIGHT())), 
+	float(DDIVCONST(rand()%Ui::WIDTH())));
+  setsize(10);
+  settype(P_TYPE);
+  SetBitmap(&Gbit[ptype]);
+  restore();
+  
+  timeLeft = 275;
+}
+
+void PowerUp::tick()
+{
+  timeLeft--;
+  if(timeLeft == 0) die();
+  ScreenObject::tick();
+}
 
 
 

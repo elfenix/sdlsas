@@ -43,9 +43,10 @@ const float MassSpinner   = 2.0f;
 const float BUL_SPEED     = 7.5f;
 
 // System Setup
-SBitmap Gbit[8];                          // graphics. =)
+SBitmap Gbit[11];                          // graphics. =)
 SBitmap Gbackdrop;
 SBitmap titleScreen;
+SBitmap extraLives;                       // 1/2 scale ship for extra men.
 
 #ifdef HAVE_SOUND
 Mix_Chunk *soundSamples[8];               // Sound!
@@ -96,6 +97,12 @@ void LoadBitmaps()
   Gbit[BULLET2].LoadImage(BINDIR "/graphics/bullet2.bmp");
   Gbit[SPINNER].LoadImage(BINDIR "/graphics/spinner.bmp");
   Gbit[SHIELD].LoadImage(BINDIR "/graphics/shield.bmp");
+  Gbit[P_WMAX].LoadImage(BINDIR "/graphics/wMaxPowerUp.bmp");
+  Gbit[P_WENG].LoadImage(BINDIR "/graphics/wRechargePowerUp.bmp");
+  Gbit[P_WTHR].LoadImage(BINDIR "/graphics/wThreePowerUp.bmp");
+  extraLives.LoadImage(BINDIR "/graphics/ship0.bmp");
+  extraLives.scalep5();
+  extraLives.SetTrans(true);
   morphBitmaps[0].LoadImage(BINDIR "/graphics/medast.bmp");
   morphBitmaps[1].LoadImage(BINDIR "/graphics/morph1.bmp");
   morphBitmaps[2].LoadImage(BINDIR "/graphics/morph2.bmp");
@@ -250,6 +257,31 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
   }
 }
 
+///////////////////////////////////////////////////////
+// Do the PowerUps
+void PowerUpF(int i)
+{
+  int ptype;
+  PowerUp* iobj;
+
+  iobj = (PowerUp*)ObjectList[i];
+  if(!iobj) return;
+
+  ptype = iobj->effect();
+  switch(ptype) {
+  case P_WMAX:
+    PlayerShip.addMaxPower(20);
+    break;
+  case P_WENG:
+    PlayerShip.addRegPower(5);
+    break;
+  case P_WTHR:
+    canShootThree = 1;
+    break;
+  }
+}
+
+
 
 //////////////////////////////////////////////////////
 // Bounce Objects? Why Yes!
@@ -356,8 +388,13 @@ int MoveObjects()
 	    break;
 	  case BULLET2:
 	    ObjectList[i]->die();
+	    break;
+	  case P_TYPE:
+	    ObjectList[i]->die();
+	    PowerUpF(i);
+	    crash = 0; touched--;
 	  } 
-	  touched = 1;
+	  touched++;
 	}
       }
       
@@ -440,7 +477,7 @@ void Fire()
   }
 
   
-  if (PlayerShip.weaponPower() > 0) {
+  if (PlayerShip.weaponPower() > 10) {
     PlaySound(SND_FIRE);
 
     rx = PlayerShip.GetX() + (PlayerShip.GetWidth() / 2);
@@ -468,7 +505,7 @@ void Fire()
     ObjectList[bullet]->SetMaxSpeed(255.0f);
     ObjectList[bullet]->settype(SHIP_BUL);     
  
-    if(canShootThree) {
+    if(canShootThree && PlayerShip.weaponPower() > 20) {
       // Fire 2
       bullet = GetOpenObject();
       ObjectList[bullet] = new ScreenObject;
@@ -501,7 +538,7 @@ void Fire()
       ObjectList[bullet]->SetMaxSpeed(255.0f);
       ObjectList[bullet]->settype(SHIP_BUL); 
 
-      PlayerShip.dischargeWeapon(); // Weapon discharges 2x as fast when shooting 3...
+      PlayerShip.dischargeWeapon(); // Discharg 2x as fast when shooting 3
     }
   } else {
     // TODO: Do something interesting.
@@ -513,14 +550,38 @@ void Fire()
 void botline()
 {
     char text[256] = { 0 };
-    int y;
+    int y, x;
 
-    y = Ui::HEIGHT() - Ui::fontHeight();
+    y = 10;
+    x = Ui::HEIGHT() - 
+    sprintf(text, "Score:%7d", score);
+    Ui::ShowText(DMULTCONST(5), DMULTCONST(5), text);
 
-    sprintf(text, "Score:%7d Ships:%2d  Lvl:%2d  Shield:%2d",
-	    score, PlayerShip.ships(), Glevel, PlayerShip.shieldPercent());
+    // Draw weapon + shield energy meter.
+    Gbit[BULLET].put(52, DDIVCONST(y));
+    for( x = 0; x < (PlayerShip.weaponPercent()*2); x++ ) {
+      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y, 255-x, (55)+x, 0);
+      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+1, 255-x, 55+x, 0);
+      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+2, 255-x, 55+x, 0);
+      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+3, 255-x, 55+x, 0);
+      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+4, 255-x, 55+x, 0);
+    }
 
-    Ui::ShowText(0, y, text);	// This routine is a bit slow.. but
+    // Draw shield energy meter.
+    y += 10;
+    Gbit[BULLET].put(52, DDIVCONST(y));
+    for( x = 0; x < (PlayerShip.weaponPercent()*2); x++ ) {
+      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y, 255-x, (55)+x, 0);
+      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+1, 255-x, 55+x, 0);
+      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+2, 255-x, 55+x, 0);
+      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+3, 255-x, 55+x, 0);
+      Ui::setpixel(DMULTCONST(58)+DDIV2CONST(x), y+4, 255-x, 55+x, 0);
+    } 
+
+    y = DDIVCONST(Ui::HEIGHT() - DMULTCONST(12));
+    for( x = 0; x < (PlayerShip.ships()-1); x++) {
+      extraLives.put(2+x*10, y);
+    }
 }
 
 
@@ -769,6 +830,12 @@ void PlayGame()
 	  ObjectList[j] = new Enemy;
 	}
 
+	if (!(rand()%250)) {
+	  int j;
+	  j = GetOpenObject();
+	  ObjectList[j] = new PowerUp;
+	}
+
 	
 	dead += MoveObjects();
 	if(deathTimer == 0) { dead = 1; deathTimer = -1; }
@@ -893,7 +960,7 @@ void ShowInfo()
 // Show the Game Title... 
 void ShowTitle(int selected)
 {
-  const int xstart = DMULTCONST(40), ystart = DMULTCONST(90);
+  const int xstart = 40, ystart = 90;
   const int yinc = 10;
   int cstring;
   

@@ -31,7 +31,7 @@
 
 // If the game runs slow this might help speed it up,
 // turns off font Anti Aliasing
-// #define QUICK_FONTS
+#define QUICK_FONTS
 
 // Cheatcodes?
 #define CHEAT_CODES	
@@ -50,8 +50,9 @@
 #define SCREEN_Y 400
 #define PLAY_X (SCREEN_X/2)
 #define PLAY_Y (SCREEN_Y/2)
-#define DMULTCONST(a) (a*2)
-#define DDIVCONST(a) (a/2)
+#define DMULTCONST(a) ((a)*2)
+#define DDIVCONST(a) ((a)/2)
+#define DDIV2CONST(a) ((a))
    
 #else
 
@@ -61,6 +62,7 @@
 #define PLAY_Y	SCREEN_Y
 #define DMULTCONST(a) (a)
 #define DDIVCONST(a) (a)
+#define DDIV2CONST(a) ((a)/2)
 
 #endif
 
