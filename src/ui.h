@@ -63,8 +63,8 @@ class Ui
 
   static void inline setpixel(int x, int y, char r, char g, char b)
     {
-      if(x < 0 || x > myscreen->w) return;
-      if(y < 0 || y > myscreen->h) return;
+      if(x < 0 || x >= myscreen->w) return;
+      if(y < 0 || y >= myscreen->h) return;
       (pixelDriver)(myscreen, x, y, r, g, b);
     }
 

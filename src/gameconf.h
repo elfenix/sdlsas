@@ -10,8 +10,11 @@
 #define VERSION "1.96.2(CVS RELEASE)"
 
 // Where do we want the game files?
-#ifndef BINDIR
+// Note: This is NOT the place to edit this, use the *MAKEFILE*
+#ifndef GAMEDIR
 #define BINDIR "/usr/share/sasteroids/"
+#else
+#define BINDIR GAMEDIR
 #endif
 
 // Uncomment line bellow if your using an old C++ compiler
@@ -38,6 +41,7 @@
 #define PLAY_X (SCREEN_X/2)
 #define PLAY_Y (SCREEN_Y/2)
 #define DMULTCONST(a) (a*2)
+#define DDIVCONST(a) (a/2)
    
 #else
 
@@ -46,6 +50,12 @@
 #define PLAY_X SCREEN_X
 #define PLAY_Y	SCREEN_Y
 #define DMULTCONST(a) (a)
+#define DDIVCONST(a) (a/2)
 
+#endif
 
+// Where do we want the game files?
+// Note: This is NOT the place to edit this, use the *MAKEFILE*
+#ifndef BINDIR
+#define BINDIR "/usr/share/sasteroids/"
 #endif

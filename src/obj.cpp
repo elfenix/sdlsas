@@ -273,16 +273,7 @@ void Explosion::draw()
   for (i = 0; i < numPTS; i++) {
     x = int (pts[i].GetX() + position.GetX());
     y = int (pts[i].GetY() + position.GetY());
-    
-    if (x < 0)
-      x = 0;
-    if (x >= 639)
-      x = 638;
-    if (y < 0)
-      y = 0;
-    if (y >= 399)
-      y = 398;
-    
+       
     Ui::setpixel(x, y, 255, 255, status[i]);
 #ifdef DOUBLE_SIZE
     Ui::setpixel(x + 1, y + 1, 255, 255, status[i]);

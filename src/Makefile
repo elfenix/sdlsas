@@ -6,6 +6,8 @@ CC = g++
 INCLUDE = -I/usr/include
 OPTIMIZE = -fomit-frame-pointer -O2 -ffast-math -funroll-loops -march=pentium -mcpu=pentium
 OPTS = -Wall -pipe
+GDIR=\"$(GAMEDIR)\"
+DEFINES = -DGAMEDIR=$(GDIR)
 
 # regular use
 CFLAGS	 = -Wall $(DEFINES) $(INC) $(OPTIMIZE) $(OPTS)

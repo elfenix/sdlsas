@@ -15,7 +15,6 @@ Requirements:
 	
 	Everything else should work standard out-of-the-box.
 
-	
 
 To install:
 
@@ -28,8 +27,6 @@ game play options and values.
 From the SDLSasteroids directory(where this file resides)
 
 run 'make'
-run './installbin'
+run 'make install'
 
 The binary should now be installed. 
-
-

@@ -57,7 +57,7 @@ int G_use_backdrop = 0;
 Ship PlayerShip;	                  // Info about player's ship.
 int score, Glevel, numasts, oldscore;     // scoring and level info
 int ClassicMode = 0;                      // classic mode?
-int BackdropOn = 0;                       // is the backdrop on?
+int BackdropOn = 1;                       // is the backdrop on?
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -605,8 +605,8 @@ void PlayGame()
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
       case SDL_VIDEORESIZE:
-	ScreenLimits.SetXY(DMULTCONST(event.resize.w), 
-			   DMULTCONST(event.resize.h));
+	ScreenLimits.SetXY(DDIVCONST(event.resize.w), 
+			   DDIVCONST(event.resize.h));
 	Ui::resync(event.resize.w, event.resize.h);
 	break;
 	
@@ -738,7 +738,8 @@ void PlayGame()
 	FinishedLastCall = 1;
       }
       
-      if(BackdropOn) {
+      if(BackdropOn && Ui::WIDTH() <= DMULTCONST(320) &&
+	 Ui::HEIGHT() <= DMULTCONST(200)) {
 	Gbackdrop.put(0, 0);
       } else {
 	Ui::clearscreen();
@@ -945,7 +946,8 @@ int main(int argc, char *argv[])
   srand((unsigned int) time(NULL));
   
   InitializeSDL();
-  
+
+  cerr << "Opening: " << BINDIR "sast.cf" << endl;
   if (Gcf.open(BINDIR "sast.cf") != 0) {
     cerr << "Open failed on sast.cf" << endl;
     exit(-1);
