@@ -3,6 +3,25 @@ Sasteroids ChangeLog
 (See bottom of README file for credits)
 
 
+v2.99 to v3.0
+==================
+	Fixed bug in enemy ship fire
+	Added NASA Copyright information
+
+v2.0 to v2.99
+==================
+	Dropped double size feature
+	Moved graphics to png
+	Added alpha blending support
+	Seperated out Asteroids into seperate source file
+	Generally cleaned up source base
+	Added start of joystick support(Digisin)
+	Added more, and better, backdrops
+	Moved to new graphics from Digisin
+	Added new shield graphic
+	Moved to OpenGL and SDL_gfx
+
+
 v1.99 to v2.0
 ==================
 	Default to window interface

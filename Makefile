@@ -9,7 +9,7 @@ MANDIR=/usr/man
 EXTRA_DEFINES=-DWANT_OPENGL
 EXTRA_LIBS=-lGL
 
-# For SDL_gfx
+# For SDL_gfx - NOT SUPPORTED AT THIS TIME (will work, some features missing...)
 # EXTRA_DEFINES=
 # EXTRA_LIBS=-lSDL_gfx
 
