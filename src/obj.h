@@ -183,8 +183,10 @@ class Ship : public ScreenObject
   
   Ship() : ScreenObject(), shieldMax(30), shieldTimeLeft(0), 
     Vbounce(0), shieldLives(3), lives(3), thrustcnt(0), pos(0) 
-    { deadStick = 0; SetBitmap(); wrapMoves = 1; wPower = 0; }
+    { deadStick = 0; SetBitmap(); wrapMoves = 1; wPower = 0; angle = 0; }
   
+  inline void resetDirection() { pos = 0; SetBitmap(); angle = 0; }
+
   inline void SetDeadStick(int dead) { deadStick = dead; }
   inline int isDeadStick() { return deadStick; }
   

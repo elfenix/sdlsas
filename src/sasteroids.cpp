@@ -523,6 +523,7 @@ void ResetShip()
   PlayerShip.SetXY(x, y);
   PlayerShip.SetupDrawing();
   PlayerShip.SetVel(0.0f, 0.0f);
+  PlayerShip.resetDirection();
 }
 
 
