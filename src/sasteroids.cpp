@@ -571,12 +571,10 @@ void PlayGame()
       botline();
 
       if(dead) {
-	int x, y, width, height;
+	int x, y;
 
-	width = Gbit[BIT_PLAYER].width(); 
-	height = Gbit[BIT_PLAYER].height();
-	x = int(ScreenLimits.GetX()) - width;
-	y = int(ScreenLimits.GetY()) - height;
+	x = int(ScreenLimits.GetX());
+	y = int(ScreenLimits.GetY());
 	x = x / 2;
 	y = y / 2;
 	

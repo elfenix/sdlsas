@@ -104,15 +104,11 @@ void ScreenObject::tick()
     
 
 
-    //    if(bounce > 0) {
-    //      bounce--;
-    //    } else {
-      velocity += accelleration;
-      //    }
-
+    velocity += accelleration;
+    
     // Look to see if we are visible...
-    if (position.GetX() > ScreenLimits.GetX() ||
-	position.GetY() > ScreenLimits.GetY()) {
+    if (position.GetX() - (GetWidth() / 2.0f)  > ScreenLimits.GetX() ||
+	position.GetY() - (GetHeight() / 2.0f) > ScreenLimits.GetY()) {
 	if (!wrapMoves)
 	    die();		// If we don't wrap, we die...
 	else {
@@ -127,8 +123,8 @@ void ScreenObject::tick()
     }
 
 
-    if (position.GetX() < (0.0f-size.GetX()) || 
-	position.GetY() < (0.0f-size.GetY())) {
+    if (position.GetX() + (GetWidth()/2.0f) < (0.0f-size.GetX()) || 
+	position.GetY() + (GetWidth()/2.0f)< (0.0f-size.GetY())) {
 	if (!wrapMoves)
 	    die();
 	else {
