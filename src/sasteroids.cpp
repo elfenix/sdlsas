@@ -17,6 +17,9 @@
 void displayScreen(char *screen);
 void upscore(int upby);
 
+#define SND_BOOM_A     0
+#define SND_BOOM_B     1
+#define SND_FIRE       2
 
 /////////////////////////////////////////////////////////////////////////////
 // Global variables: 
@@ -41,6 +44,9 @@ const float BUL_SPEED     = 7.5f;
 cfc Gcf;                                  // graphics interface and
 SBitmap Gbit[8];                          // graphics. =)
 SBitmap Gbackdrop;
+
+Mix_Chunk *soundSamples[8];               // Sound!
+
 int G_use_backdrop = 0;
 
 // Global Game Play Variables.
@@ -188,6 +194,9 @@ void KillAsteroid(int number, int killedBy)
   char blastAngle;
 
   if(ObjectList[number]->alive()) {
+    // play a sound. :)
+    Mix_PlayChannel(-1, soundSamples[SND_BOOM_B], 0);
+    
     numasts -= 1;
     
     // this asteroid is dead now
@@ -393,41 +402,43 @@ int MoveObjects()
 // fire a bullet for player ship
 void Fire()
 {
-    int bullet;
-    float fcos, fsin;
-    float rx, ry;
-
-
-    if (PlayerShip.weaponPower() > 0) {
-	bullet = GetOpenObject();
-
-	ObjectList[bullet] = new ScreenObject;
-	ObjectList[bullet]->restore();
-	fsin = -FastMath::cos(PlayerShip.getAngle());
-	fcos = FastMath::sin(PlayerShip.getAngle());
-	rx = PlayerShip.GetX() + (PlayerShip.GetWidth() / 2);
-	ry = PlayerShip.GetY() + (PlayerShip.GetHeight() / 2);
-
-	ObjectList[bullet]->SetXY(rx + PlayerShip.Size() * fcos,
+  int bullet;
+  float fcos, fsin;
+  float rx, ry;
+  
+  
+  if (PlayerShip.weaponPower() > 0) {
+    Mix_PlayChannel(-1, soundSamples[SND_FIRE], 0);
+    
+    bullet = GetOpenObject();
+    
+    ObjectList[bullet] = new ScreenObject;
+    ObjectList[bullet]->restore();
+    fsin = -FastMath::cos(PlayerShip.getAngle());
+    fcos = FastMath::sin(PlayerShip.getAngle());
+    rx = PlayerShip.GetX() + (PlayerShip.GetWidth() / 2);
+    ry = PlayerShip.GetY() + (PlayerShip.GetHeight() / 2);
+    
+    ObjectList[bullet]->SetXY(rx + PlayerShip.Size() * fcos,
 				  ry + PlayerShip.Size() * fsin);
-
-	ObjectList[bullet]->SetVel(PlayerShip.VelX() + BUL_SPEED * fcos,
-				   PlayerShip.VelY() + BUL_SPEED * fsin);
-
-	// Give it a bit of a kick back... ehehehheeheh
-	if(!ClassicMode)
-	  PlayerShip.AddVel(-fcos / 10.0f, -fsin / 10.0f);
-	
-  	ObjectList[bullet]->SetAcc(0.0f, 0.0f);
-	ObjectList[bullet]->SetBitmap(&Gbit[BULLET]);
-	ObjectList[bullet]->SetWrapMoves(false);
-	ObjectList[bullet]->SetMaxSpeed(255.0f);
-	ObjectList[bullet]->settype(SHIP_BUL);	/* SHIP_BUL(254) is bullet */
-
-	PlayerShip.dischargeWeapon();
-    } else {
-	// TODO: Do something interesting.
-    }
+    
+    ObjectList[bullet]->SetVel(PlayerShip.VelX() + BUL_SPEED * fcos,
+			       PlayerShip.VelY() + BUL_SPEED * fsin);
+    
+    // Give it a bit of a kick back... ehehehheeheh
+    if(!ClassicMode)
+      PlayerShip.AddVel(-fcos / 10.0f, -fsin / 10.0f);
+    
+    ObjectList[bullet]->SetAcc(0.0f, 0.0f);
+    ObjectList[bullet]->SetBitmap(&Gbit[BULLET]);
+    ObjectList[bullet]->SetWrapMoves(false);
+    ObjectList[bullet]->SetMaxSpeed(255.0f);
+    ObjectList[bullet]->settype(SHIP_BUL);	/* SHIP_BUL(254) is bullet */
+    
+    PlayerShip.dischargeWeapon();
+  } else {
+    // TODO: Do something interesting.
+  }
 }
 
 
@@ -805,6 +816,16 @@ void showScoringInfo()
 
 
 
+//////////////////////////////////////////////////////////
+// Load ze Wavs!
+void LoadWavs()
+{
+  soundSamples[SND_BOOM_A] = Mix_LoadWAV(BINDIR "boom1.wav");
+  soundSamples[SND_BOOM_B] = Mix_LoadWAV(BINDIR "boom2.wav");
+  soundSamples[SND_FIRE]   = Mix_LoadWAV(BINDIR "zap.wav");
+}
+
+
 
 
 /////////////////////////////////////////////////////////
@@ -812,12 +833,12 @@ void showScoringInfo()
 // 
 void InitializeSDL()
 {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0) {
-	cerr << "Couldn't initialize SDL!" << endl;
-	exit(-1);
-    }
-
-    atexit(SDL_Quit);
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0) {
+    cerr << "Couldn't initialize SDL!" << endl;
+    exit(-1);
+  }
+  
+  atexit(SDL_Quit);
 }
 
 
@@ -838,13 +859,22 @@ int main(int argc, char *argv[])
     cerr << "Open failed on sast.cf" << endl;
     exit(-1);
   }
+
+  if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024)==-1) {
+    cout << "No sound? Ieeyayayyaaaa: " << Mix_GetError() << endl;
+    exit(-1);
+  }
+
+  Mix_AllocateChannels(16);
   
+
   FastMath::init(1);
   SetupObjArray();
   LoadBitmaps();	      
   Ui::init();
   SetGamePalette();	
   ShowTitle();
+  LoadWavs();
   
   while (!done) {
     dirty = 0;
@@ -911,6 +941,8 @@ int main(int argc, char *argv[])
     
   }
   
+
+  Mix_CloseAudio();
   // shutdown & restore text mode
   Ui::restore();
   

@@ -21,12 +21,11 @@ SASTEROIDS = sasteroids
 SASTEROIDS_O = bitmap.o cfclass.o fastmath.o obj.o riloader.o sasteroids.o \
 		sbitmap.o ui.o
 
-LIBS = `sdl-config --libs` -lSDL_ttf -lfreetype 
-					
+LIBS = `sdl-config --libs` -lSDL_ttf -lfreetype -lSDL_mixer
 
 $(SASTEROIDS): $(SASTEROIDS_O)
 	g++ -o $(SASTEROIDS) $(SASTEROIDS_O) $(DEBUG) $(LIBS)
-	
+
 
 .cpp.o:
 	$(CC) $(CFLAGS) -c -o $*.o $<
