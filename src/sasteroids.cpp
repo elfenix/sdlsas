@@ -380,7 +380,7 @@ void GenerateAsteroids()
 	  ObjectList[obj]->randomDir(0.40f);
 	}
 
-	if(!(rand()%3)) {
+	if(!(rand()%3) && !ClassicMode) {
 	  do {
 	    x = (float) (rand() % 320);
 	    y = (float) (rand() % 200);
@@ -394,7 +394,7 @@ void GenerateAsteroids()
 	  numasts++;
 	}
 	
-	if(!(rand()%6)) {
+	if(!(rand()%6) && !ClassicMode) {
 	  do {
 	    x = (float) (rand() % 320);
 	    y = (float) (rand() % 200);

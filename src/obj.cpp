@@ -666,7 +666,7 @@ int CreateAsteroid(float x, float y, float xv, float yv, int type)
     if (!newobject)
 	return -1;
 
-    if(type == SMALLAST && !(rand()%LevelOdds(30,3)&&!ClassicMode))
+    if((type == SMALLAST && !(rand()%LevelOdds(30,3))) && !ClassicMode)
       {
 	type = ESMAST;
       }
