@@ -125,7 +125,6 @@ void Ship::SetBitmap()
 
 void Ship::draw()
 {
-  int i;
   if(!deadStick) {
 
     /* TODO: Implement this as part of the shield.
@@ -169,8 +168,9 @@ int Ship::shielded()
     return shieldLives;
 }
 
-void Ship::hyper()
+void Ship::Hyper()
 {
+  if(!deadStick)
     SetXY((float) (rand() % Ui::WIDTH()), (float) (rand() % Ui::HEIGHT()));
 }
 

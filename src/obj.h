@@ -248,7 +248,7 @@ class Ship : public ScreenObject
   
   void shieldOn();
   int shielded();
-  void hyper();
+  void Hyper();
   
   void SetupDrawing() {
     for(int i = 0; i < SHIPTURNS; i++) {

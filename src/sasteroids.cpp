@@ -583,10 +583,10 @@ void PlayGame()
 	
       case SDL_KEYDOWN:
 	if (event.key.keysym.sym == SDLK_LALT)
-	  PlayerShip.hyper();
+	  PlayerShip.Hyper();
 	
 	if (event.key.keysym.sym == SDLK_RALT)
-	  PlayerShip.hyper();
+	  PlayerShip.Hyper();
 	
 	if (event.key.keysym.sym == SDLK_SPACE)
 	  Fire();
