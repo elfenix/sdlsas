@@ -43,6 +43,7 @@ void Ui::init()
   TTF_SetFontStyle(myfont, TTF_STYLE_NORMAL);
 }
 
+
 ////////////////////////////////////////////////
 // Called when we are done with this library
 

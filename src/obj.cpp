@@ -9,6 +9,7 @@
 #include "sbitmap.h"
 #include "asteroid.h"
 
+
 // Global
 // SBitmap spinnerBitmaps[SHIPTURNS];
  SBitmap morphBitmaps[10];

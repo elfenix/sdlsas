@@ -22,6 +22,7 @@ void upscore(int upby);
 // Global variables: 
 
 // System Setup
+
 SBitmap Gbit[NUM_BITMAPS];                // graphics. =)
 SBitmap Backdrops[NUM_BACKS];
 
