@@ -153,6 +153,7 @@ void Fire()
     ObjectList[bullet]->SetWrapMoves(false);
     ObjectList[bullet]->SetMaxSpeed(255.0f);
     ObjectList[bullet]->settype(SHIP_BUL);     
+    ObjectList[bullet]->setsize(5);
  
     if(canShootThree && PlayerShip.weaponPower() > 20) {
       // Fire 2
@@ -170,6 +171,7 @@ void Fire()
       ObjectList[bullet]->SetWrapMoves(false);
       ObjectList[bullet]->SetMaxSpeed(255.0f);
       ObjectList[bullet]->settype(SHIP_BUL);  
+      ObjectList[bullet]->setsize(5);
       
       // Fire 3
       bullet = GetOpenObject();
@@ -186,6 +188,7 @@ void Fire()
       ObjectList[bullet]->SetWrapMoves(false);
       ObjectList[bullet]->SetMaxSpeed(255.0f);
       ObjectList[bullet]->settype(SHIP_BUL); 
+      ObjectList[bullet]->setsize(5);
 
       PlayerShip.dischargeWeapon(); // Discharg 2x as fast when shooting 3
     }
