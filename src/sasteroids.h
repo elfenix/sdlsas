@@ -80,7 +80,7 @@ const int SND_WARP = 4;
 // Constants. (tune game here)
 const int   GAME_CLOCK    = 33;           // Number of msec(33) between ticks.
 const float START_DIST    = 70;           // Disance asteroids start from ship
-const int   MAXASTEROIDS  = 16;           // Max # Asteroids
+const int   MAXASTEROIDS  = 10;           // Max # Asteroids
 
 const float MassBigAst    = 8.0f;         // Masses for bouncing + collision
 const float MassSmallAst  = 4.0f;
