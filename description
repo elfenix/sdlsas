@@ -1,0 +1,9 @@
+SDL Sasteroids is a port of the original Sasteroids game to a modern Linux enviroment. Unlike Sasteroids, which dependended on vgalib and an earlier version of GCC, this game may be played on modern hardware.
+
+This project uses SDL, SDL Sasteroids should run on several different Unix implementations compared to the previous original.  While there are many other Asteroids games out there, Sasteroids was one of the first graphical games for Linux, and for Linux old-timers will definately give some memories of old Slackware installs where Doom and Sasteroids where it for graphical games.  
+
+For new fans, the game features artwork and a different (and faster!) playstyle than more boring asteroids clones. For old fans, there are MANY suprises thrown in just to keep you guessing, and to hopefully provide a challenge to those that have already "beaten" it. 
+
+---------------------
+
+SDL Sasteroids is a major revision to the original sasteroids game to allow it to run on modern systems. In addition to providing very similar gameplay to the original sasteroids game, a few suprises and updates have been inserted to make it fun for old fans. :)
