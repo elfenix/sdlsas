@@ -11,12 +11,6 @@
 
 #include "sasteroids.h"
 
-// #include <stdlib.h>
-// #include "sbitmap.h"
-// #include "fastmath.h"
-// #include "sasteroids.h"
-// #include "vector.h"
-
 const int SHIPTURNS = 32;
 const int TURNANGLE = 256/SHIPTURNS;
 
@@ -26,6 +20,7 @@ extern SBitmap ShipBitmaps[32];
 extern SBitmap ShipThrusts[32];
 extern SBitmap morphBitmaps[10];
 extern SBitmap spinnerBitmaps[32];
+extern Vector ScreenLimits;
 
 void InitShips();
 
@@ -171,7 +166,6 @@ class ScreenObject {
   Vector size;
   SBitmap* mysprite;
   int objtype, mysize;
-  static Vector ScreenLimits;
 };
 
 

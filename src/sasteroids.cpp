@@ -21,6 +21,7 @@ void upscore(int upby);
 #define SND_BOOM_B     1
 #define SND_BOOM_C     2
 #define SND_FIRE       3
+#define SND_WARP       4
 
 /////////////////////////////////////////////////////////////////////////////
 // Global variables: 
@@ -56,6 +57,7 @@ int G_use_backdrop = 0;
 Ship PlayerShip;	                  // Info about player's ship.
 int score, Glevel, numasts, oldscore;     // scoring and level info
 int ClassicMode = 0;                      // classic mode?
+int BackdropOn = 0;                       // is the backdrop on?
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -602,13 +604,22 @@ void PlayGame()
   while (!GameOver) {
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
+      case SDL_VIDEORESIZE:
+	ScreenLimits.SetXY(DMULTCONST(event.resize.w), 
+			   DMULTCONST(event.resize.h));
+	Ui::resync(event.resize.w, event.resize.h);
+	break;
 	
       case SDL_KEYDOWN:
-	if (event.key.keysym.sym == SDLK_LALT && !pause)
+	if (event.key.keysym.sym == SDLK_LALT && !pause && !dead) {
+	  PlaySound(SND_WARP);
 	  PlayerShip.Hyper();
+	}
 	
-	if (event.key.keysym.sym == SDLK_RALT && !pause)
+	if (event.key.keysym.sym == SDLK_RALT && !pause && !dead) {
+	  PlaySound(SND_WARP);
 	  PlayerShip.Hyper();
+	}
 	
 	if (event.key.keysym.sym == SDLK_SPACE && !pause)
 	  Fire();
@@ -662,6 +673,10 @@ void PlayGame()
 	break;
       case SDL_ACTIVEEVENT:
 	;
+	break;
+
+      case SDL_QUIT:
+	exit(0);
 	break;
 	
       case SDL_USEREVENT:	      
@@ -723,7 +738,11 @@ void PlayGame()
 	FinishedLastCall = 1;
       }
       
-      Gbackdrop.put(0, 0);
+      if(BackdropOn) {
+	Gbackdrop.put(0, 0);
+      } else {
+	Ui::clearscreen();
+      }
       DrawObjects();
       botline();
 
@@ -893,6 +912,7 @@ void LoadWavs()
   soundSamples[SND_BOOM_B] = Mix_LoadWAV(BINDIR "boom2.wav");
   soundSamples[SND_BOOM_C] = Mix_LoadWAV(BINDIR "shipexplode.wav");
   soundSamples[SND_FIRE]   = Mix_LoadWAV(BINDIR "zap.wav");
+  soundSamples[SND_WARP]   = Mix_LoadWAV(BINDIR "warp.wav");
 #endif
 }
 
@@ -955,6 +975,17 @@ int main(int argc, char *argv[])
     
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
+
+      case SDL_VIDEORESIZE:
+	ScreenLimits.SetXY(DMULTCONST(event.resize.w), 
+			   DMULTCONST(event.resize.h));
+	Ui::resync(event.resize.w, event.resize.h);
+	break;
+	
+      case SDL_QUIT:
+	exit(0);
+	break;
+
       case SDL_KEYDOWN:
 	if (event.key.keysym.sym == SDLK_h) {
 	  c = 'h';

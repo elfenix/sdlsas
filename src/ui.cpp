@@ -30,8 +30,8 @@ void Ui::CenterText(char* msg)
 
   TTF_SizeText(myfont, msg, &width, &height);
 
-  x = SCREEN_X - width;
-  y = SCREEN_Y - height;
+  x = WIDTH() - width;
+  y = HEIGHT() - height;
   x /= 2;
   y /= 2;
 
@@ -45,7 +45,7 @@ void Ui::CenterXText(int y, char* msg)
 
   TTF_SizeText(myfont, msg, &width, &height);
 
-  x = SCREEN_X - width;
+  x = WIDTH() - width;
   x /= 2;
 
   ShowText(x, y, msg); 
@@ -87,11 +87,24 @@ void Ui::drawToVirtual()
     SDL_Flip(myscreen);
 }
 
+void Ui::resync(int newX, int newY)
+{
+  myscreen = SDL_SetVideoMode(newX, newY, 16, 
+				SDL_HWSURFACE | SDL_ANYFORMAT | 
+				SDL_RESIZABLE);
+
+  if(!myscreen) {
+    cerr << "Resize Failed, Bailing out." << endl;
+  }
+}
+
 
 // Initialize SDL Library and User Interface 
 void Ui::init()
 {
-    myscreen = SDL_SetVideoMode(SCREEN_X, SCREEN_Y, 16, SDL_HWSURFACE);
+    myscreen = SDL_SetVideoMode(SCREEN_X, SCREEN_Y, 16, 
+				SDL_HWSURFACE | SDL_ANYFORMAT | 
+				SDL_RESIZABLE);
     if (!myscreen) {
 	cerr << "Couldn't Grab a Visual: ERROR!" << endl;
 	exit(-1);

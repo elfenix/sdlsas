@@ -14,7 +14,7 @@ SBitmap morphBitmaps[10];
 SBitmap ShipBitmaps[SHIPTURNS];
 SBitmap ShipThrusts[SHIPTURNS];
 
-Vector ScreenObject::ScreenLimits(320, 200);
+Vector ScreenLimits(PLAY_X, PLAY_Y);
 
 // /////////////////////////////////////////////////////////
 // Screen Object class w00t!

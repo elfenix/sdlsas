@@ -39,6 +39,7 @@ class Ui
   static void drawToVirtual();
   static void init();
   static void restore();
+  static void resync(int x, int y);
   
   static void message( int y, char *msg ); // message centered at line y
   static void message( char *msg ) { message(0,msg); }

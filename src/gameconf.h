@@ -21,10 +21,7 @@
 #define HAVE_SOUND
 
 // Double Size 320x200 displays?
-#define DOUBLE_SIZE	
-
-// Use backdrops?
-#define USE_BACKDROP	
+// #define DOUBLE_SIZE	
 
 // Use non original enhanced behavoir?
 #define NON_ORIGINAL 
@@ -36,19 +33,19 @@
 // Don't Edit bellow this line for standard configuration
 
 #ifdef DOUBLE_SIZE
-
+#define SCREEN_X 640
+#define SCREEN_Y 400
 #define PLAY_X (SCREEN_X/2)
 #define PLAY_Y (SCREEN_Y/2)
 #define DMULTCONST(a) (a*2)
-#define SCREEN_X 640
-#define SCREEN_Y 400
    
 #else
 
+#define SCREEN_X 420
+#define SCREEN_Y 210
 #define PLAY_X SCREEN_X
 #define PLAY_Y	SCREEN_Y
 #define DMULTCONST(a) (a)
-#define SCREEN_X 320
-#define SCREEN_Y 200
+
 
 #endif
