@@ -69,10 +69,63 @@ using namespace std;
 void LoadBitmap( SBitmap &b, const char* file);
 int LevelOdds(int lvlMax, int maxChance = 1, int lvlStep = 1);
 
+
+const int SND_BOOM_A = 0;
+const int SND_BOOM_B = 1;
+const int SND_BOOM_C = 2;
+const int SND_FIRE = 3;
+const int SND_WARP = 4;
+
+
+// Constants. (tune game here)
+const int   GAME_CLOCK    = 33;           // Number of msec(33) between ticks.
+const float START_DIST    = 70;           // Disance asteroids start from ship
+const int   MAXASTEROIDS  = 16;           // Max # Asteroids
+
+const float MassBigAst    = 8.0f;         // Masses for bouncing + collision
+const float MassSmallAst  = 4.0f;
+const float MassMedAst    = 6.0f;
+const float MassShip      = 5.0f / 4.0f;
+const float MassEnemy     = 1.0f;
+const float MassBullet    = 1.0f / 8.0f;
+const float MassSpinner   = 2.0f;
+
+const float BUL_SPEED     = 7.5f;
+
+class SBitmap;
+class Ship;
+
 extern SBitmap Gbit[NUM_BITMAPS];
 extern SBitmap extraLives;
-extern int Glevel;
+extern SBitmap Gbackdrop;
+extern SBitmap titleScreen;
 extern int ClassicMode;
-extern int numasts;
+extern Ship PlayerShip;
+
+extern int score, Glevel, numasts, oldscore;
+extern int BackdropOn, wantFullScreen;
+
+extern int canShootThree;
+extern int smartZapper;
+extern int deathTimer;
+
+extern int eeggU, eeggD, eeggL, eeggR, eeggS;
+
+extern char HiScoreStrings[10][10];
+extern int HiScoreNumbers[10];
+
+#ifdef HAV_SOUND
+extern Mix_Chunk *soundSamples[8];
+#endif
+
+void PlaySound(int soundNumber);
+void upscore(int inc);
+void HitSpinner(int number, int killedBy);
+void HitEnemy(int number, int killedBy);
+void BounceObjects(int i, int j);
+void CleanUpStuff();
+void GenerateAsteroids();
+int MoveObjects();
+void LoadBitmaps();
 
 #endif

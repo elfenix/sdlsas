@@ -12,22 +12,22 @@ DEFINES = -DGAMEDIR=$(GDIR)
 
 
 # for debugging
-#CFLAGS	 = -Wall $(DEFINES) $(INC) $(DEBUG) $(OPTS) 
+#CFLAGS	 = -Wall $(INC) $(DEBUG) $(OPTS) 
 #DEBUG = -g -pg
 
 #LFLAGS   = -static
 
 SASTEROIDS = sasteroids
-SASTEROIDS_O = fastmath.o obj.o sasteroids.o sbitmap.o ui.o
+SASTEROIDS_O = fastmath.o obj.o sasteroids.o sbitmap.o ui.o ships.o
 
 LIBS = `sdl-config --libs` -lSDL_ttf -lfreetype -lSDL_mixer
 
 $(SASTEROIDS): $(SASTEROIDS_O)
-	g++ -o $(SASTEROIDS) $(SASTEROIDS_O) $(DEBUG) $(LIBS)
+	g++ -Wall -o $(SASTEROIDS) $(SASTEROIDS_O) $(DEFINES) $(DEBUG) $(LIBS)
 
 
 .cpp.o:
-	$(CC) $(CFLAGS) -c -o $*.o $<
+	$(CC) -Wall $(DEFINES) $(CFLAGS) -c -o $*.o $<
 
 
 .PHONY:	dep depend clean cleanall

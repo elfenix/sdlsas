@@ -16,7 +16,7 @@ SBitmap ShipThrusts[SHIPTURNS];
 
 Vector ScreenLimits(PLAY_X, PLAY_Y);
 
-// /////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 // Screen Object class w00t!
 
 ScreenObject::ScreenObject()
@@ -158,385 +158,6 @@ void ScreenObject::randomDir(float magn)
 
 
 
-// ///////////////////////////////////////////////////////////////////////
-// Ship Class....
-Ship::Ship() : ScreenObject()
-{
-  shieldMax = 100;
-  shieldTimeLeft = 0;
-  bounce = 0;
-  shieldLives = 3;
-  lives = 3;
-  thrustcnt = 0;
-  pos = 0;
-  deadStick = 0;
-  wrapMoves = 1;
-  wPower = 0;
-  angle = 0;
-
-  setsize(8);
-  SetBitmap();
-}
-
-void Ship::SetBitmap()
-{
-    if (thrustcnt)
-	ScreenObject::SetBitmap(&ShipThrusts[pos]);
-    else
-	ScreenObject::SetBitmap(&ShipBitmaps[pos]);
-}
-
-void Ship::draw()
-{
-  if(!deadStick) {
-    ScreenObject::draw();
-    if(shielded())
-      Gbit[SHIELD].put( int(position.GetX()), int(position.GetY()) );
-  }
-}
-
-
-void Ship::tick()
-{
-    wrapMoves = 1;
-
-    if (thrustcnt)
-	thrustcnt--;
-    if (!thrustcnt)
-	accelleration.SetXY(0, 0);
-    if (shieldStatus) {
-      shieldTimeLeft--;
-      if(shieldTimeLeft<=0) shieldStatus = 0;
-    } 
-
-    if (bounce > 0) {
-	accelleration.SetXY(0,0);
-	velocity.SetXY(1.0f - float(rand()%10)/5.0f,
-		       1.0f - float(rand()%10)/5.0f);		
-	bounce--;
-    }
-      
-    SetBitmap();
-    ScreenObject::tick();
-
-    if (wPower < maxPower)
-	wPower+=rechargeRate;
-}
-
-void Ship::shieldOn()
-{
-    if (shieldTimeLeft > 0)
-      shieldStatus = 1;
-}
-
-void Ship::shieldOff()
-{
-  shieldStatus = 0;
-}
-
-
-int Ship::shielded()
-{
-    return shieldStatus;
-}
-
-void Ship::Hyper()
-{
-  if(!deadStick)
-    SetXY((float) (rand() % Ui::WIDTH()), (float) (rand() % Ui::HEIGHT()));
-}
-
-
-void Ship::Reset() 
-{ 
-  pos = 0; SetBitmap(); angle = 0; bounce = 0;
-  maxPower = 220;
-  wPower = maxPower;
-  rechargeRate = 2;
-  shieldMax = 100;
-  shieldTimeLeft = shieldMax;
-  shieldStatus = 0;
-  
-  
-  restore();
-  SetDeadStick(0);
-
-  int width = ShipBitmaps[0].width();
-  int height = ShipBitmaps[0].height();
-  int x = int(ScreenLimits.GetX()) - width;
-  int y = int(ScreenLimits.GetY()) - height;
-  x = x / 2; y = y / 2;
-  SetXY(x, y);
-  SetVel(0.0f, 0.0f);
-}
-
-
-
-void Ship::Brake()
-{
-  if(!deadStick) 
-    SetVel(0.0f, 0.0f );
-}
- 
-void Ship::SetDeadStick(int dead)
-{
-  deadStick = dead;
-}
-
-
-void Ship::Thrust(float rRate)
-{ 
-  if(!deadStick) {
-    accelleration.SetXY(FastMath::sin(angle),-FastMath::cos(angle)); 
-    accelleration = accelleration * rRate;
-    thrustcnt = 3;
-    SetBitmap();
-  }
-}
-
-void Ship::addMaxPower(int a) 
-{ 
-  maxPower += a; 
-}
-
-void Ship::addRegPower(int a) 
-{ 
-  rechargeRate += a; 
-}
-
-void Ship::dischargeWeapon()
-{
-  wPower -= 25;
-}
-
-void Ship::shieldAdd(int a)
-{
-  shieldTimeLeft += a;
-  if(shieldTimeLeft > shieldMax) shieldTimeLeft = shieldMax;
-}
-
-void Ship::SetBounce()
-{
-  bounce = 15;
-}
-
-/////////////////////////////////////////////
-// Spinner Class (works a lot like ship class )
-
-void Spinner::SetBitmap()
-{
-    if (morphStage >= 0)
-	ScreenObject::SetBitmap(&morphBitmaps[morphStage / 3]);
-    else
-	ScreenObject::SetBitmap(&spinnerBitmaps[pos]);
-}
-
-void Spinner::tick()
-{
-    rotLeft(1);
-    if (morphStage >= 0)
-	morphStage--;
-
-    // Just for fun... mwahahhahahaha
-    if(isEvil && !ClassicMode) {
-      float ax, ay;
-      
-      ax = PlayerShip.GetX() - GetX();  // Find the distance.  
-      ay = PlayerShip.GetY() - GetY();
-      
-      ax = ax / 160;
-      ay = ay / 100;
-
-      if(ax < 0) ax -= 0.5f;
-      if(ax > 0) ax += 0.5f;
-      if(ay < 0) ay -= 0.5f;
-      if(ay > 0) ay += 0.5f;
- 
-      velocity.SetXY(ax, ay);  
-    } else {
-      if(!(rand()%100)) {
-	velocity.SetXY(velocity.GetX(), -velocity.GetY());
-      }
-    }
-     
-
-    wrapMoves = 1;
-    SetBitmap();
-    ScreenObject::tick();
-}
-
-void Spinner::draw()
-{
-  ScreenObject::draw();
-}
-
-void Spinner::hit()
-{
-  hitCount--;
-  if(hitCount <= 0) isAlive = false;
-}
-
-//////////////////////////////////////////////////////////
-// Explosion Class - for the nice big booms! =D
-
-Explosion::Explosion()
-{
-    velocity.SetXY(0, 0);
-    position.SetXY(0 * 2, 0 * 2);
-    size = 3;
-    accelleration.SetXY(0.0f, 0.0f);
-    isAlive = true;	       
-    objtype = 255;
-    mysize = 10;
-    timeLeft = 255;
-    mysprite = &ShipThrusts[0];	// Assign a dumby bitmap.. makes life
-    initExplosion();
-}
-
-
-Explosion::Explosion(float gx, float gy, float vx, float vy)
-{
-    velocity.SetXY(vx, vy);
-    position.SetXY(DMULTCONST(gx), DMULTCONST(gy));
-    size = 3;
-    accelleration.SetXY(0.0f, 0.0f);
-    isAlive = true;
-    objtype = 255;
-    mysize = 10;
-    timeLeft = 255;
-    mysprite = &ShipThrusts[0];	// Assign a dumby bitmap.
-    initExplosion();
-}
-
-
-void Explosion::draw()
-{
-  int i, x, y;
-  
-  for (i = 0; i < numPTS; i++) {
-    x = int (pts[i].GetX() + position.GetX());
-    y = int (pts[i].GetY() + position.GetY());
-       
-    Ui::setpixel(x, y, 255, 255, status[i]);
-#ifdef DOUBLE_SIZE
-    Ui::setpixel(x + 1, y + 1, 255, 255, status[i]);
-    Ui::setpixel(x, y + 1, 255, 255, 0);
-#endif
-  }
-}
-
-
-void Explosion::tick()
-{
-  int i;
-  
-  for (i = 0; i < numPTS; i++) {
-    pts[i] += vel[i];
-    if (vel[i].GetX() > 5.0f || vel[i].GetX() < -5.0f)
-      status[i] -= 3;
-    if (vel[i].GetY() > 5.0f || vel[i].GetY() < -5.0f)
-      status[i] -= 3;
-    status[i] -= 1;
-    timeLeft--;
-  }
-  
-  if(timeLeft < 0) 
-    isAlive = false;
-}
-
-
-void Explosion::initExplosion()
-{
-  int i;
-  
-  for (i = 0; i < numPTS; i++) {
-    pts[i].SetXY(float (rand() % DMULTCONST(5)), float (rand() % DMULTCONST(5)));
-    vel[i].SetXY(DMULTCONST(5.0f) - float (rand() % DMULTCONST(10)),
-		 DMULTCONST(5.0f) - float (rand() % DMULTCONST(10)));
-    
-    vel[i] += velocity;
-    status[i] = 255;
-  }
-}
-
-
-/////////////////////////////////////////////
-// The Enemy Class. =D
-
-Enemy::Enemy() 
-{
-  velocity.SetXY(1.0f, 0.25f);
-  position.SetXY(4, 30);
-  accelleration.SetXY(0.0f, 0.0f);
-  isAlive = true;	       
-  objtype = ENEMY;
-  mysize = 10;
-  SetBitmap(&Gbit[ENEMY]);
-}
-
-
-void Enemy::tick()
-{
-  Vector temp;
-  int j;
-  ScreenObject::tick(); 
-
-
-
-  if(!(rand()%50)) {
-    j = GetOpenObject();
-    temp.SetXY( PlayerShip.GetX()-GetX()+PlayerShip.VelX(), 
-		PlayerShip.GetY()-GetY()+PlayerShip.VelY());  
-    temp /= temp.length();
-    temp *= 2.5f;
-    
-    ObjectList[j] = new ScreenObject;
-    ObjectList[j]->restore();
-    ObjectList[j]->SetVel(temp.GetX(), temp.GetY());
-    ObjectList[j]->SetXY(GetX(), GetY());
-    ObjectList[j]->SetAcc(0.0f, 0.0f);
-    ObjectList[j]->SetWrapMoves(false);
-    ObjectList[j]->SetMaxSpeed(255.0f);
-    ObjectList[j]->settype(BULLET2);
-    ObjectList[j]->SetBitmap(&Gbit[BULLET2]);
-    ObjectList[j]->setsize(5);
-  }
-}
-
-
-///////////////////////////////////////////////////////
-// Powerup Screen Object
-PowerUp::PowerUp()
-{
-  const int MaxSlots = 7;
-  int SlotMachine[MaxSlots] = 
-    { 
-      P_WMAX, P_WMAX, P_WENG, P_WENG, P_WENG, P_WTHR, P_SHLD 
-    };
-
-  ptype = SlotMachine[rand()%MaxSlots];
-  
-  SetVel(0.0f, 0.0f);
-  SetAcc(0.0f, 0.0f);
-  SetXY(float(DDIVCONST(rand()%Ui::HEIGHT())), 
-	float(DDIVCONST(rand()%Ui::WIDTH())));
-  setsize(5);
-  settype(P_TYPE);
-  SetBitmap(&Gbit[ptype]);
-  restore();
-  
-  timeLeft = 275;
-}
-
-void PowerUp::tick()
-{
-  timeLeft--;
-  if(timeLeft == 0) die();
-  ScreenObject::tick();
-}
-
-
-
 // Rotate the pixmaps for all of the ships, spinners, etc... that rotate
 // around. =)
 void InitShips()
@@ -651,6 +272,115 @@ void AllObjectsTick()
 }
 
 
+
+///////////////////////////////////////////////////////
+// Kill an asteroid - and create new ones if needed.
+void KillAsteroid(int number, int killedBy, bool killChildren = false)
+{
+  int j, ctype;
+  Explosion* explode;
+
+  if(ObjectList[number]->alive()) {
+    // play a sound. :)
+    PlaySound(SND_BOOM_B);
+    
+    numasts -= 1;
+    
+    // this asteroid is dead now
+    // explode the original asteroid!
+    j = GetOpenObject();
+    explode = new Explosion(ObjectList[number]->GetX(),
+			    ObjectList[number]->GetY(),
+			    ObjectList[number]->VelX(),
+			    ObjectList[number]->VelY());
+    ObjectList[j] = explode;
+
+    // Check if we need to do something special when the asteroid dies
+    if(ObjectList[number]->type() == ESMAST) {
+      unsigned char angle; 
+
+      for(angle = 0; angle < 220; angle += 30) {
+	float fsin = FastMath::sin(angle) * 4.0f;
+	float fcos = FastMath::cos(angle) * 4.0f;
+	int j = GetOpenObject();
+	ObjectList[j] = new ScreenObject;
+	ObjectList[j]->restore();
+	ObjectList[j]->SetVel(fsin, fcos);
+	ObjectList[j]->SetXY(ObjectList[number]->GetX(), 
+			     ObjectList[number]->GetY());
+	ObjectList[j]->SetAcc(0.0f, 0.0f);
+	ObjectList[j]->SetWrapMoves(false);
+	ObjectList[j]->SetMaxSpeed(255.0f);
+	ObjectList[j]->settype(BULLET2);
+	ObjectList[j]->SetBitmap(&Gbit[BULLET2]);
+	ObjectList[j]->setsize(5);
+      } 
+    }
+
+    ObjectList[number]->die();
+
+    // up the points, but only if WE killed the asteroid
+    if(killedBy != 0 && ObjectList[killedBy]) {
+      if(ObjectList[killedBy]->type() == SHIP_BUL) {
+	if(ObjectList[number]->type() == BIGAST) upscore(500);
+	if(ObjectList[number]->type() == MEDAST) upscore(250);
+	if(ObjectList[number]->type() == SMALLAST) upscore(100);
+      }
+    }
+    
+    // figure out the new type of asteroids to create.
+    if(ObjectList[number]->type() == BIGAST) ctype = MEDAST;
+    else if(ObjectList[number]->type() == MEDAST) ctype = SMALLAST;
+    else ctype = 255;
+    
+    // create the asteroids
+    // when creating the asteroid we blast 2 at a time in opposite
+    // directions. TODO: Make this a more correct in terms of physics.
+    if(ctype != 255 && !killChildren) {
+      char rA1, rA2;
+      float px, py, vx, vy;
+      
+      rA1 = rand() % 255; 
+      rA2 = int(rA1 + 128) % 255;
+      
+      px = ObjectList[number]->GetX();
+      py = ObjectList[number]->GetY();
+      vx = ObjectList[number]->VelX();
+      vy = ObjectList[number]->VelY();
+         
+      CreateAsteroid( px, py, 
+		      FastMath::sin(rA1) * 1.0f + vx, 
+		      FastMath::cos(rA1) * 1.0f + vy, ctype );     
+      CreateAsteroid( px, py,
+		      FastMath::sin(rA2) * 1.0f + vx,
+		      FastMath::cos(rA2) * 1.0f + vy, ctype );
+
+      do {
+	rA2 = rand() % 255;
+      } while( abs(rA2 - rA1) < 5 && abs(rA2 - (rA1+124)) < 5);      
+      rA1 = int(rA2 + 128) % 255;
+      CreateAsteroid( px, py,
+		      FastMath::sin(rA1) * 1.0f + vx,
+		      FastMath::cos(rA1) * 1.0f + vy, ctype );
+      if(ctype == MEDAST && !(rand()%LevelOdds(16,4))) {
+	j = GetOpenObject();
+	ObjectList[j] = new Spinner;
+	ObjectList[j]->SetXY(px, py);
+	ObjectList[j]->SetVel(FastMath::sin(rA2)*1.0f + vx, 
+			      FastMath::cos(rA2)*1.0f + vy);
+      } else {
+	CreateAsteroid( px, py, 
+			FastMath::sin(rA2) * 1.0f + vx,
+			FastMath::cos(rA2) * 1.0f + vy, ctype );
+      }
+    }   
+  }
+}
+
+
+
+
+
 /////////////////////////////////////////////////////////////////////////////
 // Create an asteroid - does no checking of variables, just makes it
 int CreateAsteroid(float x, float y, float xv, float yv, int type)
@@ -700,3 +430,248 @@ int CreateAsteroid(float x, float y, float xv, float yv, int type)
 
     return openObject;
 }
+
+
+
+////////////////////////////////////////////////////////////////////////////
+// create asteroids for beginning of each level/game
+void GenerateAsteroids()
+{
+    int i, obj;
+    float x, y;
+    Vector temp;
+
+    for (i = 0; i <= (Glevel / 2 + 1) && i <= MAXASTEROIDS; i++) {
+	do {
+	    x = (float) (rand() % 320);
+	    y = (float) (rand() % 200);
+	    temp.SetXY(x, y);
+	}
+	while (PlayerShip.GetXYVec().length(temp) < START_DIST);
+
+	obj = CreateAsteroid(x, y, 0, 0, BIGAST);
+
+	if(ObjectList[obj]) {
+	  ObjectList[obj]->randomDir(0.40f);
+	}
+
+	if(!(rand()%3) && !ClassicMode) {
+	  do {
+	    x = (float) (rand() % 320);
+	    y = (float) (rand() % 200);
+	    temp.SetXY(x, y);
+	  }
+	  while (PlayerShip.GetXYVec().length(temp) < START_DIST);
+	  obj = CreateAsteroid(x, y, 0, 0, MEDAST);
+	  if(ObjectList[obj]) {
+	    ObjectList[obj]->randomDir(1.00f);
+	  }
+	}
+	
+	if(!(rand()%6) && !ClassicMode) {
+	  do {
+	    x = (float) (rand() % 320);
+	    y = (float) (rand() % 200);
+	    temp.SetXY(x, y);
+	  }
+	  while (PlayerShip.GetXYVec().length(temp) < START_DIST);
+	  obj = CreateAsteroid(x, y, 0, 0, SMALLAST);
+	  if(ObjectList[obj]) {
+	    ObjectList[obj]->randomDir(1.40f);
+	  }
+	}	
+    }
+}
+
+
+///////////////////////////////////////////////////////
+// Do the PowerUps
+void PowerUpF(int i)
+{
+  int ptype;
+  PowerUp* iobj;
+
+  iobj = (PowerUp*)ObjectList[i];
+  if(!iobj) return;
+
+  ptype = iobj->effect();
+  switch(ptype) {
+  case P_WMAX:
+    PlayerShip.addMaxPower(20);
+    break;
+  case P_WENG:
+    PlayerShip.addRegPower(2);
+    break;
+  case P_WTHR:
+    canShootThree = 1;
+    break;
+  case P_SHLD:
+    PlayerShip.shieldAdd(50);
+    break;
+  }
+}
+
+
+
+
+// /////////////////////////////////////////////////////////////////////////
+// Move all the game objects, check for collisions... etc...
+int MoveObjects()
+{
+  
+  int i = 0, crash = 0, touched = 0;
+  
+  AllObjectsTick();
+  
+  // Loop through every object.
+  for (i = 1; i < MAX_OBJECTS; i++) {
+    if (ObjectList[i]) {
+      
+      // Check for ship collision....
+      if (collide(*ObjectList[i], *ObjectList[0])
+	  && ObjectList[i]->type() != 254
+	  && ObjectList[i]->type() != 255
+	  && ObjectList[i]->alive()) {
+	crash = 1;
+	if(PlayerShip.shielded()) {
+	  PlayerShip.SetBounce();
+	  crash = 0; touched--;
+	} else	if(!PlayerShip.isDeadStick() && !touched) {
+	  switch(ObjectList[i]->type()) {
+	  case SMALLAST:
+	  case MEDAST:
+	  case BIGAST:
+	  case ESMAST:
+	    KillAsteroid(i, 0);
+	    break;
+	  case SPINNER:
+	    HitSpinner(i, 0);
+	    HitSpinner(i, 0);
+	    HitSpinner(i, 0);
+	    HitSpinner(i, 0);
+	    HitSpinner(i, 0);
+	    break;
+	  case BULLET2:
+	    ObjectList[i]->die();
+	    break;
+	  case P_TYPE:
+	    ObjectList[i]->die();
+	    PowerUpF(i);
+	    crash = 0; touched--;
+	  } 
+	  touched++;
+	}
+      }
+      
+      // Check for asteroid collisions... etc...
+      for (int j = 1; j < MAX_OBJECTS; j++) {
+	if (ObjectList[j]) {
+	  
+	  // Check every object against every other here 
+	  if (i == j)
+	    continue;	/* Don't check against self */
+	  
+	  if (ObjectList[i]->alive() && ObjectList[j]->alive()
+	      && (ObjectList[i]->type() == 254 || 
+		  ObjectList[i]->type() == BULLET2)
+	      && collide(*ObjectList[i], *ObjectList[j])) {
+	    switch (ObjectList[j]->type()) {
+	    case SMALLAST:
+	    case BIGAST:
+	    case MEDAST:
+	    case ESMAST:
+	      KillAsteroid(j, i);
+	      ObjectList[i]->die();
+	      break;
+	    case SPINNER:
+	      HitSpinner(j, i);
+	      ObjectList[i]->die();
+	      break;
+	    case ENEMY:
+	      if(ObjectList[i]->type() != BULLET2) 
+		HitEnemy(j, i);
+	    }
+	  } else {
+	    if(ObjectList[i]->type() == SPINNER || 
+	       ObjectList[j]->type() == SPINNER) {
+	      BounceObjects(i, j);
+	    }    
+	  }
+	  
+	} // end if(ObjectList[i])
+      }
+      
+    }
+  }
+  
+  return crash;
+}
+
+
+// Utility Function.
+void CleanUpStuff() 
+{
+  int i;
+  for(i = 1; i < MAX_OBJECTS; i++) {
+    if(!ObjectList[i]) continue;
+    if(ObjectList[i]->type() == MEDAST ||
+       ObjectList[i]->type() == SMALLAST ||
+       ObjectList[i]->type() == BIGAST) {
+      if(numasts > 1) { 
+	KillAsteroid(i, 0);
+      } 
+    }
+  } 
+  
+  canShootThree = 1;
+  deathTimer = 128;
+}
+
+
+
+
+//////////////////////////////////////////////////////
+// Set up the array of game objects.
+void LoadBitmaps()
+{
+  Gbit[SMALLAST].LoadImage(BINDIR "/graphics/smallast.bmp");
+  Gbit[ESMAST].LoadImage(BINDIR "/graphics/esmallast.bmp");
+  Gbit[MEDAST].LoadImage(BINDIR "/graphics/medast.bmp");
+  Gbit[BIGAST].LoadImage(BINDIR "/graphics/bigast.bmp");
+  Gbackdrop.LoadImage(BINDIR "/graphics/back1.bmp", false);
+  titleScreen.LoadImage(BINDIR "/graphics/title.bmp", false);
+  Gbit[ENEMY].LoadImage(BINDIR "/graphics/enemy.bmp");
+  Gbit[BULLET].LoadImage(BINDIR "/graphics/bullet.bmp");
+  Gbit[BULLET2].LoadImage(BINDIR "/graphics/bullet2.bmp");
+  Gbit[SPINNER].LoadImage(BINDIR "/graphics/spinner.bmp");
+  Gbit[SHIELD].LoadImage(BINDIR "/graphics/shield.bmp");
+  Gbit[P_WMAX].LoadImage(BINDIR "/graphics/wMaxPowerUp.bmp");
+  Gbit[P_WENG].LoadImage(BINDIR "/graphics/wRechargePowerUp.bmp");
+  Gbit[P_WTHR].LoadImage(BINDIR "/graphics/wThreePowerUp.bmp");
+  Gbit[P_SHLD].LoadImage(BINDIR "/graphics/wShieldPowerUp.bmp");
+  extraLives.LoadImage(BINDIR "/graphics/ship0.bmp");
+  extraLives.scalep5();
+  extraLives.SetTrans(true);
+  morphBitmaps[0].LoadImage(BINDIR "/graphics/medast.bmp");
+  morphBitmaps[1].LoadImage(BINDIR "/graphics/morph1.bmp");
+  morphBitmaps[2].LoadImage(BINDIR "/graphics/morph2.bmp");
+  morphBitmaps[3].LoadImage(BINDIR "/graphics/morph3.bmp");
+  morphBitmaps[4].LoadImage(BINDIR "/graphics/morph4.bmp");
+  morphBitmaps[5].LoadImage(BINDIR "/graphics/morph5.bmp");
+  morphBitmaps[6].LoadImage(BINDIR "/graphics/morph6.bmp");
+  morphBitmaps[7].LoadImage(BINDIR "/graphics/morph7.bmp");
+  morphBitmaps[8].LoadImage(BINDIR "/graphics/morph8.bmp");
+  morphBitmaps[9].LoadImage(BINDIR "/graphics/morph9.bmp"); 
+  
+  InitShips();
+}
+
+
+
+//////////////////////////////////////////////////////
+// Bounce Objects? Why Yes!
+void BounceObjects(int i, int j) 
+{
+  // TODO: BOUNCE OBJECTS
+}
+
