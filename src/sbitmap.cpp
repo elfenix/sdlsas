@@ -11,87 +11,17 @@
 
 #include "sasteroids.h"
 
-void getpixel(SDL_Surface *mysurface, int x, int y, char r, char g, char b)
-{
-  if(x < 0 || y < 0) return;
-  if(x > mysurface->w || y > mysurface->h) return;
-
-  // BIG TODO HERE!!!!!!!!!!!11
-}
-
-
-void setpixel(SDL_Surface * screen, int x, int y, char r, char g, char b)
-{
-  Uint8 *ubuff8;
-  Uint16 *ubuff16;
-  Uint32 *ubuff32;
-  Uint32 color;
-  
-  if(x < 0 || y < 0) return;
-  if(x > Ui::WIDTH() || y > Ui::HEIGHT()) return; 
-  
-  // Lock the screen/image, if needed.
-  if (SDL_MUSTLOCK(screen)) {
-    if (SDL_LockSurface(screen) < 0)
-      return;
-  }
-  
-  // Get the color 
-  color = SDL_MapRGB(screen->format, r, g, b);
-  
-  // How we draw the pixel depends on the bitdepth 
-  
-  
-  switch (screen->format->BytesPerPixel) {
-  case 1:
-    ubuff8 = (Uint8 *) screen->pixels;
-    ubuff8 += (y * screen->pitch) + x;
-    *ubuff8 = (Uint8) color;
-    break;
-  case 2:
-    ubuff8 = (Uint8 *) screen->pixels;
-    ubuff8 +=
-      (y * screen->pitch) + (x * screen->format->BytesPerPixel);
-    ubuff16 = (Uint16 *) ubuff8;
-    *ubuff16 = (Uint16) color;
-    break;
-  case 3:
-    ubuff8 = (Uint8 *) screen->pixels;
-    ubuff8 += (y * screen->pitch) + (x * 3);
-    r = (color >> screen->format->Rshift) & 0xFF;
-    g = (color >> screen->format->Gshift) & 0xFF;
-    b = (color >> screen->format->Bshift) & 0xFF;
-    ubuff8[0] = r;
-    ubuff8[1] = g;
-    ubuff8[2] = b;
-    break;
-  case 4:
-    ubuff32 = (Uint32 *) screen->pixels;
-    ubuff32 += ((y * screen->pitch) >> 2) + x;
-    *ubuff32 = color;
-    break;
-  default:
-    fprintf(stderr, "Error: Unknown bitdepth!\n");
-  }
-    
-  // Unlock the screen if needed 
-  if (SDL_MUSTLOCK(screen)) {
-    SDL_UnlockSurface(screen);
-  }
-}
-
-
-void
-scaleCopy2(int w1, int h1, unsigned char *map1, int w2,
-	   int h2, unsigned char *map2)
-{
-    memcpy(map2, map1, w2 * h2);
-}
-
-
 void SBitmap::SetTrans(bool wantTrans)
 {
-  // BIG TOOD HERE
+  Uint32 key;
+  if(!mySurface) return;
+
+  key = SDL_MapRGB(mySurface->format, 0, 0, 0);
+  if(wantTrans) {
+    SDL_SetColorKey(mySurface, SDL_SRCCOLORKEY|SDL_RLEACCEL, key);
+  } else {
+    SDL_SetColorKey(mySurface, 0, key);
+  }
 }
 
 
@@ -178,13 +108,15 @@ void SBitmap::rot(Angle degrees)
 }
 
 
-void SBitmap::LoadImage(char* file) 
+void SBitmap::LoadImage(char* file, bool sflag) 
 {
-  mysurface = SDL_LoadBMP(file);
-  if(!mysurface) {
+  mySurface = SDL_LoadBMP(file);
+  if(!mySurface) {
     cerr << "[Fatal] Could not load bitmap: " << SDL_GetError() << endl;
     exit(-1);
   }
+
+  SetTrans(sflag);
 }
 
 
@@ -192,15 +124,15 @@ void SBitmap::copy(SBitmap& b)
 { 
   SDL_Surface* surfaceCopy;
   
-  if(mysurface) SDL_FreeSurface(mysurface);
-  if(!b.mysurface) return;
+  if(mySurface) SDL_FreeSurface(mySurface);
+  if(!b.mySurface) return;
 
-  surfaceCopy = b.mysurface;
-  mysurface = SDL_ConvertSurface(surfaceCopy,
+  surfaceCopy = b.mySurface;
+  mySurface = SDL_ConvertSurface(surfaceCopy,
 				 surfaceCopy->format,
 				 surfaceCopy->flags);
 
-  if(!mysurface) {
+  if(!mySurface) {
     cerr << "[Fatal] Couldn't Create SDL Surface!" << endl;
     exit(-1);
   }

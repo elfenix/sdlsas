@@ -32,6 +32,7 @@ ScreenObject::ScreenObject()
   mysize = 1;
 }
 
+
 ScreenObject::ScreenObject(int type)
 {
   wrapMoves = false;
@@ -44,6 +45,7 @@ ScreenObject::ScreenObject(int type)
   mysize = 1;
   objtype = type;
 }
+
 
 ScreenObject::~ScreenObject()
 {

@@ -4,9 +4,7 @@
 // are included.
 
 // File   : Ui.h[1.0]
-// Name   : gamelib1.0
-// Status : proposed
-// Changed: Sun Jun 12 22:18:17 1994
+// Changed: FRI OCT-10-2002
 
 // a layer on top of the svgalib library.
 // Routines to setup the initialize the screen/svgalib/etc, restore back
@@ -19,7 +17,7 @@
 
 #include "sasteroids.h"
 
-// call before using setpixel. =)
+// call before using setpixel or getpixel. =)
 void GraphicsStartDraw(SDL_Surface* visual);
 void GraphicsStopDraw(SDL_Surface* visual);
 
@@ -28,14 +26,21 @@ void g_setpixelB1(SDL_Surface* visual, int x, int y, char r, char g, char b);
 void g_setpixelB2(SDL_Surface* visual, int x, int y, char r, char g, char b);
 void g_setpixelB3(SDL_Surface* visual, int x, int y, char r, char g, char b);
 void g_setpixelB4(SDL_Surface* visual, int x, int y, char r, char g, char b);
+void setpixel(SDL_Surface *screen, int x, int y, char r, char g, char b);
+
+// Unsafe getpixel functions, may be used, but don't check x/y coord's.
+void g_getpixelB1(SDL_Surface* v, int x, int y, char *r, char *g, char *b);
+void g_getpixelB2(SDL_Surface* v, int x, int y, char *r, char *g, char *b);
+void g_getpixelB3(SDL_Surface* v, int x, int y, char *r, char *g, char *b);
+void g_getpixelB4(SDL_Surface* v, int x, int y, char *r, char *g, char *b);
+void getpixel(SDL_Surface *screen, int x, int y, char *r, char *g, char *b);
+
 
 
 class Ui 
 {
  public: 
   static void updateScreen();
-  static void drawToPhysical();
-  static void drawToVirtual();
   static void init();
   static void restore();
   static void resync(int x, int y);
@@ -93,16 +98,11 @@ class Ui
 
  private:
   static TTF_Font *myfont;
-  static void die(int);
   static void drawCursor(int x, int y);
   static void hideCursor(int x, int y);
 
   static void (*pixelDriver)(SDL_Surface* visual, 
 			     int x, int y, char r, char g, char b);
 };
-
-inline void updateScreen() { Ui::updateScreen(); }
-inline void drawToPhysical() { Ui::drawToPhysical(); }
-
 
 #endif

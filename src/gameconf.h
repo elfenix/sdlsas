@@ -29,6 +29,10 @@
 // Use non original enhanced behavoir?
 #define NON_ORIGINAL 
 
+// If the game runs slow this might help speed it up,
+// turns off font Anti Aliasing
+#define QUICK_FONTS
+
 // Cheatcodes?
 #define CHEAT_CODES	
 

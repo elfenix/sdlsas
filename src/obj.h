@@ -301,11 +301,7 @@ class Explosion : public ScreenObject {
   
   virtual void draw();
   virtual void tick(); 
-  
-  //  bool realAlive() 
-  //{ if(timeLeft > 0) return true; else return false; }
-  
-  
+   
  private:
   int timeLeft, size;
   static const int numPTS = 15;

@@ -72,20 +72,6 @@ inline void PlaySound(int soundNumber)
 }
 
 
-///////////////////////////////////////////////////////
-// Load bitmap image from 'file' into 'b'
-void LoadBitmap(SBitmap & b, const char *file)
-{
-  char bigPath[256];
-  strcpy(bigPath, BINDIR);
-  strcat(bigPath, file);
-  //  RawImageLoader loader(Gcf);
-  //  if (loader.load(file, LOAD_IMAGE) == EXIT_SUCCESS)
-  //    b.setMap(loader);
-  b.LoadImage(bigPath);
-}
-
-
 //////////////////////////////////////////////////////
 // Set up the array of game objects.
 void LoadBitmaps()
@@ -520,9 +506,8 @@ void PlayGame()
 
   ResetShip();
   FreeObjArray();
-
-
   Ui::clearscreen();
+
   timer = SDL_AddTimer( GAME_CLOCK, TimerTick, 0 );
   
   if(!timer) {
@@ -531,8 +516,8 @@ void PlayGame()
   }
   
   keystatebuffer = SDL_GetKeyState(NULL);
-  Gbackdrop.SetTrans(0);
-  //  Gbackdrop.setupsurface();
+  Gbackdrop.SetTrans(false);
+ 
   
   pause = 0;
   GameOver = 0;
@@ -617,7 +602,7 @@ void PlayGame()
       case SDL_QUIT:
 	exit(0);
 	break;
-	
+      
       case SDL_USEREVENT:	      
 	// This only gets called while the GAME CLOCK ITSELF is ticking =)
 	
@@ -708,7 +693,6 @@ void PlayGame()
 
       if(!sastWantTicks) {
 	Ui::CenterText(pstr);
-	//	SetGamePalette();
 	FinishedLastCall = 1;
       }
 
@@ -724,7 +708,7 @@ void PlayGame()
 // return 1=easy, 4=medium, 8=hard
 int selectGame()
 {
-    Ui::drawToPhysical();
+  // Ui::drawToPhysical();
     displayScreen("back.raw");
     // TODO: skill level selection...
     return 1;
@@ -732,7 +716,7 @@ int selectGame()
 
 
 // //////////////////////////////////////////////////////////////////////////
-void showInfo()
+void ShowInfo()
 {
     displayScreen(BINDIR "graphics/back.bmp");
     int x, y;
@@ -763,61 +747,43 @@ void showInfo()
     Ui::ShowText(x + 140, y + 220, "random area on screen)");
     Ui::ShowText(x + 140, y + 240, "Pause ");
     Ui::ShowText(x + 140, y + 280, " Quit game");
-    updateScreen();
+    Ui::updateScreen();
 }
 
 
-// Show the Game Title..
+
+/////////////////////////////////////////////////
+// Show the Game Title... 
 void ShowTitle(int selected)
 {
-    displayScreen(BINDIR "/graphics/title.bmp");
-
-    Ui::ShowTextColor(DMULTCONST(40), DMULTCONST(90),
-		      "SDL Sasteroids Version " VERSION,
+  const int xstart = 40, ystart = 90;
+  const int yinc = 10;
+  int cstring;
+  
+  char *tStringList[] =
+    { "SDL Sasteroids Version " VERSION,
+      "(I) INFORMATION",
+      "(H) HIGH SCORES",
+      "(S) START GAME",
+      "(Q) QUIT",
+      NULL
+    };
+      
+  displayScreen(BINDIR "/graphics/title.bmp");
+ 
+  for(cstring = 0; tStringList[cstring] != 0; cstring++) {
+    Ui::ShowTextColor(DMULTCONST(xstart),
+		      DMULTCONST(ystart+(yinc*cstring)),
+		      tStringList[cstring],
 		      255, 255, 255);
-    
-    Ui::ShowTextColor(DMULTCONST(40), DMULTCONST(100),
-		      "(I) INFORMATION",
-		      255, 255, 255);
-    
-    Ui::ShowTextColor(DMULTCONST(40), DMULTCONST(110),
-		      "(H) HIGH SCORES",
-		      255, 255, 255);
-    
-    Ui::ShowTextColor(DMULTCONST(40), DMULTCONST(120),
-		      "(S) START GAME",
-		      255, 255, 255);
-
-    Ui::ShowTextColor(DMULTCONST(40), DMULTCONST(130),
-		      "(Q) QUIT",
-		      255, 255, 255);
-
-
-    switch(selected) 
-      {
-      case 1:
-	Ui::ShowTextColor(DMULTCONST(40)+1, DMULTCONST(100)+1,
-			  "(I) INFORMATION",
-			  255, 255, 0);
-	break;
-      case 2:
-	Ui::ShowTextColor(DMULTCONST(40)+1, DMULTCONST(110)+1,
-			  "(H) HIGH SCORES",
-			  255, 255, 0);
-	break;
-      case 3:
-	Ui::ShowTextColor(DMULTCONST(40)+1, DMULTCONST(120)+1,
-			  "(S) START GAME",
-			  255, 255, 0);
-	break;
-      case 4:   
-	Ui::ShowTextColor(DMULTCONST(40)+1, DMULTCONST(130)+1,
-			  "(Q) QUIT",
-			  255, 255, 0);
-	break;
-      }
-    
-    updateScreen();
+    if(selected == cstring)
+      Ui::ShowTextColor(DMULTCONST(xstart)+1,
+			DMULTCONST(ystart+(yinc*cstring))+1,
+			tStringList[cstring],
+			255, 255, 0);
+  }
+  
+  Ui::updateScreen();
 }
 
 
@@ -885,12 +851,6 @@ int main(int argc, char *argv[])
   srand((unsigned int) time(NULL));
   
   InitializeSDL();
-
-  //  cerr << "Opening: " << BINDIR "sast.cf" << endl;
-  //  if (Gcf.open(BINDIR "sast.cf") != 0) {
-  //    cerr << "Open failed on sast.cf" << endl;
-  //    exit(-1);
-  //  }
 
 #ifdef HAVE_SOUND
   if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024)==-1) {
@@ -1007,7 +967,7 @@ int main(int argc, char *argv[])
 	ShowTitle(menu);
 	break;
       case 2:
-	showInfo();
+	ShowInfo();
 	break;
       case 3:
 	showScoringInfo();

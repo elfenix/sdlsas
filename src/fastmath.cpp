@@ -9,13 +9,10 @@
 // Status : proposed
 // Changed: Sun Jun 12 22:19:12 1994
 
-
 #include "sasteroids.h"
-
 
 double FastMath::Vcos[TRIGSIZE];
 double FastMath::Vsin[TRIGSIZE];
-
 
 void FastMath::init(int verbose)
 {
