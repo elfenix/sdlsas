@@ -11,12 +11,14 @@
 #ifndef __RawImageLoader__
 #define __RawImageLoader__
 
-#include <stdlib.h>
-#include "bitmap.h"
-#include "cfclass.h"
+#include "sasteroids.h"
 
-#include <iostream>
-using namespace std;
+// #include <stdlib.h>
+// #include "bitmap.h"
+// #include "cfclass.h"
+
+// #include <iostream>
+// using namespace std;
 
 
 // The RawImageLoader class demonstrates a class derived from ImageLoader

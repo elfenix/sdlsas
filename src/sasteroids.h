@@ -6,18 +6,32 @@
 #ifndef __SAST__
 #define __SAST__
 
-#include "bitmap.h"
-#include "sbitmap.h"
-#include "cfclass.h"
-#include "fastmath.h"
-#include "ui.h"
-#include "obj.h"
+#include <stdio.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_ttf.h>
+#include <math.h>
+#include <time.h>
+#include <ctype.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define VERSION "SDL Sasteroids"
-#define BINDIR "/usr/games/"
+#include "gameconf.h"
 
-// load 'file' from Gcf into bitmap b.
-void LoadBitmap( SBitmap &b, const char* file);
+#ifdef _OLD_CPP_HEADERS
+#include <iostream.h>
+#else
+#include <iostream>
+using namespace std;
+#endif
+
+#ifdef _WIN32
+#define M_PI 3.14159265358979323846
+#else
+#include <termios.h>
+#include <glob.h>
+#endif
 
 #define SMALLAST 0
 #define MEDAST   1
@@ -27,6 +41,21 @@ void LoadBitmap( SBitmap &b, const char* file);
 #define BULLET2  5
 #define SPINNER  6
 #define SHIELD   7
+#define SHIP_BUL 254
+
+#include "fastmath.h"
+#include "vector.h"
+#include "ui.h"
+#include "cfclass.h"
+#include "bitmap.h"
+#include "sbitmap.h"
+#include "riloader.h"
+#include "fastmath.h"
+#include "obj.h"
+#include "sasteroids.h"
+
+// load 'file' from Gcf into bitmap b.
+void LoadBitmap( SBitmap &b, const char* file);
 
 extern SBitmap Gbit[8];
 

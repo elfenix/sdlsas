@@ -9,11 +9,13 @@
 #ifndef __BPObj__
 #define __BPObj__
 
-#include <stdlib.h>
-#include "sbitmap.h"
-#include "fastmath.h"
 #include "sasteroids.h"
-#include "vector.h"
+
+// #include <stdlib.h>
+// #include "sbitmap.h"
+// #include "fastmath.h"
+// #include "sasteroids.h"
+// #include "vector.h"
 
 const int SHIPTURNS = 32;
 const int TURNANGLE = 256/SHIPTURNS;

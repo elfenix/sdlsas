@@ -10,38 +10,33 @@
 // Changed: Sun Jun 12 22:19:12 1994
 
 
-#include <math.h>
-#include "fastmath.h"
-#include <iostream>
+#include "sasteroids.h"
 
-using namespace std;
 
-double
- FastMath::Vcos[TRIGSIZE];
-double
- FastMath::Vsin[TRIGSIZE];
+double FastMath::Vcos[TRIGSIZE];
+double FastMath::Vsin[TRIGSIZE];
 
-void
- FastMath::init(int verbose)
+
+void FastMath::init(int verbose)
 {
-    double radian;
-    int i;
-
+  double radian;
+  int i;
+  
+  if (verbose)
+    cout << "Building math tables ";
+  
+  for (i = 0; i < (TRIGSIZE); i++) {
+    
+    radian = (M_PI / 180.0) * (double) i *(360.0 / (double) TRIGSIZE);
+    
+    Vcos[i] =::cos(radian);
+    Vsin[i] =::sin(radian);
+    
     if (verbose)
-	cout << "Building math tables ";
-
-    for (i = 0; i < (TRIGSIZE); i++) {
-
-	radian = (M_PI / 180.0) * (double) i *(360.0 / (double) TRIGSIZE);
-
-	Vcos[i] =::cos(radian);
-	Vsin[i] =::sin(radian);
-
-	if (verbose)
-	    if ((i % 40) == 0)
-		cout << '.' << flush;
-    }
-
-    if (verbose)
-	cout << endl;
+      if ((i % 40) == 0)
+	cout << '.' << flush;
+  }
+  
+  if (verbose)
+    cout << endl;
 }

@@ -9,23 +9,7 @@
 // 
 // SDL Sasteroids Code by Andrew M. (aka Merlin262)
 
-#include <stdio.h>
-#include <SDL/SDL.h>
-#include <math.h>
-#include <iostream>
-#include <time.h>
-
-#include "sbitmap.h"
-#include "riloader.h"
-#include "cfclass.h"
-#include "ui.h"
-#include "fastmath.h"
-#include "obj.h"
 #include "sasteroids.h"
-
-using namespace std;
-
-#define SHIP_BUL 254
 
 
 /////////////////////////////////////////////////////////////////////////////

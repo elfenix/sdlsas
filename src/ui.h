@@ -17,17 +17,7 @@
 #ifndef __Ui__
 #define __Ui__
 
-#include <stdio.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_ttf.h>
-#include <signal.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <termios.h>
-
-#include <iostream>
-using namespace std;
-
+#include "sasteroids.h"
 
 // call before using setpixel. =)
 void GraphicsStartDraw(SDL_Surface* visual);

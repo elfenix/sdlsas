@@ -3,9 +3,10 @@
 // Feel free to use/distribute/modify as long as proper credits
 // are included.
 
-#include <iostream>
-#include "ui.h"
-#include "bitmap.h"
+#include "sasteroids.h"
+
+// #include "ui.h"
+// #include "bitmap.h"
 
 using namespace std;
 

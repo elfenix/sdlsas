@@ -8,9 +8,10 @@
 // Status : proposed
 // Changed: Sun Jun 12 22:19:13 1994
 
-
 #ifndef __FastMath__
 #define __FastMath__
+
+#include "sasteroids.h"
 
 typedef float FixedPoint;
 

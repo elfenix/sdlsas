@@ -9,10 +9,7 @@
 // Status : proposed
 // Changed: Sun Jun 12 22:19:30 1994
 
-#include <iostream>
-#include "sbitmap.h"
-
-using namespace std;
+#include "sasteroids.h"
 
 /*
  * Setup the palette 

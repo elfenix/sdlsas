@@ -45,10 +45,12 @@
 #ifndef __BPsbitmap__
 #define __BPsbitmap__
 
-#include <SDL/SDL.h>
-#include "ui.h"
-#include "bitmap.h"
-#include "fastmath.h"	// sin/cos tables, Fixed Point math stuff
+#include "sasteroids.h"
+
+// #include <SDL/SDL.h>
+// #include "ui.h"
+// #include "bitmap.h"
+// #include "fastmath.h"	// sin/cos tables, Fixed Point math stuff
 
 class SBitmap;
 typedef SBitmap *SBitmapPtr;

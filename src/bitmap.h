@@ -14,14 +14,7 @@
 #ifndef __BPbitmap__
 #define __BPbitmap__
 
-#include <stdlib.h>	// for NULL
-#include <math.h>
-#include <string.h>	// for memcpy
-#include <SDL/SDL.h>
-
-#include <iostream>
-using namespace std;
-
+#include "sasteroids.h"
 
 class Bitmap;
 typedef Bitmap *BitmapPtr;

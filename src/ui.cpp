@@ -16,16 +16,7 @@
 
 
 
-#include "sbitmap.h"
-#include "riloader.h"
-#include "cfclass.h"
-#include "ui.h"
-#include "fastmath.h"
-#include "obj.h"
 #include "sasteroids.h"
-#include <SDL/SDL.h>
-#include <stdlib.h>
-#include <string.h>
 
 SDL_Surface *Ui::myscreen = 0;
 TTF_Font *Ui::myfont = 0;

@@ -14,18 +14,21 @@
  */
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <ctype.h>
-#include <glob.h>
-#include <iostream>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <string.h>
+// #include <fcntl.h>
+// #include <unistd.h>
+// #include <ctype.h>
+// #include <glob.h>
+// #include <iostream>
 
-using namespace std;
+// using namespace std;
 
-#include "cfclass.h"
+#include "sasteroids.h"
+
+
+// #include "cfclass.h"
 
 #define SIGLEN 12
 

@@ -1,6 +1,8 @@
 #ifndef _CFCLASS_H
 #define _CFCLASS_H
 
+#include "sasteroids.h"
+
 /* Compound file v3.0
  * (C) John Remyn 1992-1994
  * booyman@xs4all.hacktic.nl
