@@ -1,0 +1,16 @@
+SDL Sasteroids is the combination of several packages under different
+licenses.
+
+The source code is covered under a fairly liberal license(see README.xast,
+and README). Graphics files are included under this liberal license as well.
+
+The fonts are (C)opyright by Dustin Norlander, and distributable under the
+term of the GPL. (Included for convenience).
+
+Sounds:
+
+From the original distribution: boom1.wav  boom2.wav  flash.wav zap.wav
+See the README file for details
+
+Added: shipexplode.wav
+These files are from Golgotha(TM) and are public domain.
