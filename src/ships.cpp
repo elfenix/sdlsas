@@ -118,6 +118,7 @@ void Explosion::draw()
   int i;
   float x, y, distance;
 
+  Ui::startpixels();
   for (i = 0; i < numPTS; i++) {
     x = (pts[i].GetX() + position.GetX());
     y = (pts[i].GetY() + position.GetY());
@@ -134,6 +135,7 @@ void Explosion::draw()
     Ui::setpixel(x + 1, y + 1, 255, 255, (char) distance);
     Ui::setpixel(x, y + 1, 255, 255, 0);
   }
+  Ui::stoppixels();
 }
 
 

@@ -70,6 +70,22 @@ class Ui
       return TTF_FontHeight(myfont); 
     }
 
+
+  static void inline startpixels()
+    {
+#ifdef WANT_OPENGL
+      glDisable(GL_TEXTURE_2D);
+#endif
+    }
+
+  static void inline stoppixels()
+    {
+#ifdef WANT_OPENGL
+      glEnable(GL_TEXTURE_2D);
+#endif
+    }
+
+
   static void inline setpixel(int x, int y, char r, char g, char b, char a = 255)
     {
       if(x < 0 || x >= myscreen->w) return;
@@ -78,33 +94,9 @@ class Ui
 #ifdef WANT_OPENGL
       char byteBuffer[4] = { r, g, b, a };
 
-
       glRasterPos2i(x, y);
       glDrawPixels(1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &byteBuffer); 
-
-      /*
-
-      glDisable(GL_TEXTURE_2D);  
-      glDisable(GL_BLEND);
-      glBegin(GL_QUADS);
-
-      glColor3b(r, g, b);
-      glVertex3f(x, y, 0.0f);
-
-      glColor3b(r, g, b);
-      glVertex3f(x+1.0f, y, 0.0f);
-
-      glColor3b(r, g, b);
-      glVertex3f(x+1.0f, y+1.0f, 0.0f);
-
-      glColor3b(r, g, b);
-      glVertex3f(x, y+1.0f, 0.0f);
-
-      glEnd();
-      glEnable(GL_TEXTURE_2D);
-      glEnable(GL_BLEND);
-      glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-      */
+      
 #else
       //      (pixelDriver)(myscreen, x, y, r, g, b);
 #endif

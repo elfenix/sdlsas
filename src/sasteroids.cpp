@@ -141,6 +141,7 @@ void sounddisplay()
   if(sDisplayTimer < 0) sDisplayTimer = 0;
   if(!sDisplayTimer) return;
 
+  Ui::startpixels();
   for( x = 0; x < MainVolume; x++ ) {
     Ui::setpixel(x1+x, y, 255-x, (55)+x, 0);
     Ui::setpixel(x1+x, y+1, 255-x, 55+x, 0);
@@ -148,6 +149,7 @@ void sounddisplay()
     Ui::setpixel(x1+x, y+3, 255-x, 55+x, 0);
     Ui::setpixel(x1+x, y+4, 255-x, 55+x, 0);
   } 
+  Ui::stoppixels();
 
 }
 
@@ -180,6 +182,7 @@ void botline()
     if(!ClassicMode) { 
       // Draw weapon + shield energy meter.
       Gbit[BULLET].put(x1-12, (y));
+      Ui::startpixels();
       for( x = 0; x < (PlayerShip.weaponPercent()*2); x++ ) {
 	Ui::setpixel(x1+x, y, 255-x, (55)+x, 0, animstage);
 	Ui::setpixel(x1+x, y+1, 255-x, 55+x, 0, animstage);
@@ -187,12 +190,13 @@ void botline()
 	Ui::setpixel(x1+x, y+3, 255-x, 55+x, 0, animstage);
 	Ui::setpixel(x1+x, y+4, 255-x, 55+x, 0, animstage);
       } 
-      
+      Ui::stoppixels();
       // Draw shield energy meter.
       y += 10;
     }
 
     Gbit[BULLET].put(x1-12, y);
+    Ui::startpixels();
     for( x = 0; x < (PlayerShip.shieldPercent()*2); x++ ) {
       Ui::setpixel(x1+(x), y, 255-x, (55)+x, 0, animstage);
       Ui::setpixel(x1+(x), y+1, 255-x, 55+x, 0, animstage);
@@ -200,6 +204,7 @@ void botline()
       Ui::setpixel(x1+(x), y+3, 255-x, 55+x, 0, animstage);
       Ui::setpixel(x1+(x), y+4, 255-x, 55+x, 0, animstage);
     } 
+    Ui::stoppixels();
     
     y = (Ui::HEIGHT() - 24);
     for( x = 0; x < (PlayerShip.ships()-1); x++) {
