@@ -401,7 +401,8 @@ int CreateAsteroid(float x, float y, float xv, float yv, int type)
     if (!newobject)
 	return -1;
 
-    if((type == SMALLAST && !(rand()%LevelOdds(30,3))) && !ClassicMode)
+    if((type == SMALLAST && !(rand()%LevelOdds(30,3))) && !ClassicMode
+       && (Glevel > 3))
       {
 	type = ESMAST;
       }
@@ -645,7 +646,10 @@ void LoadBitmaps()
   Gbit[MEDAST].LoadImage(BINDIR "/graphics/medast.bmp");
   Gbit[BIGAST].LoadImage(BINDIR "/graphics/bigast.bmp");
   Gbackdrop.LoadImage(BINDIR "/graphics/back1.bmp", false);
-  titleScreen.LoadImage(BINDIR "/graphics/title.bmp", false);
+  if(!ClassicMode)
+    titleScreen.LoadImage(BINDIR "/graphics/title.bmp", false);
+  else
+    titleScreen.LoadImage(BINDIR "/graphics/title2.bmp", false);
   Gbit[ENEMY].LoadImage(BINDIR "/graphics/enemy.bmp");
   Gbit[BULLET].LoadImage(BINDIR "/graphics/bullet.bmp");
   Gbit[BULLET2].LoadImage(BINDIR "/graphics/bullet2.bmp");

@@ -11,7 +11,7 @@
 
 Ship::Ship() : ScreenObject()
 {
-  shieldMax = 100;
+  shieldMax = 200;
   shieldTimeLeft = 0;
   bounce = 0;
   shieldLives = 3;
@@ -102,7 +102,7 @@ void Ship::Reset()
   maxPower = 220;
   wPower = maxPower;
   rechargeRate = 2;
-  shieldMax = 140;
+  shieldMax = 280;
   shieldTimeLeft = shieldMax;
   shieldStatus = 0;
   
