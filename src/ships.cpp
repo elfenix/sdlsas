@@ -102,7 +102,7 @@ void Ship::Reset()
   maxPower = 220;
   wPower = maxPower;
   rechargeRate = 2;
-  shieldMax = 100;
+  shieldMax = 140;
   shieldTimeLeft = shieldMax;
   shieldStatus = 0;
   

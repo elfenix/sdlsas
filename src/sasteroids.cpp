@@ -51,6 +51,7 @@ int eeggS = 1;
 char HiScoreStrings[10][10];
 int HiScoreNumbers[10];
 
+
 ///////////////////////////////////////////////////////////
 // Initialize HiScores list - TODO: Load Hi Score List
 void InitializeHiScores()
@@ -61,6 +62,7 @@ void InitializeHiScores()
     HiScoreNumbers[i] = 0;
   }
 }
+
 
 //////////////////////////////////////////////////////////
 // Save Hi Score list - TODO: Save Hi Score List
@@ -94,6 +96,7 @@ void PlaySound(int soundNumber)
 #endif
 }
 
+
 //////////////////////////////////////////////////////////////
 // upscore - from xasteroids
 void upscore(int up)
@@ -114,7 +117,7 @@ void Fire()
  int bullet;
   float fcos, fsin;
   float rx, ry;
-  
+
   if(eeggL == 80 && eeggR == 160 && eeggU == 3 && eeggD == 12 ) {
     CleanUpStuff();
     eeggL = 0; eeggR = 0; eeggU = 0; eeggD = 0; eeggS = 1;
@@ -190,6 +193,7 @@ void Fire()
     // TODO: Do something interesting.
   }
 }
+
 
 ////////////////////////////////////////////////////////////////////////////
 // botline - modified from xasteroids
@@ -285,6 +289,8 @@ void PlayGame()
   char pstr[256];
   int pause = 0;
   int dead = 0;
+  int finalDead = 0;
+  int aegg = 0;
   SDL_Event event;
   SDL_TimerID timer;
   
@@ -323,6 +329,7 @@ void PlayGame()
   GameOver = 0;
   cReq = 0;
   sastWantTicks = 1;
+  finalDead = 0;
   FinishedLastCall = 1;
   deathTimer = -1;
 
@@ -336,6 +343,11 @@ void PlayGame()
 	break;
 	
       case SDL_KEYDOWN:
+	if(finalDead && !(finalDead > 2)) {
+	  sastWantTicks = 0;
+	  GameOver = 1;
+	}
+
 	if (event.key.keysym.sym == SDLK_LALT && !pause && !dead) {
 	  PlaySound(SND_WARP);
 	  PlayerShip.Hyper();
@@ -399,7 +411,7 @@ void PlayGame()
 	  }
 	}
 
-	if(event.key.keysym.sym == SDLK_s) {
+	if(event.key.keysym.sym == SDLK_s && !finalDead) {
 	  if(dead) {
 	    ResetShip();
 	    dead = 0;
@@ -435,6 +447,7 @@ void PlayGame()
 	}
 #endif
 	
+
 	break;
       case SDL_ACTIVEEVENT:
 	;
@@ -448,6 +461,7 @@ void PlayGame()
 	// This only gets called while the GAME CLOCK ITSELF is ticking =)
 	deathTimer--;
 	if(deathTimer < -128) deathTimer = -1;
+	if(finalDead && finalDead > 2) finalDead--;
 
 	if (keystatebuffer[SDLK_RIGHT])
 	  PlayerShip.rotRight(1);
@@ -488,7 +502,7 @@ void PlayGame()
 
 	
 	dead += MoveObjects();
-	if(deathTimer == 0) { dead = 1; deathTimer = -1; }
+	if(deathTimer == 0) { dead = 1; deathTimer = -1; aegg = 1; }
 
 	if(dead == 1) {
 	  PlaySound(SND_BOOM_C);
@@ -498,8 +512,8 @@ void PlayGame()
 	  PlayerShip.death();
 	  PlayerShip.SetDeadStick(1);
 	  if(PlayerShip.ships() <= 0) { 
-	    GameOver = 1;
-	    sastWantTicks = 0;
+	    finalDead = 20;
+	    sastWantTicks = 1;
 	  }    
 	  
 	  j = GetOpenObject();
@@ -538,11 +552,22 @@ void PlayGame()
 	if(flashShip > 24 || flashShip < 0) flashShip = 0;
 	flashShip++;
 	
-	if(flashShip >  12) {
+	if(flashShip >  12 && !finalDead) {
 	  ShipBitmaps[0].put(x, y);
 	}
 	
-	Ui::CenterXText(180, pstr);
+	if(finalDead) {
+	  strcpy(pstr, "Game Over - Hit a key to return to the menu.");
+	  Ui::CenterXText(180-finalDead*10, pstr);
+	} else {
+	  Ui::CenterXText(180, pstr);
+	}
+
+	if(aegg && finalDead) {
+	  strcpy(pstr, "Strange, the only way to win is to not play.");
+	  Ui::CenterXText(140, pstr);
+	}
+	
       }
 
       if(!sastWantTicks) {
