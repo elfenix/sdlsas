@@ -13,7 +13,7 @@
 
 #include "sasteroids.h"
 
-const int MAX_OBJECTS = 128;
+const int MAX_OBJECTS = 256;
 const int SHIPTURNS = 32;
 const int TURNANGLE = 256/SHIPTURNS;
 const int EXPLODE_TYPE = 255;

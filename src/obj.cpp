@@ -283,12 +283,14 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
   if(ObjectList[number]->alive()) {
     // play a sound. :)
     PlaySound(SND_BOOM_B);
-    
+
+    ObjectList[number]->die();    
     numasts -= 1;
     
     // this asteroid is dead now
     // explode the original asteroid!
     j = GetOpenObject();
+    if(j == -1) return;
     explode = new Explosion(ObjectList[number]->GetX(),
 			    ObjectList[number]->GetY(),
 			    ObjectList[number]->VelX(),
@@ -303,6 +305,7 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
 	float fsin = FastMath::sin(angle) * 4.0f;
 	float fcos = FastMath::cos(angle) * 4.0f;
 	int j = GetOpenObject();
+	if(j == -1) return;
 	ObjectList[j] = new ScreenObject;
 	ObjectList[j]->restore();
 	ObjectList[j]->SetVel(fsin, fcos);
@@ -317,7 +320,7 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
       } 
     }
 
-    ObjectList[number]->die();
+
 
     // up the points, but only if WE killed the asteroid
     if(killedBy != 0 && ObjectList[killedBy]) {
@@ -388,16 +391,17 @@ int CreateAsteroid(float x, float y, float xv, float yv, int type)
     ScreenObject *newobject;
     int openObject;
 
-    numasts++;
+    
     openObject = GetOpenObject();
     if (openObject == -1)
 	return -1;
+    numasts++;
 
     newobject = new ScreenObject(type);
     if (!newobject)
 	return -1;
 
-    if((type == SMALLAST && !(rand()%LevelOdds(30,3))) && !ClassicMode)
+    if((type == SMALLAST && (rand()%LevelOdds(30,3))) && !ClassicMode)
       {
 	type = ESMAST;
       }
@@ -427,7 +431,6 @@ int CreateAsteroid(float x, float y, float xv, float yv, int type)
     }
 
     ObjectList[openObject] = newobject;
-
     return openObject;
 }
 
@@ -440,6 +443,9 @@ void GenerateAsteroids()
     int i, obj;
     float x, y;
     Vector temp;
+
+    i = GetOpenObject();
+    if(i == -1) return;
 
     for (i = 0; i <= (Glevel / 2 + 1) && i <= MAXASTEROIDS; i++) {
 	do {
