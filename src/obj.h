@@ -342,6 +342,14 @@ class Spinner : public Ship
     return morphStage;
   }
 
+  inline int bounceStat() {
+    return bounce;
+  }
+
+  inline void setBounceStat(int i) {
+    bounce = i;
+  }
+
  private:
   int morphStage, isEvil, hitCount;		 
 };

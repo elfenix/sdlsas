@@ -376,7 +376,7 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
       CreateAsteroid( px, py,
 		      FastMath::sin(rA1) * 1.0f + vx,
 		      FastMath::cos(rA1) * 1.0f + vy, ctype );
-      if(ctype == MEDAST && !(rand()%LevelOdds(16,7))) {
+      if(ctype == MEDAST && !(rand()%LevelOdds(16,7))) { 
       	j = GetOpenObject();
 	ObjectList[j] = new Spinner;
 	ObjectList[j]->SetXY(px, py);
@@ -413,7 +413,7 @@ int CreateAsteroid(float x, float y, float xv, float yv, int type)
 
     numasts++;
 
-    if((type == SMALLAST && !(rand()%LevelOdds(30,7))) && !ClassicMode
+    if((type == SMALLAST && !(rand()%LevelOdds(50,14))) && !ClassicMode
        && (Glevel > 3))
       {
 	type = ESMAST;
@@ -651,7 +651,10 @@ void ObjectsHit(int i, int j, int& touched, int& crash)
     Spinner* t = (Spinner*)ObjectList[i];
     if(t->morph()!=-1) break;
     if(ObjectList[j]->type() == P_TYPE) break;
-    BounceObjects(i, j);
+    if(!(t->bounceStat() > 1)) {
+      BounceObjects(i, j);
+      t->setbounce();
+    }
   }
 }
 

@@ -186,30 +186,42 @@ void Spinner::tick()
     // Just for fun... mwahahhahahaha
     
     float ax, ay;
+
+    if(!bounce) {    
+      if(!(rand()%20)) {
+	ax = PlayerShip.GetX() - GetX();  // Find the distance.  
+	ay = PlayerShip.GetY() - GetY();
+	
+	ax = ax / 200;
+	ay = ay / 200;
+
+	if(PlayerShip.isDeadStick() || PlayerShip.shielded())
+	  { ax = -ax; ay = -ay; }
+
+	if(ax < 0) ax -= 0.4f;
+	if(ax > 0) ax += 0.4f;
+	if(ay < 0) ay -= 0.4f;
+	if(ay > 0) ay += 0.4f;
     
-    ax = PlayerShip.GetX() - GetX();  // Find the distance.  
-    ay = PlayerShip.GetY() - GetY();
-    
-    ax = ax / 160;
-    ay = ay / 100;
+	if(!(rand()%20)) { ax = 0.8f; }
+	if(!(rand()%21)) { ax = -0.8f; }
+	if(!(rand()%30)) { ay = 0.8f; }
+	if(!(rand()%31)) { ay = -0.8f; }
+      
+	velocity.SetXY(ax, ay);    
+      }
+    } else {
+      ax = (float(rand()%100)-50.0f)/50.0f;
+      ay = (float(rand()%100)-50.0f)/50.0f;
+      velocity.SetXY(ax, ay);
+    }
 
-    if(PlayerShip.isDeadStick() || PlayerShip.shielded())
-      { ax = -ax; ay = -ay; }
+    if(bounce) {
+      bounce -= 2;
+      if(bounce < 0) bounce = 0;
+    }
 
-    if(ax < 0) ax -= 0.5f;
-    if(ax > 0) ax += 0.5f;
-    if(ay < 0) ay -= 0.5f;
-    if(ay > 0) ay += 0.5f;
-
-    if(!(rand()%20)) { ax = 0.8f; }
-    if(!(rand()%21)) { ax = -0.8f; }
-    if(!(rand()%30)) { ay = 0.8f; }
-    if(!(rand()%31)) { ay = -0.8f; }
-    
-
-    velocity.SetXY(ax, ay);    
-
-    wrapMoves = 1;
+    wrapMoves = 1; 
     SetBitmap();
     ScreenObject::tick();
 }

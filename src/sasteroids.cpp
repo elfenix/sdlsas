@@ -52,7 +52,7 @@ char HiScoreStrings[10][10];
 int HiScoreNumbers[10];
 
 // Store the current volume!
-int MainVolume = 100;
+int MainVolume = 90;
 int DispVolume = 0;
 
 
@@ -450,7 +450,8 @@ void PlayGame()
 	}
 
 	if(event.key.keysym.sym == SDLK_PLUS) {
-	  if(MainVolume < 128) MainVolume++;
+	  if(MainVolume < 128) MainVolume+=8;
+	  if(MainVolume > 128) MainVolume=128;
 	  DispVolume = 64;
 #ifdef HAVE_SOUND
 	  Mix_Volume( -1, MainVolume);
@@ -458,7 +459,8 @@ void PlayGame()
 	}
 
 	if(event.key.keysym.sym == SDLK_MINUS) {
-	  if(MainVolume > 0) MainVolume--;
+	  if(MainVolume > 0) MainVolume-=8;
+	  if(MainVolume < 0) MainVolume=0;
 	  DispVolume = 64;
 #ifdef HAVE_SOUND
 	  Mix_Volume( -1, MainVolume );
@@ -555,7 +557,7 @@ void PlayGame()
 	}
 
 
-	if(!(rand()%LevelOdds(32, 1250, 1))) {
+	if(!(rand()%LevelOdds(32, 2050, 1))) {
 	  int j;
 	  j = GetOpenObject();
 	  ObjectList[j] = new Enemy;
@@ -821,6 +823,7 @@ int main(int argc, char *argv[])
 
   Mix_AllocateChannels(16);
   Mix_ReserveChannels(1);  // for jet engine!
+  Mix_Volume( -1, MainVolume);
 #endif
 
   FastMath::init(1); 

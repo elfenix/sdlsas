@@ -43,7 +43,7 @@
 #define SAS_EXTRAS
 
 // Run in fullscreen mode by default? (Comment to disable)
-#define WANT_FULLSCREEN SDL_FULLSCREEN
+// #define WANT_FULLSCREEN SDL_FULLSCREEN
 
 // Resizable by default? (Uncomment/Comment to enable/disable)
 // Only set as resizable if we aren't resizable.
