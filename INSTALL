@@ -3,6 +3,20 @@ Installation Directions For SDL-Sasteroids:
 
 Currently, SDL Sasteroids uses it's (mostly) original build system.
 
+Requirements:
+	A somewhat fast computer(Pentium+) is highly recommended, if your
+	computer is slower than that, I'd suggest giving the old version
+	of Sasteroids a try w/ an older distribution. :)
+
+	The following libraries are required:
+		SDL 1.2+
+		SDL_ttf 
+		SDL_mixer
+	
+	Everything else should work standard out-of-the-box.
+
+	
+
 To install:
 
 First edit the Makefile, using a text editor,

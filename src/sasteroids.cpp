@@ -46,7 +46,9 @@ cfc Gcf;                                  // graphics interface and
 SBitmap Gbit[8];                          // graphics. =)
 SBitmap Gbackdrop;
 
+#ifdef HAVE_SOUND
 Mix_Chunk *soundSamples[8];               // Sound!
+#endif
 
 int G_use_backdrop = 0;
 
@@ -54,6 +56,18 @@ int G_use_backdrop = 0;
 Ship PlayerShip;	                  // Info about player's ship.
 int score, Glevel, numasts, oldscore;     // scoring and level info
 int ClassicMode = 0;                      // classic mode?
+
+
+/////////////////////////////////////////////////////////////////////////
+// play sound function (just to help with the #ifdef's not being everywhere
+//
+inline void PlaySound(int soundNumber)
+{
+#ifdef HAVE_SOUND
+  if(soundSamples[soundNumber])
+    Mix_PlayChannel(-1, soundSamples[soundNumber], 0);
+#endif
+}
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -196,7 +210,7 @@ void KillAsteroid(int number, int killedBy)
 
   if(ObjectList[number]->alive()) {
     // play a sound. :)
-    Mix_PlayChannel(-1, soundSamples[SND_BOOM_B], 0);
+    PlaySound(SND_BOOM_B);
     
     numasts -= 1;
     
@@ -409,7 +423,7 @@ void Fire()
   
   
   if (PlayerShip.weaponPower() > 0) {
-    Mix_PlayChannel(-1, soundSamples[SND_FIRE], 0);
+    PlaySound(SND_FIRE);
     
     bullet = GetOpenObject();
     
@@ -675,7 +689,7 @@ void PlayGame()
 	
 	dead += MoveObjects();
 	if(dead == 1) {
-	  Mix_PlayChannel(-1, soundSamples[SND_BOOM_C], 0);
+	  PlaySound(SND_BOOM_C);
 	  int j;
 	  
 	  strcpy(pstr, "Press s to start");
@@ -781,16 +795,16 @@ void ShowTitle()
 		 "SDL Sasteroids Version " VERSION);
     
     Ui::ShowText(DMULTCONST(40), DMULTCONST(100),
-		 "'I' FOR INFORMATION");
+		 "(I) INFORMATION");
 
     Ui::ShowText(DMULTCONST(40), DMULTCONST(110),
-		 "'H' FOR HIGH SCORES" );
+		 "(H) HIGH SCORES" );
     
     Ui::ShowText(DMULTCONST(40), DMULTCONST(120),
-		 "'S' TO START GAME");
+		 "(S) START GAME");
 
     Ui::ShowText(DMULTCONST(40), DMULTCONST(130),
-		 "'Q' TO QUIT");
+		 "(Q) TO QUIT");
 
     updateScreen();
 }
@@ -822,10 +836,12 @@ void showScoringInfo()
 // Load ze Wavs!
 void LoadWavs()
 {
+#ifdef HAVE_SOUND
   soundSamples[SND_BOOM_A] = Mix_LoadWAV(BINDIR "boom1.wav");
   soundSamples[SND_BOOM_B] = Mix_LoadWAV(BINDIR "boom2.wav");
   soundSamples[SND_BOOM_C] = Mix_LoadWAV(BINDIR "shipexplode.wav");
   soundSamples[SND_FIRE]   = Mix_LoadWAV(BINDIR "zap.wav");
+#endif
 }
 
 
@@ -863,12 +879,14 @@ int main(int argc, char *argv[])
     exit(-1);
   }
 
+#ifdef HAVE_SOUND
   if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024)==-1) {
     cout << "No sound? Ieeyayayyaaaa: " << Mix_GetError() << endl;
     exit(-1);
   }
 
   Mix_AllocateChannels(16);
+#endif
   
 
   FastMath::init(1);
@@ -945,7 +963,10 @@ int main(int argc, char *argv[])
   }
   
 
+#ifdef HAVE_SOUND
   Mix_CloseAudio();
+#endif 
+
   // shutdown & restore text mode
   Ui::restore();
   

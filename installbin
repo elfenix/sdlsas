@@ -13,4 +13,6 @@ echo Installing man page in /usr/man/man6
 install --mode=644 sasteroids.6 /usr/man/man6
 echo Installing font in /usr/games/
 install --mode=644 fonts/Wargames.ttf /usr/games
+echo Installing sounds in /usr/games
+cp sounds/* /usr/games/ # lazy, I know...
 echo

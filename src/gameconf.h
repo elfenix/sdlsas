@@ -7,7 +7,7 @@
 // Information about the Game
 
 // Set the version string for SDL Sasteroids
-#define VERSION "SDL Sasteroids 1.96.2(CVS)"
+#define VERSION "1.96.2(CVS)"
 
 // Where do we want the game files?
 #ifndef BINDIR
@@ -16,6 +16,9 @@
 
 // Uncomment line bellow if your using an old C++ compiler
 // #define _OLD_CPP_HEADERS
+
+// Use Sound?
+#define HAVE_SOUND
 
 // Double Size 320x200 displays?
 #define DOUBLE_SIZE	

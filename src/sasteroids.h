@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
-#include <SDL/SDL_mixer.h>
 #include <math.h>
 #include <time.h>
 #include <ctype.h>
@@ -19,6 +18,11 @@
 #include <string.h>
 
 #include "gameconf.h"
+
+#ifdef HAVE_SOUND
+#include <SDL/SDL_mixer.h>
+#endif
+
 
 #ifdef _OLD_CPP_HEADERS
 #include <iostream.h>
