@@ -3,13 +3,26 @@ Sasteroids ChangeLog
 (See bottom of README file for credits)
 
 
-v1.96.1 to v1.96.2
+v1.96.1 to v1.97
 ===========
 	Changed layout of header files(more managable).
+	
 	Double sizing is now user configurable.
+	
 	Added some support for Win32(thanks Rainer Koschnick).
+	
 	User configuration actually means something now.
 	
+	Fixed MANY graphical glitches and irritants.
+	
+	Windows may now resize.
+	
+	Sound support with SDL_mixer.
+	
+	Windows properly close.
+	
+	Low CPU systems, and hi latency no longer locks up game(thanks LIM,
+	#sdl)
 	
 v1.96 to v1.96.1
 ===========
