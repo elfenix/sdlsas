@@ -514,8 +514,8 @@ void ResetShip()
   
   width = ShipBitmaps[0].width(); 
   height = ShipBitmaps[0].height();
-  x = PLAY_X - width;
-  y = PLAY_Y - height;
+  x = int(ScreenLimits.GetX()) - width;
+  y = int(ScreenLimits.GetY()) - height;
   x = x / 2;
   y = y / 2;
 
@@ -704,7 +704,7 @@ void PlayGame()
 	  GenerateAsteroids();
 	}
 
-	if (!(rand()%10000)) {
+	if (!(rand()%5000)) {
 	  int j;
 	  j = GetOpenObject();
 	  ObjectList[j] = new Enemy;
@@ -752,8 +752,8 @@ void PlayGame()
 
 	width = ShipBitmaps[0].width(); 
 	height = ShipBitmaps[0].height();
-	x = PLAY_X - width;
-	y = PLAY_Y - height;
+	x = int(ScreenLimits.GetX()) - width;
+	y = int(ScreenLimits.GetY()) - height;
 	x = x / 2;
 	y = y / 2;
 	
