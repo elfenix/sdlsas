@@ -38,20 +38,47 @@ void SBitmap::compile()
 }
 
 
-// copy with scaling 
-void SBitmap::scaleCopy(const Bitmap & b, int w, int h)
+// scale this bitmap
+void SBitmap::scale2x()
 {
+  int x, y;
+  char r, g, b;
+  SDL_Surface* newSurface;
+  
+  if(!mySurface) return;
+ 
+  newSurface = SDL_CreateRGBSurface(mySurface->flags,
+				    mySurface->w*2, mySurface->h*2,
+				    mySurface->format->BitsPerPixel,
+				    mySurface->format->Rmask,
+				    mySurface->format->Gmask,
+				    mySurface->format->Bmask,
+				    mySurface->format->Amask);
+  if(!newSurface) {
+    cerr << "[Warning] Scaling Failed: " << SDL_GetError() << endl;
+    return;
+  } 
+  
+  GraphicsStartDraw(newSurface);
+  GraphicsStartDraw(mySurface);
 
-    // check if scale factor=1
-    /*
-     * cout << "Scaling to " << w << "x" << h << endl; if ( (b.width()==w) 
-     * && (b.height()==h) ) { copy( b ); } else { allocMem(w,h);
-     * 
-     * if (Vimage!=NULL) {
-     * 
-     * scaleCopy2( b.width(), b.height(), (unsigned char *)b.map(), w, h, 
-     * Vimage); } } 
-     */
+  for( x = 0; x < mySurface->w; x++) {
+    for( y = 0; y < mySurface->h; y++) {           
+      getpixel(mySurface, x, y, &r, &g, &b);
+      setpixel(newSurface, x*2, y*2, r, g, b);
+      setpixel(newSurface, x*2+1, y*2+1, r, g, b);
+      setpixel(newSurface, x*2, y*2+1, r, g, b);
+      setpixel(newSurface, x*2+1, y*2, r, g, b);
+    }
+  } 
+
+  GraphicsStopDraw(mySurface);
+  GraphicsStopDraw(newSurface);
+
+  SDL_FreeSurface(mySurface);
+  mySurface = newSurface;
+  
+  compile();
 }
 
 
@@ -78,20 +105,20 @@ void SBitmap::rotc90()
   GraphicsStartDraw(mySurface);
 
 
-  for( y = 0; y < height()/2; y++) {
-    for( x = y; x < (width()-y-1); x++) {
+  for( y = 0; y < mySurface->h/2; y++) {
+    for( x = y; x < (mySurface->w-y-1); x++) {
 
-      getpixel(mySurface, y, height()-1-x,  &r, &g, &b);
+      getpixel(mySurface, y, mySurface->h-1-x,  &r, &g, &b);
       setpixel(newSurface, x, y, r, g, b);
 
-      getpixel(mySurface, width()-1-x, height()-1-y,  &r, &g, &b);
-      setpixel(newSurface, y, height()-1-x, r, g, b);
+      getpixel(mySurface, mySurface->w-1-x, mySurface->h-1-y,  &r, &g, &b);
+      setpixel(newSurface, y, mySurface->h-1-x, r, g, b);
 
-      getpixel(mySurface, width()-1-y, x,  &r, &g, &b);
-      setpixel(newSurface, width()-1-x, height()-1-y, r, g, b);
+      getpixel(mySurface, mySurface->w-1-y, x,  &r, &g, &b);
+      setpixel(newSurface, mySurface->w-1-x, mySurface->h-1-y, r, g, b);
 
       getpixel(mySurface, x, y, &r, &g, &b);
-      setpixel(newSurface, width()-1-y, x,  r, g, b);
+      setpixel(newSurface, mySurface->w-1-y, x,  r, g, b);
     }
   }
 
@@ -136,14 +163,14 @@ void SBitmap::rot(Angle degrees)
 
 
   // find middle of the bitmap
-  xo = (double) (width() / 2);
-  yo = (double) (height() / 2);
+  xo = (double) (mySurface->w / 2);
+  yo = (double) (mySurface->h / 2);
 
   // loop through each pixel in new buffer, and rotate *backwards*
   // into the bitmap to see what color it should have.
   // This method avoids getting holes in the bitmap
-  for (y = 0; y < height(); y++)
-    for (x = 0; x < width(); x++) {
+  for (y = 0; y < mySurface->h; y++)
+    for (x = 0; x < mySurface->w; x++) {
       x1 = (int) (xo + ((double) x - xo) * FastMath::cos(-degrees) -
 		  ((double) y - yo) * FastMath::sin(-degrees));
       
@@ -151,8 +178,8 @@ void SBitmap::rot(Angle degrees)
 		  ((double) y - yo) * FastMath::cos(-degrees));
       
       
-      if ((x1 < 0) || (x1 >= width()) || (y1 < 0)
-	  || (y1 >= height())) {
+      if ((x1 < 0) || (x1 >= mySurface->w) || (y1 < 0)
+	  || (y1 >= mySurface->h)) {
 	r = g = b = 0;
       } else {
 	getpixel(mySurface, x1, y1, &r, &g, &b);
@@ -171,7 +198,7 @@ void SBitmap::rot(Angle degrees)
 }
 
 
-void SBitmap::LoadImage(char* file, bool sflag) 
+void SBitmap::LoadImage(char* file, bool sflag, int sF) 
 {
   mySurface = SDL_LoadBMP(file);
   if(!mySurface) {
@@ -179,6 +206,8 @@ void SBitmap::LoadImage(char* file, bool sflag)
     exit(-1);
   }
 
+  SetTrans(sflag);
+  if(sF == 2) scale2x();
   SetTrans(sflag);
 }
 

@@ -35,12 +35,12 @@ class SBitmap
     { if(mySurface) SDL_FreeSurface(mySurface); }
   
   // Image functions. :)
-  void LoadImage(char* path, bool setTrans = true);
+  void LoadImage(char* path, bool setTrans = true, int sF = 2);
   void copy(SBitmap& b);
   void rotc90();
   void rot(Angle degrees);
   void SetTrans(bool wantTrans);
-  void scaleCopy( const Bitmap& b, int w, int h );
+  void scale2x();
   void compile();
     
   // Inline (speed critical) functions bellow:
@@ -51,16 +51,16 @@ class SBitmap
     SDL_BlitSurface(mySurface, NULL, Ui::myscreen, &b); 
   }
   
-  inline unsigned int width() const
+  inline int width() const
     { 
       if(!mySurface) return 0; 
-      return mySurface->h; 
+      return DDIVCONST(mySurface->w); 
     };
 
-  inline unsigned int height() const
+  inline int height() const
     {
       if(!mySurface) return 0;
-      return mySurface->h; 
+      return DDIVCONST(mySurface->h); 
     };
   
  protected:

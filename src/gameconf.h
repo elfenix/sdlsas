@@ -24,20 +24,20 @@
 // #define HAVE_SOUND
 
 // Double Size 320x200 displays?
-// #define DOUBLE_SIZE	
+#define DOUBLE_SIZE	
 
 // Use non original enhanced behavoir?
 #define NON_ORIGINAL 
 
 // If the game runs slow this might help speed it up,
 // turns off font Anti Aliasing
-// #define QUICK_FONTS
+#define QUICK_FONTS
 
 // Cheatcodes?
 #define CHEAT_CODES	
 
 // Print some diagnostics here and there(not recommended)
-#define PRINT_DIAG
+// #define PRINT_DIAG
 
 ///////////////////////////////////////////////////////
 // Don't Edit bellow this line for standard configuration

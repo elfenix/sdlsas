@@ -11,12 +11,12 @@ GDIR=\"/usr/share/sasteroids/\"
 DEFINES = -DGAMEDIR=$(GDIR)
 
 # regular use
-#CFLAGS	 = -Wall $(DEFINES) $(INC) $(OPTIMIZE) $(OPTS)
-#DEBUG = 
+CFLAGS	 = -Wall $(DEFINES) $(INC) $(OPTIMIZE) $(OPTS)
+DEBUG = 
 
 # for debugging
-CFLAGS	 = -Wall $(DEFINES) $(INC) $(DEBUG) $(OPTS) 
-DEBUG = -g -pg
+#CFLAGS	 = -Wall $(DEFINES) $(INC) $(DEBUG) $(OPTS) 
+#DEBUG = -g -pg
 
 #LFLAGS   = -static
 

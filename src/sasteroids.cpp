@@ -46,6 +46,7 @@ const float BUL_SPEED     = 7.5f;
 // cfc Gcf;                                  // graphics interface and
 SBitmap Gbit[8];                          // graphics. =)
 SBitmap Gbackdrop;
+SBitmap titleScreen;
 
 #ifdef HAVE_SOUND
 Mix_Chunk *soundSamples[8];               // Sound!
@@ -79,7 +80,8 @@ void LoadBitmaps()
   Gbit[SMALLAST].LoadImage(BINDIR "/graphics/smallast.bmp");
   Gbit[MEDAST].LoadImage(BINDIR "/graphics/medast.bmp");
   Gbit[BIGAST].LoadImage(BINDIR "/graphics/bigast.bmp");
-  Gbackdrop.LoadImage(BINDIR "/graphics/back1.bmp");
+  Gbackdrop.LoadImage(BINDIR "/graphics/back1.bmp", false);
+  titleScreen.LoadImage(BINDIR "/graphics/title.bmp", false);
   Gbit[ENEMY].LoadImage(BINDIR "/graphics/enemy.bmp");
   Gbit[BULLET].LoadImage(BINDIR "/graphics/bullet.bmp");
   Gbit[BULLET2].LoadImage(BINDIR "/graphics/bullet2.bmp");
@@ -758,7 +760,7 @@ void ShowInfo()
 // Show the Game Title... 
 void ShowTitle(int selected)
 {
-  const int xstart = 40, ystart = 90;
+  const int xstart = DMULTCONST(40), ystart = DMULTCONST(90);
   const int yinc = 10;
   int cstring;
   
@@ -771,7 +773,7 @@ void ShowTitle(int selected)
       NULL
     };
       
-  displayScreen(BINDIR "/graphics/title.bmp");
+  titleScreen.put(0,0);
  
   for(cstring = 0; tStringList[cstring] != 0; cstring++) {
     Ui::ShowTextColor(DMULTCONST(xstart),
@@ -878,8 +880,8 @@ int main(int argc, char *argv[])
       switch (event.type) {
 
       case SDL_VIDEORESIZE:
-	ScreenLimits.SetXY(DMULTCONST(event.resize.w), 
-			   DMULTCONST(event.resize.h));
+	ScreenLimits.SetXY(DDIVCONST(event.resize.w), 
+			   DDIVCONST(event.resize.h));
 	Ui::resync(event.resize.w, event.resize.h);
 	break;
 	
