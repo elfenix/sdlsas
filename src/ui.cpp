@@ -35,7 +35,7 @@ void Ui::init()
   }
   atexit(TTF_Quit);
 
-  myfont = TTF_OpenFont(BINDIR "/fonts/nicefont.ttf", 24);
+  myfont = TTF_OpenFont("fonts/nicefont.ttf", 24);
   if (!myfont) {
     throw "Couldn't open font file";
   }

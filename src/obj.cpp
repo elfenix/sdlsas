@@ -348,45 +348,43 @@ void CleanUpStuff()
 }
 
 
-
-
 //////////////////////////////////////////////////////
 // Set up the array of game objects.
 void LoadBitmaps()
 {
-  Gbit[SMALLAST].LoadImage(BINDIR "/graphics/smallast.png");
-  Gbit[ESMAST].LoadImage(BINDIR "/graphics/esmallast.png");
-  Gbit[MEDAST].LoadImage(BINDIR "/graphics/medast.png");
-  Gbit[BIGAST].LoadImage(BINDIR "/graphics/bigast.png");
+  Gbit[SMALLAST].LoadImage("graphics/smallast.png");
+  Gbit[ESMAST].LoadImage  ("graphics/esmallast.png");
+  Gbit[MEDAST].LoadImage  ("graphics/medast.png");
+  Gbit[BIGAST].LoadImage  ("graphics/bigast.png");
 
-  Backdrops[0].LoadImage(BINDIR "/graphics/back1.jpg");
-  Backdrops[1].LoadImage(BINDIR "/graphics/back2.jpg");
-  Backdrops[2].LoadImage(BINDIR "/graphics/back3.jpg");
-  Backdrops[3].LoadImage(BINDIR "/graphics/back1.jpg");
-  Backdrops[4].LoadImage(BINDIR "/graphics/back2.jpg");
+  Backdrops[0].LoadImage("graphics/back1.jpg");
+  Backdrops[1].LoadImage("graphics/back2.jpg");
+  Backdrops[2].LoadImage("graphics/back3.jpg");
+  Backdrops[3].LoadImage("graphics/back1.jpg");
+  Backdrops[4].LoadImage("graphics/back2.jpg");
   
 
   if(!ClassicMode)
-    titleScreen.LoadImage(BINDIR "/graphics/title.png");
+    titleScreen.LoadImage("graphics/title.png");
   else
-    titleScreen.LoadImage(BINDIR "/graphics/title2.png");
+    titleScreen.LoadImage("graphics/title2.png");
 
-  Gbit[ENEMY  ].LoadImage(BINDIR "/graphics/enemy.png");
-  Gbit[BULLET ].LoadImage(BINDIR "/graphics/bullet.png");
-  Gbit[BULLET2].LoadImage(BINDIR "/graphics/bullet2.png");
-  Gbit[SPINNER].LoadImage(BINDIR "/graphics/spinner.png");
-  Gbit[SHIELD ].LoadImage(BINDIR "/graphics/shield.png");
-  Gbit[P_WMAX ].LoadImage(BINDIR "/graphics/wMaxPowerUp.png");
-  Gbit[P_WENG ].LoadImage(BINDIR "/graphics/wRechargePowerUp.png");
-  Gbit[P_WTHR ].LoadImage(BINDIR "/graphics/wThreePowerUp.png");
-  Gbit[P_SHLD ].LoadImage(BINDIR "/graphics/wShieldPowerUp.png");
-  Gbit[P_SRCG ].LoadImage(BINDIR "/graphics/wShieldRecharge.png");
+  Gbit[ENEMY  ].LoadImage("graphics/enemy.png");
+  Gbit[BULLET ].LoadImage("graphics/bullet.png");
+  Gbit[BULLET2].LoadImage("graphics/bullet2.png");
+  Gbit[SPINNER].LoadImage("graphics/spinner.png");
+  Gbit[SHIELD ].LoadImage("graphics/shield.png");
+  Gbit[P_WMAX ].LoadImage("graphics/wMaxPowerUp.png");
+  Gbit[P_WENG ].LoadImage("graphics/wRechargePowerUp.png");
+  Gbit[P_WTHR ].LoadImage("graphics/wThreePowerUp.png");
+  Gbit[P_SHLD ].LoadImage("graphics/wShieldPowerUp.png");
+  Gbit[P_SRCG ].LoadImage("graphics/wShieldRecharge.png");
   
-  Gbit[BIT_PLAYER ].LoadImage(BINDIR "/graphics/ship0.png");
-  Gbit[BIT_PLAYERT].LoadImage(BINDIR "/graphics/ship1.png");
-  Gbit[BIT_SPINNER].LoadImage(BINDIR "/graphics/spinner.png");
+  Gbit[BIT_PLAYER ].LoadImage( "graphics/ship0.png");
+  Gbit[BIT_PLAYERT].LoadImage( "graphics/ship1.png");
+  Gbit[BIT_SPINNER].LoadImage( "graphics/spinner.png");
 
-  extraLives.LoadImage(BINDIR "/graphics/ship0.png");
+  extraLives.LoadImage("graphics/ship0.png");
 }
 
 
@@ -395,14 +393,14 @@ void LoadBitmaps()
 void LoadWavs()
 {
 #ifdef HAVE_SOUND
-  soundSamples[SND_BOOM_A] = Mix_LoadWAV(BINDIR "/sounds/boom1.wav");
-  soundSamples[SND_BOOM_B] = Mix_LoadWAV(BINDIR "/sounds/boom2.wav");
-  soundSamples[SND_BOOM_C] = Mix_LoadWAV(BINDIR "/sounds/shipexplode.wav");
-  soundSamples[SND_FIRE]   = Mix_LoadWAV(BINDIR "/sounds/zap.wav");
-  soundSamples[SND_WARP]   = Mix_LoadWAV(BINDIR "/sounds/warp.wav");
-  soundSamples[SND_ENEMY]  = Mix_LoadWAV(BINDIR "/sounds/flash.wav");
-  soundSamples[SND_POWERUP] = Mix_LoadWAV(BINDIR "/sounds/powerup.wav");
-  soundSamples[SND_ENGINE] = Mix_LoadWAV(BINDIR "/sounds/engine.wav");
+  soundSamples[SND_BOOM_A]  = Mix_LoadWAV( "sounds/boom1.wav");
+  soundSamples[SND_BOOM_B]  = Mix_LoadWAV( "sounds/boom2.wav");
+  soundSamples[SND_BOOM_C]  = Mix_LoadWAV( "sounds/shipexplode.wav");
+  soundSamples[SND_FIRE]    = Mix_LoadWAV( "sounds/zap.wav");
+  soundSamples[SND_WARP]    = Mix_LoadWAV( "sounds/warp.wav");
+  soundSamples[SND_ENEMY]   = Mix_LoadWAV( "sounds/flash.wav");
+  soundSamples[SND_POWERUP] = Mix_LoadWAV( "sounds/powerup.wav");
+  soundSamples[SND_ENGINE]  = Mix_LoadWAV( "sounds/engine.wav");
 #endif
 }
 

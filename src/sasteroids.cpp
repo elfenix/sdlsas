@@ -650,7 +650,7 @@ void ShowInfo()
 /////////////////////////////////////////////////////////////////////////////
 void showScoringInfo()
 {
-    displayScreen(BINDIR "/graphics/back.bmp");	// TODO, rewrite this screen
+    displayScreen("graphics/back.bmp");	// TODO, rewrite this screen
 }
 
 
@@ -780,7 +780,7 @@ void MainMenuInformation(int* done)
       "Return to Game",
       NULL};
 
-  SBitmap mouse(GAMEDIR "/graphics/mouse.png");
+  SBitmap mouse("graphics/mouse.png");
   GraphicsMenu MainMenu(&mouse, &titleScreen, tStringList);
   
   /* Run the Main Menu */
@@ -812,7 +812,7 @@ void MainMenuCredits(int *done)
       NULL
     };
 
-  SBitmap mouse(GAMEDIR "/graphics/mouse.png");
+  SBitmap mouse("graphics/mouse.png");
   GraphicsMenu MainMenu(&mouse, &titleScreen, tStringList);
   
   MainMenu.setAction(10, MainMenuQuit);
@@ -840,6 +840,7 @@ int main(int argc, char *argv[])
   
   srand((unsigned int) time(NULL));
 
+  chdir(GAMEDIR);
   
   InitializeSDL();
   HandleCommandLine(argc, argv);
@@ -864,7 +865,7 @@ int main(int argc, char *argv[])
   LoadWavs();
   IntegerDisplay::initialize();
 
-  SBitmap mouse(GAMEDIR "/graphics/mouse.png");
+  SBitmap mouse("graphics/mouse.png");
   GraphicsMenu MainMenu(&mouse, &titleScreen, tStringList);
 
   /* Run the Main Menu */
