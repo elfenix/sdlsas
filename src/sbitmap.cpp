@@ -300,12 +300,14 @@ void SBitmap::LoadImage(char* file)
 }
 
 
-void SBitmap::putA(float x, float y, float layer) 
+void SBitmap::putA(float x, float y, float layer, float alpha) 
 {
   if(!myTexture) return;
 
 #ifdef WANT_OPENGL
   glBindTexture(GL_TEXTURE_2D, myTexture);
+  glColor4f(1.0f, 1.0f, 1.0f, alpha);
+
 
   glBegin(GL_QUADS);
 
@@ -322,6 +324,8 @@ void SBitmap::putA(float x, float y, float layer)
   glVertex3f(x, y, layer);
   
   glEnd();
+
+  glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 #else
   if(!myTexture) return;
 

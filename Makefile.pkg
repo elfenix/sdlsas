@@ -1,26 +1,42 @@
 # Makefile for sasteroids
 
 # Edit Bellow to change the installation locations
-GAMEDIR=/usr/share/sasteroids/
+GAMEDIR=.
 BINDIR=/usr/bin/
 MANDIR=/usr/man
 
-all: src/sasteroids
+# Uncomment for Make install.....
+GAMEDIR=../sasteroids
+BINDIR=../sasteroids
+MANDIR=../sasteroids
 
-install: src/sasteroids
+
+# For OpenGL
+EXTRA_DEFINES=-DWANT_OPENGL
+EXTRA_LIBS=-lGL
+
+# For SDL_gfx - NOT SUPPORTED AT THIS TIME (will work, some features missing...)
+# EXTRA_DEFINES=
+# EXTRA_LIBS=-lSDL_gfx
+
+all: 
+	make GAMEDIR=$(GAMEDIR) EXTRA_DEFINES=$(EXTRA_DEFINES) EXTRA_LIBS=$(EXTRA_LIBS) -C src
+
+install: 
+	make GAMEDIR=$(GAMEDIR) -C src
 	install -d $(GAMEDIR)
 	install -d $(GAMEDIR)/graphics
 	install -d $(GAMEDIR)/sounds
 	install -d $(GAMEDIR)/fonts
 	install -d $(BINDIR)
-	install --strip --mode=4755 src/sasteroids $(BINDIR)
+	install --strip --mode=755 src/sasteroids $(BINDIR)
 	install --mode=644 sasteroids.6 $(MANDIR)/man6
-	install --mode=644 fonts/Wargames.ttf $(GAMEDIR)/fonts/
+	install --mode=644 fonts/nicefont.ttf $(GAMEDIR)/fonts/
 	install --mode=644 sounds/*.wav $(GAMEDIR)/sounds/
-	install --mode=644 graphics/*.bmp $(GAMEDIR)/graphics
-	install --mode=644 graphics/sprite/*.bmp $(GAMEDIR)/graphics
+	install --mode=644 graphics/*.png $(GAMEDIR)/graphics
+	install --mode=644 graphics/sprite/*.png $(GAMEDIR)/graphics
+	install --mode=644 graphics/backdrops/*.jpg $(GAMEDIR)/graphics
 
-src/sasteroids:
 	make GAMEDIR=$(GAMEDIR) -C src
 
 clean:

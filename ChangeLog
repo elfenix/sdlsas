@@ -3,7 +3,12 @@ Sasteroids ChangeLog
 (See bottom of README file for credits)
 
 
-v2.99 to v3.0
+v3.0 BETA 1 to v3.0 BETA 2
+==================
+	Added alpha blending for background transitions
+	Fixed mouse positioning bug.
+
+v2.99 to v3.0 BETA 1
 ==================
 	Fixed bug in enemy ship fire
 	Added NASA Copyright information

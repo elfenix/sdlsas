@@ -37,7 +37,7 @@ class SBitmap
   void LoadSurface(SDL_Surface* surface);
 
   void put(float x, float y, float rotate = 1.0f, float rotate = 1.0f, float layer = 0.0f);
-  void putA(float x, float y, float layer = 0.0f);
+  void putA(float x, float y, float layer = 0.0f, float alpha = 1.0f);
   
   inline float width() const
     { 

@@ -255,6 +255,7 @@ void PlayGame()
   int aegg = 0;
   int chOn;
   int shipInvasion = 0;
+  float alpha_anim = -1.0f;
   SDL_Event event;
   SDL_TimerID timer;
   
@@ -337,7 +338,7 @@ void PlayGame()
 	}
 
 	// Leave this cheat code in, nice for debugging.
-	if (event.key.keysym.sym == SDLK_n && !pause) Glevel++;
+	if (event.key.keysym.sym == SDLK_n && !pause) { Glevel++; alpha_anim = 1.0f; }
 	
 	// I prefer space
 	if (event.key.keysym.sym == SDLK_SPACE && !pause)
@@ -499,6 +500,7 @@ void PlayGame()
 	  GenerateAsteroids();
 	  PlayerShip.addMaxPower(2);
 	  PlayerShip.addRegPower(1);
+	  if(Glevel != 1) alpha_anim = 1.0f;
 	}
 
 	
@@ -556,6 +558,12 @@ void PlayGame()
       if(BackdropOn && Ui::WIDTH() <= 640 &&
 	 Ui::HEIGHT() <= 400) {
 	Backdrops[Glevel%NUM_BACKS].putA(0, Ui::HEIGHT());
+#ifdef WANT_OPENGL
+	if(alpha_anim > 0.0f) {
+	  Backdrops[(Glevel-1)%NUM_BACKS].putA(0, Ui::HEIGHT(), 0.0f, alpha_anim);
+	  alpha_anim -= 0.05f;
+	}
+#endif
       } else {
 	Ui::clearscreen();
       }

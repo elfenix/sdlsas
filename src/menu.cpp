@@ -177,8 +177,11 @@ void GraphicsMenu::RunMenu()
       if(actions[selected])
 	(actions[selected])(&done);
       execute = 0;
+      SDL_GetMouseState(&tX, &tY);
+      mouseX = float(tX);
+      mouseY = float(tY);
     }
-
+    
 
     Ui::predraw();
       
