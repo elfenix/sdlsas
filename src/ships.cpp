@@ -100,8 +100,8 @@ void Ship::Reset()
 { 
   pos = 0; SetBitmap(); angle = 0; bounce = 0;
   maxPower = 220;
-  wPower = maxPower;
-  rechargeRate = 2;
+  wPower = maxPower + (2*Glevel);                // As level goes up, 
+  rechargeRate = 1 + (int(0.5f*float(Glevel)));  // so does weapon. 
   shieldMax = 280;
   shieldTimeLeft = shieldMax;
   shieldStatus = 0;

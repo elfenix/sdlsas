@@ -470,7 +470,7 @@ void PlayGame()
 	  PlayerShip.rotLeft(1);
 	
 	if (keystatebuffer[SDLK_UP])
-	  PlayerShip.Thrust(0.1f);
+	  PlayerShip.Thrust(0.15f);
 
 	if (keystatebuffer[SDLK_DOWN])
 	  PlayerShip.shieldOn();
@@ -486,6 +486,8 @@ void PlayGame()
 	  Glevel++;
 	  numasts = 0;
 	  GenerateAsteroids();
+	  PlayerShip.addMaxPower(2);
+	  PlayerShip.addRegPower(1);
 	}
 
 	if (!(rand()%5000)) {
@@ -603,29 +605,18 @@ void ShowInfo()
     x = 0;
     y = 0;
 
-    Ui::ShowText(x, y + 0, "SASTEROIDS");
-    Ui::ShowText(x, y + 40, "TO PLAY THE GAME");
-    Ui::ShowText(x, y + 60, "KEY");
-    Ui::ShowText(x, y + 80, "---------");
-    Ui::ShowText(x, y + 100, " LEFT ARROW");
-    Ui::ShowText(x, y + 120, " RIGHT ARRW");
-    Ui::ShowText(x, y + 140, " SPACE     ");
-    Ui::ShowText(x, y + 160, " UP ARROW  ");
-    Ui::ShowText(x, y + 180, " DOWN ARROW ");
-    Ui::ShowText(x, y + 200, " LEFT ALT   ");
-    Ui::ShowText(x, y + 240, " P          ");
-    Ui::ShowText(x, y + 280, " Q          ");
-    Ui::ShowText(x + 140, y + 60, "ACTION");
-    Ui::ShowText(x + 140, y + 80, "------------------------");
-    Ui::ShowText(x + 140, y + 100, "Turn ship left");
-    Ui::ShowText(x + 140, y + 120, "Turn ship right");
-    Ui::ShowText(x + 140, y + 140, "Fire");
-    Ui::ShowText(x + 140, y + 160, "Thrust");
-    Ui::ShowText(x + 140, y + 180, "Shield, one per ship");
-    Ui::ShowText(x + 140, y + 200, "Hyperspece (zap to");
-    Ui::ShowText(x + 140, y + 220, "random area on screen)");
-    Ui::ShowText(x + 140, y + 240, "Pause ");
-    Ui::ShowText(x + 140, y + 280, " Quit game");
+    Ui::CenterXText( y + 0, "SASTEROIDS");
+    Ui::CenterXText( y + 40, "TO PLAY THE GAME");
+   
+    Ui::CenterXText( y + 80, "-------------------------");
+    Ui::CenterXText( y + 100, " LEFT ARROW - Turn ship Left");
+    Ui::CenterXText( y + 120, " RIGHT ARRW - Turn ship Right");
+    Ui::CenterXText( y + 140, " SPACE - Fire");
+    Ui::CenterXText( y + 160, " UP ARROW - Thrust ");
+    Ui::CenterXText( y + 180, " DOWN ARROW - Shield");
+    Ui::CenterXText( y + 200, " LEFT ALT - Hyperspace");
+    Ui::CenterXText( y + 240, " P - Pause");
+    Ui::CenterXText( y + 280, " Q - Quit");
     Ui::updateScreen();
 }
 
