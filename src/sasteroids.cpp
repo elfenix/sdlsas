@@ -43,7 +43,7 @@ const float MassSpinner   = 2.0f;
 const float BUL_SPEED     = 7.5f;
 
 // System Setup
-cfc Gcf;                                  // graphics interface and
+// cfc Gcf;                                  // graphics interface and
 SBitmap Gbit[8];                          // graphics. =)
 SBitmap Gbackdrop;
 
@@ -72,36 +72,17 @@ inline void PlaySound(int soundNumber)
 }
 
 
-/////////////////////////////////////////////////////////////////////////
-// set palette by loading one of the game bitmaps.
-// This function is a throw back from the vgalib days, but since things
-// depend on it so much...
-void SetGamePalette()
-{
-  int i;
-  char *pdata;
-  RawImageLoader loader(Gcf);
-  
-  if (loader.load("ship0.raw", LOAD_PALETTE) == EXIT_SUCCESS) {
-    for (i = 0; i < loader.numColors(); i++) {
-      pdata = (char *) loader.palette();
-	    pdata += i * 3;
-	    SBitmap::SetPalette(i, pdata[0], pdata[1], pdata[2]);
-    }
-  } else {
-    cout << "Couldn't setup game palette!" << endl;
-  }
-}
-
-
 ///////////////////////////////////////////////////////
 // Load bitmap image from 'file' into 'b'
 void LoadBitmap(SBitmap & b, const char *file)
 {
-    RawImageLoader loader(Gcf);
-    if (loader.load(file, LOAD_IMAGE) == EXIT_SUCCESS)
-	b.setMap(loader);
-    b.setupsurface();
+  char bigPath[256];
+  strcpy(bigPath, BINDIR);
+  strcat(bigPath, file);
+  //  RawImageLoader loader(Gcf);
+  //  if (loader.load(file, LOAD_IMAGE) == EXIT_SUCCESS)
+  //    b.setMap(loader);
+  b.LoadImage(bigPath);
 }
 
 
@@ -109,45 +90,28 @@ void LoadBitmap(SBitmap & b, const char *file)
 // Set up the array of game objects.
 void LoadBitmaps()
 {
-    LoadBitmap(Gbit[SMALLAST], "smallast.raw");
-    LoadBitmap(Gbit[MEDAST], "medast.raw");
-    LoadBitmap(Gbit[BIGAST], "bigast.raw");
-    LoadBitmap(Gbit[ENEMY], "enemy.raw");
-    LoadBitmap(Gbit[BULLET], "bullet.raw");
-    LoadBitmap(Gbit[BULLET2], "bullet2.raw");
-    LoadBitmap(Gbit[SPINNER], "spinner.raw");
-    LoadBitmap(Gbit[SHIELD], "shield.raw");
-    LoadBitmap(Gbackdrop, "back1.raw");
-    LoadBitmap(morphBitmaps[0], "medast.raw");
-    LoadBitmap(morphBitmaps[1], "morph1.raw");
-    LoadBitmap(morphBitmaps[2], "morph2.raw");
-    LoadBitmap(morphBitmaps[3], "morph3.raw");
-    LoadBitmap(morphBitmaps[4], "morph4.raw");
-    LoadBitmap(morphBitmaps[5], "morph5.raw");
-    LoadBitmap(morphBitmaps[6], "morph6.raw");
-    LoadBitmap(morphBitmaps[7], "morph7.raw");
-    LoadBitmap(morphBitmaps[8], "morph8.raw");
-    LoadBitmap(morphBitmaps[9], "morph9.raw");
-
-    InitShips();
+  Gbit[SMALLAST].LoadImage(BINDIR "/graphics/smallast.bmp");
+  Gbit[MEDAST].LoadImage(BINDIR "/graphics/medast.bmp");
+  Gbit[BIGAST].LoadImage(BINDIR "/graphics/bigast.bmp");
+  Gbackdrop.LoadImage(BINDIR "/graphics/back1.bmp");
+  Gbit[ENEMY].LoadImage(BINDIR "/graphics/enemy.bmp");
+  Gbit[BULLET].LoadImage(BINDIR "/graphics/bullet.bmp");
+  Gbit[BULLET2].LoadImage(BINDIR "/graphics/bullet2.bmp");
+  Gbit[SPINNER].LoadImage(BINDIR "/graphics/spinner.bmp");
+  Gbit[SHIELD].LoadImage(BINDIR "/graphics/shield.bmp");
+  morphBitmaps[0].LoadImage(BINDIR "/graphics/medast.bmp");
+  morphBitmaps[1].LoadImage(BINDIR "/graphics/morph1.bmp");
+  morphBitmaps[2].LoadImage(BINDIR "/graphics/morph2.bmp");
+  morphBitmaps[3].LoadImage(BINDIR "/graphics/morph3.bmp");
+  morphBitmaps[4].LoadImage(BINDIR "/graphics/morph4.bmp");
+  morphBitmaps[5].LoadImage(BINDIR "/graphics/morph5.bmp");
+  morphBitmaps[6].LoadImage(BINDIR "/graphics/morph6.bmp");
+  morphBitmaps[7].LoadImage(BINDIR "/graphics/morph7.bmp");
+  morphBitmaps[8].LoadImage(BINDIR "/graphics/morph8.bmp");
+  morphBitmaps[9].LoadImage(BINDIR "/graphics/morph9.bmp"); 
+  
+  InitShips();
 }
-
-
-/////////////////////////////
-// Setup Objects for drawing
-void SetupObjects()
-{
-    int i;
-
-    for (i = 0; i < 8; i++) {
-	Gbit[i].setupsurface();
-    }
-
-    for (i = 0; i < 10; i++) {
-	morphBitmaps[i].setupsurface();
-    }
-}
-
 
 
 //////////////////////////////////////////////////////////////
@@ -477,34 +441,9 @@ void botline()
 //////////////////////////////////////////////////////////////////////////
 void displayScreen(char *file)
 {
-  RawImageLoader loader(Gcf);
-  int i;
-  
-  loader.load(file, LOAD_IMAGE | LOAD_PALETTE);
-  
-  // assign TITLE.raw to a bitmap
-  SBitmap scn;
-  
-  scn.setMap(loader);
+  SBitmap backdrop(file);
   Ui::clearscreen();
-  
-  for (i = 0; i < 256; i++) {
-    SBitmap::SetPalette(i, 0, 0, 0);
-  }
-  
-  // set palette according to TITLE.raw palette
-  for (i = 0; i < loader.numColors(); i++) {
-    unsigned char a = 0, b = 0, c = 0;
-    
-    a = (unsigned char) ((char *) loader.palette())[i * 3 + 0];
-    b = (unsigned char) ((char *) loader.palette())[i * 3 + 1];
-    c = (unsigned char) ((char *) loader.palette())[i * 3 + 2];
-    SBitmap::SetPalette(i, a, b, c);
-  }
-  
-  loader.releasePaletteOwnership();
-  scn.setupsurface();
-  scn.put(0, 0);
+  backdrop.put(0, 0);
 }
 
 
@@ -580,6 +519,7 @@ void PlayGame()
   oldscore = -1;
 
   ResetShip();
+  FreeObjArray();
 
 
   Ui::clearscreen();
@@ -590,10 +530,9 @@ void PlayGame()
     exit(-1);
   }
   
-  SetupObjects();
   keystatebuffer = SDL_GetKeyState(NULL);
   Gbackdrop.SetTrans(0);
-  Gbackdrop.setupsurface();
+  //  Gbackdrop.setupsurface();
   
   pause = 0;
   GameOver = 0;
@@ -769,7 +708,7 @@ void PlayGame()
 
       if(!sastWantTicks) {
 	Ui::CenterText(pstr);
-	SetGamePalette();
+	//	SetGamePalette();
 	FinishedLastCall = 1;
       }
 
@@ -795,7 +734,7 @@ int selectGame()
 // //////////////////////////////////////////////////////////////////////////
 void showInfo()
 {
-    displayScreen("back.raw");
+    displayScreen(BINDIR "graphics/back.bmp");
     int x, y;
 
     x = 0;
@@ -831,7 +770,7 @@ void showInfo()
 // Show the Game Title..
 void ShowTitle(int selected)
 {
-    displayScreen("title.raw");
+    displayScreen(BINDIR "/graphics/title.bmp");
 
     Ui::ShowTextColor(DMULTCONST(40), DMULTCONST(90),
 		      "SDL Sasteroids Version " VERSION,
@@ -886,7 +825,7 @@ void ShowTitle(int selected)
 // ///////////////////////////////////////////////////////////////////////////
 void showScoringInfo()
 {
-    displayScreen("back.raw");	// TODO, rewrite this screen....
+    displayScreen(BINDIR "graphics/back.bmp");	// TODO, rewrite this screen
 }
 
 
@@ -947,11 +886,11 @@ int main(int argc, char *argv[])
   
   InitializeSDL();
 
-  cerr << "Opening: " << BINDIR "sast.cf" << endl;
-  if (Gcf.open(BINDIR "sast.cf") != 0) {
-    cerr << "Open failed on sast.cf" << endl;
-    exit(-1);
-  }
+  //  cerr << "Opening: " << BINDIR "sast.cf" << endl;
+  //  if (Gcf.open(BINDIR "sast.cf") != 0) {
+  //    cerr << "Open failed on sast.cf" << endl;
+  //    exit(-1);
+  //  }
 
 #ifdef HAVE_SOUND
   if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024)==-1) {
@@ -967,7 +906,6 @@ int main(int argc, char *argv[])
   SetupObjArray();
   LoadBitmaps();	      
   Ui::init();
-  SetGamePalette();	
   ShowTitle(menu);
   LoadWavs();
   
@@ -1052,7 +990,7 @@ int main(int argc, char *argv[])
     case 's':
       mode = 1;
       dirty = 1;
-      SetGamePalette();
+      //      SetGamePalette();
       PlayGame();
       break;
       

@@ -47,72 +47,55 @@
 
 #include "sasteroids.h"
 
-// #include <SDL/SDL.h>
-// #include "ui.h"
-// #include "bitmap.h"
-// #include "fastmath.h"	// sin/cos tables, Fixed Point math stuff
-
 class SBitmap;
 typedef SBitmap *SBitmapPtr;
 
 // Note: 'V' prefix indicates class variable
-class SBitmap : public Bitmap {
+class SBitmap
+{
  public:
-  SBitmap() : Bitmap(), mysurface(NULL), wantTrans(1) { };
-  SBitmap(int w, int h) : Bitmap(w,h), mysurface(NULL), wantTrans(1) { };
-  SBitmap(const SBitmap& pb) : Bitmap(pb), mysurface(NULL), wantTrans(1) { ; };
+  SBitmap() : mysurface(NULL) { };
+  SBitmap(char *file) : mysurface(NULL) { LoadImage(file); }
+  SBitmap(int w, int h) : mysurface(NULL) { };
+  SBitmap(const SBitmap& pb) : mysurface(NULL) { ; };
   
   ~SBitmap() 
     { if(mysurface) SDL_FreeSurface(mysurface); }
   
+  // Image functions. :)
+  void LoadImage(char* path);
+  void copy(SBitmap& b);
+  
   // copy with scaling. Take bitmap b, scale it to width/height (w/h)
   // are copy result to 'this' object	
   void scaleCopy( const Bitmap& b, int w, int h );
-  
-  void copy(SBitmap& b) { 
-    if (b.Vimage!=NULL) {
-      allocMem( b.width(), b.height() );       
-      if (Vimage!=NULL)   memcpy(Vimage, b.Vimage, Vsize);
-    } else {
-      Vimage=NULL;
-    }
-    setupsurface();	
-  }
-  
-  static void SetPalette(int num, char r, char g, char b);
-  void setupsurface();
-  
-  static char Vpal[256][3];
-  
+    
   // display bitmap on screen using svgalib calls
   inline void put(int x, int y) {
     SDL_Rect b;
     if(mysurface) {
       b.x = DMULTCONST(x); b.y = DMULTCONST(y);
       SDL_BlitSurface(mysurface, NULL, Ui::myscreen, &b);  
-    } else {
-      setupsurface();
-      if(mysurface) {
-	b.x = DMULTCONST(x); b.y = DMULTCONST(y);
-	SDL_BlitSurface(mysurface, NULL, Ui::myscreen, &b);  
-      }
-    }
+    } 
   }
   
-  
-  // Note: currently, the size of the bitmaps won't be changed by
-  // any of the rotate functions, so data can be rotated 'out' of
-  // the image.
-  // rotate so many degrees.
-  // degrees=0..TRIGSIZE (defined in FastMath.h)
   void rot(Angle degrees);
-  
-  inline void SetTrans(int i) 
-    { wantTrans = i; }
+  void SetTrans(bool wantTrans);
+
+  inline unsigned int width() const
+    { 
+      if(!mysurface) return 0; 
+      return mysurface->h; 
+    };
+
+  inline unsigned int height() const
+    {
+      if(!mysurface) return 0;
+      return mysurface->h; 
+    };
   
  protected:
   SDL_Surface* mysurface;
-  int wantTrans;
 };
 
 

@@ -249,11 +249,11 @@ class Ship : public ScreenObject
   void Hyper();
   
   void SetupDrawing() {
-    for(int i = 0; i < SHIPTURNS; i++) {
-      ShipBitmaps[i].setupsurface();
-      ShipThrusts[i].setupsurface();
-      spinnerBitmaps[i].setupsurface(); // Works for the time being.
-    }
+    //    for(int i = 0; i < SHIPTURNS; i++) {
+    //      ShipBitmaps[i].setupsurface();
+    //      ShipThrusts[i].setupsurface();
+    //      spinnerBitmaps[i].setupsurface(); // Works for the time being.
+    //    }
   }
   
   inline int weaponPower() { if(deadStick) return 0; return wPower; }

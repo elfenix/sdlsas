@@ -133,12 +133,12 @@ void Ui::init()
     SDL_ShowCursor(0);
 
     if (TTF_Init() < 0) {
-	fprintf(stderr, "Coudln't initialize TTF library!\n");
+	fprintf(stderr, "Couldn't initialize TTF library!\n");
 	exit(-1);
     }
     atexit(TTF_Quit);
 
-    myfont = TTF_OpenFont(BINDIR "Wargames.ttf", DMULTCONST(9));
+    myfont = TTF_OpenFont(BINDIR "/fonts/Wargames.ttf", DMULTCONST(9));
     if (!myfont) {
 	fprintf(stderr, "Couldn't grab TTF font!\n");
 	exit(-1);

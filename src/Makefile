@@ -11,18 +11,17 @@ GDIR=\"/usr/share/sasteroids/\"
 DEFINES = -DGAMEDIR=$(GDIR)
 
 # regular use
-CFLAGS	 = -Wall $(DEFINES) $(INC) $(OPTIMIZE) $(OPTS)
-DEBUG = 
+#CFLAGS	 = -Wall $(DEFINES) $(INC) $(OPTIMIZE) $(OPTS)
+#DEBUG = 
 
 # for debugging
-#CFLAGS	 = -Wall $(DEFINES) $(INC) $(DEBUG) $(OPTS) 
-#DEBUG = -g -pg
+CFLAGS	 = -Wall $(DEFINES) $(INC) $(DEBUG) $(OPTS) 
+DEBUG = -g -pg
 
 #LFLAGS   = -static
 
 SASTEROIDS = sasteroids
-SASTEROIDS_O = bitmap.o cfclass.o fastmath.o obj.o riloader.o sasteroids.o \
-		sbitmap.o ui.o
+SASTEROIDS_O = fastmath.o obj.o sasteroids.o sbitmap.o ui.o
 
 LIBS = `sdl-config --libs` -lSDL_ttf -lfreetype -lSDL_mixer
 

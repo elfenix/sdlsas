@@ -21,10 +21,10 @@
 // #define _OLD_CPP_HEADERS
 
 // Use Sound?
-#define HAVE_SOUND
+// #define HAVE_SOUND
 
 // Double Size 320x200 displays?
-#define DOUBLE_SIZE	
+// #define DOUBLE_SIZE	
 
 // Use non original enhanced behavoir?
 #define NON_ORIGINAL 
@@ -45,12 +45,12 @@
    
 #else
 
-#define SCREEN_X 420
-#define SCREEN_Y 210
+#define SCREEN_X 320
+#define SCREEN_Y 200
 #define PLAY_X SCREEN_X
 #define PLAY_Y	SCREEN_Y
 #define DMULTCONST(a) (a)
-#define DDIVCONST(a) (a/2)
+#define DDIVCONST(a) (a)
 
 #endif
 

@@ -373,27 +373,27 @@ void InitShips()
   k = SHIPTURNS >> 2;		// SHIPTURNS must be multiple of 4
   
   for (j = 0; j < k; j++) {
-    LoadBitmap(ShipBitmaps[j], "ship0.raw");
-    LoadBitmap(ShipThrusts[j], "ship1.raw");
-    LoadBitmap(spinnerBitmaps[j], "spinner.raw");
-    
-    // since our angles are 0..255, 64 is 90 normal degrees
-    angle = j * 64 / k;;
-    
-    if (angle != 0) {
-      ShipBitmaps[j].rot(angle);
-      ShipThrusts[j].rot(angle);
-      spinnerBitmaps[j].rot(angle);
-    }
-    
-    for (i = 1; i < 4; i++) {
-      ShipBitmaps[j + i * k].copy(ShipBitmaps[j + (i - 1) * k]);
-      ShipBitmaps[j + i * k].rotc90();
-      ShipThrusts[j + i * k].copy(ShipThrusts[j + (i - 1) * k]);
-      ShipThrusts[j + i * k].rotc90();
-      spinnerBitmaps[j + i * k].copy(spinnerBitmaps[j + (i - 1) * k]);
-      spinnerBitmaps[j + i * k].rotc90();
-    }
+   ShipBitmaps[j].LoadImage(BINDIR "/graphics/ship0.bmp");
+   ShipThrusts[j].LoadImage(BINDIR "/graphics/ship1.bmp");
+   spinnerBitmaps[j].LoadImage(BINDIR "/graphics/spinner.bmp");
+   
+   // since our angles are 0..255, 64 is 90 normal degrees
+   angle = j * 64 / k;;
+   
+   if (angle != 0) {
+      //      ShipBitmaps[j].rot(angle);
+      //      ShipThrusts[j].rot(angle);
+      //      spinnerBitmaps[j].rot(angle);
+   }
+   
+   for (i = 1; i < 4; i++) {
+     ShipBitmaps[j + i * k].copy(ShipBitmaps[j + (i - 1) * k]);
+     //     ShipBitmaps[j + i * k].rotc90();
+     ShipThrusts[j + i * k].copy(ShipThrusts[j + (i - 1) * k]);
+     //      ShipThrusts[j + i * k].rotc90();
+     spinnerBitmaps[j + i * k].copy(spinnerBitmaps[j + (i - 1) * k]);
+     //      spinnerBitmaps[j + i * k].rotc90();
+   }
   }
 }
 

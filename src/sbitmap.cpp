@@ -11,19 +11,13 @@
 
 #include "sasteroids.h"
 
-// Setup the palette 
-char SBitmap::Vpal[256][3] = { {0, 0, 0} };
+void getpixel(SDL_Surface *mysurface, int x, int y, char r, char g, char b)
+{
+  if(x < 0 || y < 0) return;
+  if(x > mysurface->w || y > mysurface->h) return;
 
-// Setup the palette 
-void SBitmap::SetPalette(int num, char r, char g, char b)
-{  
-  if (num >= 0 && num < 256) {
-    Vpal[num][0] = r;
-    Vpal[num][1] = g;
-    Vpal[num][2] = b;
-  }
+  // BIG TODO HERE!!!!!!!!!!!11
 }
-
 
 
 void setpixel(SDL_Surface * screen, int x, int y, char r, char g, char b)
@@ -87,91 +81,17 @@ void setpixel(SDL_Surface * screen, int x, int y, char r, char g, char b)
 }
 
 
-
-void SBitmap::setupsurface()
-{
-    int x, y;
-    int rx, ry;
-    SDL_Surface *temp;
-
-    if (mysurface) {
-	SDL_FreeSurface(mysurface);
-	mysurface = 0;
-    }
-
-    if (Vimage) {
-	mysurface =
-	    SDL_CreateRGBSurface(SDL_SWSURFACE, 
-				 DMULTCONST(Vwidth),
-				 DMULTCONST(Vheight),
-				 24, 0x000000ff, 0x0000ff00, 0x00ff0000,
-				 0x00000000);
-
-	for (y = 0, ry = 0; y < DMULTCONST(Vheight); y += DMULTCONST(1), ry++) {
-	    for (x = 0, rx = 0; x < DMULTCONST(Vwidth); x += DMULTCONST(1), rx++) {
-
-		setpixel(mysurface, x, y,
-			 Vpal[Vimage[ry * Vwidth + rx]][0],
-			 Vpal[Vimage[ry * Vwidth + rx]][1],
-			 Vpal[Vimage[ry * Vwidth + rx]][2]);
-
-#ifdef DOUBLE_SIZE
-		setpixel(mysurface, x + 1, y,
-			 Vpal[Vimage[ry * Vwidth + rx]][0],
-			 Vpal[Vimage[ry * Vwidth + rx]][1],
-			 Vpal[Vimage[ry * Vwidth + rx]][2]);
-
-		setpixel(mysurface, x, y + 1,
-			 Vpal[Vimage[ry * Vwidth + rx]][0],
-			 Vpal[Vimage[ry * Vwidth + rx]][1],
-			 Vpal[Vimage[ry * Vwidth + rx]][2]);
-
-		setpixel(mysurface, x + 1, y + 1,
-			 Vpal[Vimage[ry * Vwidth + rx]][0],
-			 Vpal[Vimage[ry * Vwidth + rx]][1],
-			 Vpal[Vimage[ry * Vwidth + rx]][2]);
-#endif
-	    }
-
-	}
-
-	/*
-	 * Setup colorkeying, and then make sure we have alloced the
-	 * fastest surface possible 
-	 */
-	if (wantTrans) {
-	    SDL_SetColorKey(mysurface, SDL_SRCCOLORKEY,
-			    SDL_MapRGB(mysurface->format, 0, 0, 0));
-
-	    temp = mysurface;
-	    mysurface = SDL_DisplayFormatAlpha(temp);
-	    if (!mysurface)
-		mysurface = temp;
-	    else
-		SDL_FreeSurface(temp);
-	} else {
-	    temp = mysurface;
-	    mysurface = SDL_DisplayFormat(temp);
-
-	    if (!mysurface)
-		mysurface = temp;
-	    else
-		SDL_FreeSurface(temp);
-	}
-    }
-}
-
-
-
-
-
-
-
 void
 scaleCopy2(int w1, int h1, unsigned char *map1, int w2,
 	   int h2, unsigned char *map2)
 {
     memcpy(map2, map1, w2 * h2);
+}
+
+
+void SBitmap::SetTrans(bool wantTrans)
+{
+  // BIG TOOD HERE
 }
 
 
@@ -200,7 +120,7 @@ void SBitmap::scaleCopy(const Bitmap & b, int w, int h)
 void SBitmap::rot(Angle degrees)
 {
 
-    // cout << "W:" << width() << " H:"<< height() <<" Size:" << size() << 
+  /*    // cout << "W:" << width() << " H:"<< height() <<" Size:" << size() << 
     // endl;
     unsigned char *buf = new unsigned char[size()];
 
@@ -254,5 +174,34 @@ void SBitmap::rot(Angle degrees)
     // set bitmap to new rotated bitmap
     Vimage = buf;
 
-    setupsurface();
+    setupsurface(); */
+}
+
+
+void SBitmap::LoadImage(char* file) 
+{
+  mysurface = SDL_LoadBMP(file);
+  if(!mysurface) {
+    cerr << "[Fatal] Could not load bitmap: " << SDL_GetError() << endl;
+    exit(-1);
+  }
+}
+
+
+void SBitmap::copy(SBitmap& b) 
+{ 
+  SDL_Surface* surfaceCopy;
+  
+  if(mysurface) SDL_FreeSurface(mysurface);
+  if(!b.mysurface) return;
+
+  surfaceCopy = b.mysurface;
+  mysurface = SDL_ConvertSurface(surfaceCopy,
+				 surfaceCopy->format,
+				 surfaceCopy->flags);
+
+  if(!mysurface) {
+    cerr << "[Fatal] Couldn't Create SDL Surface!" << endl;
+    exit(-1);
+  }
 }
