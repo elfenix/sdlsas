@@ -23,6 +23,7 @@ Ship::Ship() : ScreenObject()
   wPower = 0;
   angle = 0;
 
+  size.SetXY(14,14);
   setsize(8);
   SetBitmap();
 }

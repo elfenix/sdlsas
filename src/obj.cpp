@@ -88,15 +88,16 @@ void ScreenObject::tick()
 	    tx = position.GetX();
 	    ty = position.GetY();
 	    if (tx > ScreenLimits.GetX())
-		tx = 0.1f;
+		tx = 0.1f-size.GetX();
 	    if (ty > ScreenLimits.GetY())
-		ty = 0.1f;
+		ty = 0.1f-size.GetY();
 	    position.SetXY(tx, ty);
 	}
     }
 
 
-    if (position.GetX() < (0.0f) || position.GetY() < (0.0f)) {
+    if (position.GetX() < (0.0f-size.GetX()) || 
+	position.GetY() < (0.0f-size.GetY())) {
 	if (!wrapMoves)
 	    die();
 	else {
