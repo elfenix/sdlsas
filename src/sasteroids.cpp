@@ -304,7 +304,7 @@ void GenerateAsteroids()
     float x, y;
     Vector temp;
 
-    FreeObjArray();
+    //    FreeObjArray();
 
     for (i = 0; i <= (Glevel / 2 + 1); i++) {
 	do {

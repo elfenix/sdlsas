@@ -7,7 +7,7 @@
 // Information about the Game
 
 // Set the version string for SDL Sasteroids
-#define VERSION "1.96.2(CVS RELEASE)"
+#define VERSION "1.97 (CVS RELEASE)"
 
 // Where do we want the game files?
 // Note: This is NOT the place to edit this, use the *MAKEFILE*
