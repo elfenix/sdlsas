@@ -1,273 +1,394 @@
-// Copyright 1994 Brad Pitzel
-// Modification Copyright 2002 Andrew M. 
-//
-// Feel free to use/distribute/modify as long as credit/copyrights for
-// myself and constributors are included.
-
-// File : SBitmap.c[1.0]
-// Changed: Sun Jun 12 22:19:30 1994
+/*************************************************************/
+/* Original Files Copyright 1994, Brad Pitzel                */
+/* Modifications Copyright 2003, Andrew McCall               */
+/*************************************************************/
+/* Feel free to use/distribute/modify as long as credit      */
+/* copyrights for myself and contributors are included.      */
+/*************************************************************/
 
 #include "sasteroids.h"
 
-void SBitmap::SetTrans(bool wantTrans)
-{
-  Uint32 key;
-  if(!mySurface) return;
-  
-  key = SDL_MapRGB(mySurface->format, 0, 0, 0);
-  if(wantTrans) {
-    SDL_SetColorKey(mySurface, SDL_SRCCOLORKEY|SDL_RLEACCEL, key);
-  } else {
-    SDL_SetColorKey(mySurface, 0, key);
-  }
 
-  compile();
-}
+#ifndef WANT_OPENGL
+#include <SDL_rotozoom.h>
+#endif
 
 
-void SBitmap::compile()
+
+/*************************************************************/
+/* Convert SDL_Surfaces to GL Textures  **********************/
+/*************************************************************/
+#ifdef WANT_OPENGL
+
+static void sb_getpixelB1(SDL_Surface* v, SDL_Surface* d, int x, int y, Uint32* color)
 {  
-  SDL_Surface* temp; 
-  temp = mySurface;
-  mySurface = SDL_DisplayFormat(mySurface);
-  if(!mySurface) {
-    cerr << "[Warning] " << SDL_GetError() << endl;
-    mySurface = temp;
-  } else 
-    SDL_FreeSurface(temp);
+  Uint32 tmp;
+  Uint8 *ubuff8;
+  Uint8 r, g, b;
+  
+  ubuff8 = (Uint8 *) v->pixels;
+  ubuff8 += (y * v->pitch) + x;
+  tmp = (Uint32) (*ubuff8);
+  SDL_GetRGB(tmp, v->format, (Uint8*) &r, (Uint8*) &g, (Uint8*) &b);
+  *color = SDL_MapRGB(d->format, r, g, b);
 }
 
 
-// scale this bitmap(in half)
-void SBitmap::scalep5()
+static void sb_getpixelB2(SDL_Surface* v, SDL_Surface* d, int x, int y, Uint32* color)
 {
-  int x, y;
-  char r, g, b;
-  SDL_Surface* newSurface;
-  
-  if(!mySurface) return;
+  Uint32 tmp;
+  Uint8 *ubuff8;
+  Uint16 *ubuff16;
+  Uint8 r, g, b;
+
+  ubuff8 = (Uint8 *) v->pixels;
+  ubuff8 += (y * v->pitch) + (x * v->format->BytesPerPixel);
+  ubuff16 = (Uint16 *) ubuff8;
+  tmp = (Uint32) *ubuff16;
  
-  newSurface = SDL_CreateRGBSurface(mySurface->flags,
-				    mySurface->w/2, mySurface->h/2,
-				    mySurface->format->BitsPerPixel,
-				    mySurface->format->Rmask,
-				    mySurface->format->Gmask,
-				    mySurface->format->Bmask,
-				    mySurface->format->Amask);
-  if(!newSurface) {
-    cerr << "[Warning] Scaling Failed: " << SDL_GetError() << endl;
-    return;
-  } 
-  
-  GraphicsStartDraw(newSurface);
-  GraphicsStartDraw(mySurface);
-
-  for( x = 0; x < mySurface->w; x++) {
-    for( y = 0; y < mySurface->h; y++) {           
-      getpixel(mySurface, x, y, &r, &g, &b);
-      setpixel(newSurface, x/2, y/2, r, g, b);
-    }
-  } 
-
-  GraphicsStopDraw(mySurface);
-  GraphicsStopDraw(newSurface);
-
-  SDL_FreeSurface(mySurface);
-  mySurface = newSurface;
-  
-  compile();
-}
-
-// scale this bitmap
-void SBitmap::scale2x()
-{
-  int x, y;
-  char r, g, b;
-  SDL_Surface* newSurface;
-  
-  if(!mySurface) return;
- 
-  newSurface = SDL_CreateRGBSurface(mySurface->flags,
-				    mySurface->w*2, mySurface->h*2,
-				    mySurface->format->BitsPerPixel,
-				    mySurface->format->Rmask,
-				    mySurface->format->Gmask,
-				    mySurface->format->Bmask,
-				    mySurface->format->Amask);
-  if(!newSurface) {
-    cerr << "[Warning] Scaling Failed: " << SDL_GetError() << endl;
-    return;
-  } 
-  
-  GraphicsStartDraw(newSurface);
-  GraphicsStartDraw(mySurface);
-
-  for( x = 0; x < mySurface->w; x++) {
-    for( y = 0; y < mySurface->h; y++) {           
-      getpixel(mySurface, x, y, &r, &g, &b);
-      setpixel(newSurface, x*2, y*2, r, g, b);
-      setpixel(newSurface, x*2+1, y*2+1, r, g, b);
-      setpixel(newSurface, x*2, y*2+1, r, g, b);
-      setpixel(newSurface, x*2+1, y*2, r, g, b);
-    }
-  } 
-
-  GraphicsStopDraw(mySurface);
-  GraphicsStopDraw(newSurface);
-
-  SDL_FreeSurface(mySurface);
-  mySurface = newSurface;
-  
-  compile();
+  SDL_GetRGB(tmp, v->format, (Uint8*) &r, (Uint8*) &g, (Uint8*) &b);
+  *color = SDL_MapRGB(d->format, r, g, b);
 }
 
 
-
-// Simple rotate bitmap routine.
-// Rotate bitmap by 90 degrees
-void SBitmap::rotc90()
+static void sb_getpixelB3(SDL_Surface* v, SDL_Surface* d, int x, int y, Uint32* color)
 {
-  int x, y;
-  char r, g, b;
-  SDL_Surface* newSurface;
+  Uint8 *ubuff8;
+  Uint32 tmp;
+  Uint8 r, g, b;
   
-  if(!mySurface) return;
+  ubuff8 = (Uint8 *) v->pixels;        // This is probably broken.
+  ubuff8 += (y * v->pitch) + (x * 3);  // TODO: Fix this.
   
-  newSurface = SDL_ConvertSurface(mySurface,
-				  mySurface->format,
-				  mySurface->flags);
-  if(!newSurface) {
-    cerr << "[Warning] Ship Rotation Failed: " << SDL_GetError() << endl;
-    return;
-  } 
-
-  GraphicsStartDraw(newSurface);
-  GraphicsStartDraw(mySurface);
+  tmp = ((Uint32)ubuff8[2]) << 16;
+  tmp |= ((Uint32)ubuff8[1]) << 8;
+  tmp |= ((Uint32)ubuff8[0]);
+  
+  SDL_GetRGB(tmp, v->format, (Uint8*)&r, (Uint8*)&g, (Uint8*)&b);  
+  *color = SDL_MapRGB(d->format, r, g, b);
+}
 
 
-  for( y = 0; y < mySurface->h/2; y++) {
-    for( x = y; x < (mySurface->w-y-1); x++) {
+static void sb_getpixelB4(SDL_Surface* v, SDL_Surface* d, int x, int y, Uint32* color)
+{
+  Uint32* ubuff32;
+  ubuff32 = (Uint32 *) v->pixels;
+  ubuff32 += ((y*v->pitch) >> 2) + x;
+  *color = *ubuff32;
+}
 
-      getpixel(mySurface, y, mySurface->h-1-x,  &r, &g, &b);
-      setpixel(newSurface, x, y, r, g, b);
 
-      getpixel(mySurface, mySurface->w-1-x, mySurface->h-1-y,  &r, &g, &b);
-      setpixel(newSurface, y, mySurface->h-1-x, r, g, b);
+static void sb_setpixelB4(SDL_Surface* visual, int x, int y, Uint32 color)
+{
+  Uint32 *ubuff32;
 
-      getpixel(mySurface, mySurface->w-1-y, x,  &r, &g, &b);
-      setpixel(newSurface, mySurface->w-1-x, mySurface->h-1-y, r, g, b);
+  ubuff32 = (Uint32 *) visual->pixels;
+  ubuff32 += ((y * visual->pitch) >> 2) + x;
+  *ubuff32 = color;
+}
 
-      getpixel(mySurface, x, y, &r, &g, &b);
-      setpixel(newSurface, mySurface->w-1-y, x,  r, g, b);
-    }
+
+/* Quick utility function for texture creation */
+static int power_of_two(int input)
+{
+	int value = 1;
+
+	while ( value < input ) {
+		value <<= 1;
+	}
+	return value;
+}
+
+
+static GLuint SDL_GL_LoadTexture(SDL_Surface *surface, GLfloat *texcoord)
+{
+  Uint32 x, y;
+  Uint32 w, h;
+  Uint32 color;
+  GLuint texture;
+  SDL_Surface *image;
+   
+  if(!surface || !surface->format) {
+    throw "Attempt to load non existant or invalid surface";
   }
 
-  GraphicsStopDraw(mySurface);
-  GraphicsStopDraw(newSurface);
+  w = power_of_two(surface->w);
+  h = power_of_two(surface->h);
 
-  SDL_FreeSurface(mySurface);
-  mySurface = newSurface;
+  texcoord[0] = 0.0f;			  // Min X 
+  texcoord[1] = 0.0f;			  // Min Y 
+  texcoord[2] = (GLfloat)surface->w / w;  // Max X 
+  texcoord[3] = (GLfloat)surface->h / h;  // Max Y 
   
-  compile();
-}
+  image = SDL_CreateRGBSurface(
+			       SDL_SWSURFACE,
+			       w, h,
+			       32,
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN // OpenGL RGBA masks 
+			       0x000000FF, 
+			       0x0000FF00, 
+			       0x00FF0000, 
+			       0xFF000000
+#else
+			       0xFF000000,
+			       0x00FF0000, 
+			       0x0000FF00, 
+			       0x000000FF
+#endif
+			       );
+  if ( image == NULL ) {
+    return 0;
+  }
 
-
-
-
-
-// Simple rotate bitmap routine.
-// Not optimized for speed. Use to create rotated versions of bitmaps
-// at game initialization, not for on-the-fly rotation.
-// width() and height() do not change, therefore.
-// parts of the bitmap could be rotated 'out'.
-void SBitmap::rot(Angle degrees)
-{
-  double xo, yo;
-  int x, y, x1, y1;
-  char r, g, b;
-  SDL_Surface* newSurface;
-  
-  if(!mySurface) return;
-  
-  newSurface = SDL_ConvertSurface(mySurface,
-				  mySurface->format,
-				  mySurface->flags);
-
-  GraphicsStartDraw(newSurface);
-  GraphicsStartDraw(mySurface);
-  
-  if(!newSurface) {
-    cerr << "[Warning] Ship Rotation Failed: " << SDL_GetError() << endl;
-    return;
-  } 
-
-
-  // find middle of the bitmap
-  xo = (double) (mySurface->w / 2);
-  yo = (double) (mySurface->h / 2);
-
-  // loop through each pixel in new buffer, and rotate *backwards*
-  // into the bitmap to see what color it should have.
-  // This method avoids getting holes in the bitmap
-  for (y = 0; y < mySurface->h; y++)
-    for (x = 0; x < mySurface->w; x++) {
-      x1 = (int) (xo + ((double) x - xo) * FastMath::cos(-degrees) -
-		  ((double) y - yo) * FastMath::sin(-degrees));
-      
-      y1 = (int) (yo + ((double) x - xo) * FastMath::sin(-degrees) +
-		  ((double) y - yo) * FastMath::cos(-degrees));
-      
-      
-      if ((x1 < 0) || (x1 >= mySurface->w) || (y1 < 0)
-	  || (y1 >= mySurface->h)) {
-	r = g = b = 0;
-      } else {
-	getpixel(mySurface, x1, y1, &r, &g, &b);
-      }
-      
-       setpixel(newSurface, x, y, r, g, b);      
+  memset(image->pixels, 0, w*h*4);
+    
+  for(x = 0; x < (Uint32)surface->w; x++) {
+    for(y = 0; y < (Uint32)surface->h; y++) {
+      switch(surface->format->BytesPerPixel) 
+	{
+	case 1:
+	  sb_getpixelB1(surface, image, x, y, &color); 
+	  break;
+	  
+	case 2:
+	  sb_getpixelB2(surface, image, x, y, &color);
+	  break;
+	  
+	case 3:
+	  sb_getpixelB3(surface, image, x, y, &color);
+	  break;
+	  
+	case 4:
+	  sb_getpixelB4(surface, image, x, y, &color);
+	  break;
+	  
+	default:
+	  cerr << "Attempt to load unsupported file format: ";
+	  printf("%d\n", surface->format->BytesPerPixel);
+	  exit(-1); 
+	}
+      sb_setpixelB4(image, x, y, color);
     }
+  }
   
-  GraphicsStopDraw(mySurface);
-  GraphicsStopDraw(newSurface);
 
-  SDL_FreeSurface(mySurface);
-  mySurface = newSurface;
+  // Create an OpenGL texture for the image 
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D,
+	       0,
+	       GL_RGBA,
+	       w, h,
+	       0,
+	       GL_RGBA,
+	       GL_UNSIGNED_BYTE,
+	       image->pixels);
+  SDL_FreeSurface(image); // No longer needed 
+  
+  return texture;
+}
 
-  compile();
+#endif
+
+
+/**********************************************************/
+/* SBitmap Class ******************************************/
+/**********************************************************/
+
+SBitmap::SBitmap()
+{
+  myTexture = 0;
 }
 
 
-void SBitmap::LoadImage(char* file, bool sflag, int sF) 
+SBitmap::SBitmap(const SBitmap& copy)
 {
-  mySurface = SDL_LoadBMP(file);
+  int i;
+
+  myTexture = copy.myTexture;
+  myWidth = copy.myWidth;
+  myHeight = copy.myHeight;
+  myHWidth = copy.myHWidth;
+  myHHeight = copy.myHHeight;
+  for(i = 0; i < 4; i++)
+    myTexcoord[i] = copy.myTexcoord[i];
+  
+  myTextureOwned = 0;
+}
+
+
+SBitmap::SBitmap(SDL_Surface* surface)
+{
+  myTexture = 0;
+  LoadSurface(surface);
+}
+
+
+SBitmap::SBitmap(char* filename) 
+{
+  myTexture = 0;
+  LoadImage(filename);
+}
+
+
+SBitmap::~SBitmap() {
+#ifdef WANT_OPENGL
+  if(myTextureOwned) {
+    glDeleteTextures(1, &myTexture);
+  }
+#else
+  if(myTextureOwned) {
+    SDL_FreeSurface(myTexture);
+  }
+#endif
+}
+
+
+void SBitmap::LoadSurface(SDL_Surface* surface)
+{
+  if(!surface) { 
+    throw "[Fatal] Attempt to load NULL Bitmap";
+  }
+  
+  myWidth = float(surface->w);
+  myHeight = float(surface->h);
+  myHWidth = myWidth / 2.0f;
+  myHHeight = myHeight / 2.0f;
+
+#ifdef WANT_OPENGL
+  myTexture = SDL_GL_LoadTexture(surface, myTexcoord);
+  if(!myTexture) {
+    throw "[Fatal] Could not load texture";
+  }
+
+#else
+  myTexture = SDL_ConvertSurface(surface, surface->format, SDL_HWSURFACE|SDL_SRCALPHA);
+  myTextureOwned = 1;
+#endif
+
+
+}
+
+
+void SBitmap::LoadImage(char* file) 
+{
+  SDL_Surface* mySurface;
+
+  mySurface = IMG_Load(file);
+  cout << "Trying to load: " << file << endl;
   if(!mySurface) {
-    cerr << "[Fatal] Could not load bitmap: " << SDL_GetError() << endl;
-    exit(-1);
+    throw "[Fatal] Could not load bitmap";
   }
 
-  SetTrans(sflag);
-  if(sF == 2) scale2x();
-  SetTrans(sflag);
+  myWidth = float(mySurface->w);
+  myHeight = float(mySurface->h);
+  myHWidth = myWidth / 2.0f;
+  myHHeight = myHeight / 2.0f;
+
+#ifdef WANT_OPENGL
+  myTexture = SDL_GL_LoadTexture(mySurface, myTexcoord);
+  if(!myTexture) {
+    throw "[Fatal] Could not load texture";
+  }
+  SDL_FreeSurface(mySurface);
+#else
+  myTexture = mySurface;
+  myTextureOwned = 1;
+#endif
+
 }
 
 
-void SBitmap::copy(SBitmap& b) 
-{ 
-  SDL_Surface* surfaceCopy;
-  
-  if(mySurface) SDL_FreeSurface(mySurface);
-  if(!b.mySurface) return;
+void SBitmap::putA(float x, float y, float layer) 
+{
+  if(!myTexture) return;
 
-  surfaceCopy = b.mySurface;
-  mySurface = SDL_ConvertSurface(surfaceCopy,
-				 surfaceCopy->format,
-				 surfaceCopy->flags);
+#ifdef WANT_OPENGL
+  glBindTexture(GL_TEXTURE_2D, myTexture);
 
-  if(!mySurface) {
-    cerr << "[Fatal] Couldn't Create SDL Surface!" << endl;
-    exit(-1);
-  }
+  glBegin(GL_QUADS);
+
+  glTexCoord2f( myTexcoord[0], myTexcoord[3] );
+  glVertex3f(x, y-myHeight, layer);
   
-  compile();
+  glTexCoord2f( myTexcoord[2], myTexcoord[3] );
+  glVertex3f(x+myWidth, y-myHeight, layer);
+
+  glTexCoord2f( myTexcoord[2], myTexcoord[1] );
+  glVertex3f(x+myWidth, y, layer);
+  
+  glTexCoord2f( myTexcoord[0], myTexcoord[1] );
+  glVertex3f(x, y, layer);
+  
+  glEnd();
+#else
+  if(!myTexture) return;
+
+  SDL_Rect dstRect;
+
+  dstRect.x = (int) x;
+  dstRect.y = Ui::HEIGHT() - (int) y;
+  
+  SDL_BlitSurface(myTexture, NULL, Ui::myscreen, &dstRect);
+#endif
 }
+
+
+void SBitmap::put(float x, float y, float sf, float rotate, float layer) 
+{
+  if(!myTexture) return;
+
+#ifdef WANT_OPENGL
+  glBindTexture(GL_TEXTURE_2D, myTexture);
+  glPushMatrix();
+
+  glTranslatef(x, y, layer);
+  glRotatef(rotate, 0.0f, 0.0f, 1.0f);
+
+  glBegin(GL_QUADS);
+  
+  glTexCoord2f( myTexcoord[0], myTexcoord[3] );
+  glVertex3f(-myHWidth * sf, -myHHeight *sf, 0.0f);
+  
+  glTexCoord2f( myTexcoord[2], myTexcoord[3] );
+  glVertex3f(myHWidth * sf, -myHHeight * sf, 0.0f);
+  
+  glTexCoord2f( myTexcoord[2], myTexcoord[1] );
+  glVertex3f(myHWidth * sf, myHHeight * sf, 0.0f);
+  
+  glTexCoord2f( myTexcoord[0], myTexcoord[1] );
+  glVertex3f(-myHWidth * sf, myHHeight * sf, 0.0f);
+
+  glEnd();
+  glPopMatrix();
+#else
+  SDL_Surface* tmp;
+  SDL_Rect dstRect;
+  int cenX, cenY;
+
+  cenX = myTexture->w >> 1;
+  cenY = myTexture->h >> 1;
+
+  if(rotate != 0 || sf != 1.0f) {
+    
+    tmp = rotozoomSurface(myTexture, rotate, sf, 0);
+    
+    dstRect.x = (myTexture->w - tmp->w) >> 1;
+    dstRect.y = (myTexture->h - tmp->h) >> 1;
+
+    dstRect.x -= cenX; dstRect.x += int(x);
+    dstRect.y -= cenY; dstRect.y += Ui::HEIGHT() - int(y); // dstRect.y = Ui::HEIGHT() - dstRect.y;
+
+    SDL_BlitSurface(tmp, NULL, Ui::myscreen, &dstRect);
+    SDL_FreeSurface(tmp);
+  } else {
+    dstRect.x = -cenX; dstRect.y = -cenY;
+    dstRect.x += int(x); dstRect.y += Ui::HEIGHT() - int(y);
+    SDL_BlitSurface(myTexture, NULL, Ui::myscreen, &dstRect);
+  }
+
+#endif
+}
+  

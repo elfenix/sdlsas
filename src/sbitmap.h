@@ -26,46 +26,40 @@
 class SBitmap
 {
  public:
-  SBitmap() : mySurface(NULL) { };
-  SBitmap(char *file) : mySurface(NULL) { LoadImage(file); }
-  SBitmap(int w, int h) : mySurface(NULL) { };
-  SBitmap(const SBitmap& pb) : mySurface(NULL) { ; };
+  SBitmap();
+  SBitmap(char *file);  
+  SBitmap(SDL_Surface* surface);
+  SBitmap(const SBitmap& pb);
+
+  ~SBitmap();
   
-  ~SBitmap() 
-    { if(mySurface) SDL_FreeSurface(mySurface); }
+  void LoadImage(char* path);
+  void LoadSurface(SDL_Surface* surface);
+
+  void put(float x, float y, float rotate = 1.0f, float rotate = 1.0f, float layer = 0.0f);
+  void putA(float x, float y, float layer = 0.0f);
   
-  // Image functions. :)
-  void LoadImage(char* path, bool setTrans = true, int sF = DMULTCONST(1));
-  void copy(SBitmap& b);
-  void rotc90();
-  void rot(Angle degrees);
-  void SetTrans(bool wantTrans);
-  void scale2x();
-  void scalep5();
-  void compile();
-    
-  // Inline (speed critical) functions bellow:
-  inline void put(int x, int y) {
-    SDL_Rect b;
-    if(!mySurface) return;
-    b.x = DMULTCONST(x); b.y = DMULTCONST(y);
-    SDL_BlitSurface(mySurface, NULL, Ui::myscreen, &b); 
-  }
-  
-  inline int width() const
+  inline float width() const
     { 
-      if(!mySurface) return 0; 
-      return DDIVCONST(mySurface->w); 
+      return myWidth;
     };
 
-  inline int height() const
+  inline float height() const
     {
-      if(!mySurface) return 0;
-      return DDIVCONST(mySurface->h); 
+      return myHeight;
     };
   
  protected:
-  SDL_Surface* mySurface;
+#ifdef WANT_OPENGL
+  GLuint myTexture, myTextureOwned;
+  GLfloat myWidth, myHeight, myHWidth, myHHeight;
+  GLfloat myTexcoord[4];  
+#else
+  SDL_Surface* myTexture;
+  unsigned int myTextureOwned;
+  float myWidth, myHeight, myHWidth, myHHeight;
+  float myTexcoord[4];
+#endif
 };
 
 #endif

@@ -7,6 +7,12 @@ and README). Graphics files are included under this liberal license as well.
 The fonts are (C)opyright by Dustin Norlander, and distributable under the
 term of the GPL. (Included for convenience).
 
+Files in graphics/backdrops are from NASA's public image archive:
+http://oposite.stsci.edu/pubinfo/pictures.html They may be distributed
+under the terms listed here: http://www.stsci.edu/institute/Copyright
+(These files are essentially in the public domain, however, NASA
+asks for voluntary accredation and notification of use.)
+
 Sounds:
 
 From the original distribution: boom1.wav  boom2.wav  flash.wav zap.wav

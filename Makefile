@@ -17,10 +17,11 @@ install:
 	install -d $(BINDIR)
 	install --strip --mode=755 src/sasteroids $(BINDIR)
 	install --mode=644 sasteroids.6 $(MANDIR)/man6
-	install --mode=644 fonts/Wargames.ttf $(GAMEDIR)/fonts/
+	install --mode=644 fonts/nicefont.ttf $(GAMEDIR)/fonts/
 	install --mode=644 sounds/*.wav $(GAMEDIR)/sounds/
-	install --mode=644 graphics/*.bmp $(GAMEDIR)/graphics
-	install --mode=644 graphics/sprite/*.bmp $(GAMEDIR)/graphics
+	install --mode=644 graphics/*.png $(GAMEDIR)/graphics
+	install --mode=644 graphics/sprite/*.png $(GAMEDIR)/graphics
+	install --mode=644 graphics/backdrops/* $(GAMEDIR)/graphics
 
 	make GAMEDIR=$(GAMEDIR) -C src
 

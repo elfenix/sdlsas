@@ -66,12 +66,11 @@
 
 
 #ifndef __VECTOR_LIB__
+#define __VECTOR_LIB__
 
 // Sense everything is inline, we make sure that different versions
 // of this header aren't mixed up in binaries by using a Macro. (I 
 // _think_ this will work....)
-
-#define Vector Vector__01
 
 // Vector 2d:
 class Vector {

@@ -17,6 +17,13 @@
 
 #include "sasteroids.h"
 
+#ifdef WANT_OPENGL
+#   include <GL/gl.h>
+#   include <GL/glu.h>
+#else
+/* TODO: No openGL */
+#endif
+
 // call before using setpixel or getpixel. =)
 void GraphicsStartDraw(SDL_Surface* visual);
 void GraphicsStopDraw(SDL_Surface* visual);
@@ -37,6 +44,8 @@ void getpixel(SDL_Surface *screen, int x, int y, char *r, char *g, char *b);
 
 // Other integers
 extern int wantFullScreen;
+class SBitmap;
+
 
 class Ui 
 {
@@ -53,13 +62,8 @@ class Ui
   static void ShowText(int x, int y, char* msg );
   static void ShowTextColor(int x, int y, char* msg, char r, char g, char b);
   static char yesNo( const char *msg );
-  
-  // returns last key pressed (eg. CR or ESC)
-  static int input( int x, int y, char *inp, int len );
-  static int input( int x, int y, char *prompt, char *inp, int len ) 
-    {
-      return Ui::input( x, y, inp, len );
-    }
+
+  static SDL_Surface* get_text(char* msg, char r,char g, char b);
   
   static int fontHeight()  
     { 
@@ -70,7 +74,40 @@ class Ui
     {
       if(x < 0 || x >= myscreen->w) return;
       if(y < 0 || y >= myscreen->h) return;
-      (pixelDriver)(myscreen, x, y, r, g, b);
+
+#ifdef WANT_OPENGL
+      char byteBuffer[3] = { r, g, b };
+
+
+      glRasterPos2i(x, y);
+      glDrawPixels(1, 1, GL_RGB, GL_UNSIGNED_BYTE, &byteBuffer);
+
+      /*
+
+      glDisable(GL_TEXTURE_2D);  
+      glDisable(GL_BLEND);
+      glBegin(GL_QUADS);
+
+      glColor3b(r, g, b);
+      glVertex3f(x, y, 0.0f);
+
+      glColor3b(r, g, b);
+      glVertex3f(x+1.0f, y, 0.0f);
+
+      glColor3b(r, g, b);
+      glVertex3f(x+1.0f, y+1.0f, 0.0f);
+
+      glColor3b(r, g, b);
+      glVertex3f(x, y+1.0f, 0.0f);
+
+      glEnd();
+      glEnable(GL_TEXTURE_2D);
+      glEnable(GL_BLEND);
+      glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+      */
+#else
+      //      (pixelDriver)(myscreen, x, y, r, g, b);
+#endif
     }
 
   static int fontWidth() { return 19; } // Fudged, shouldn't be used...
@@ -79,18 +116,18 @@ class Ui
   static int HEIGHT() { if(myscreen) return myscreen->h; return 0; }
   
   static void clearscreen() {
-    SDL_Rect A;
-    
-    if(!myscreen) return;
-    A.x = A.y = 0;
-    A.w = myscreen->w; A.h = myscreen->h;
-    SDL_FillRect(myscreen, &A, SDL_MapRGB(myscreen->format,0,0,0));
+#ifdef WANT_OPENGL
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+#endif
   };
   
   static void FullScreen() {
     SDL_WM_ToggleFullScreen(myscreen);
   };
   
+
+  static void predraw();
+
   
   friend class SBitmap;
   friend class Bitmap;
@@ -104,6 +141,19 @@ class Ui
 
   static void (*pixelDriver)(SDL_Surface* visual, 
 			     int x, int y, char r, char g, char b);
+};
+
+
+class IntegerDisplay
+{
+ public:
+  static void initialize();
+  static void display_integer(int num, float x, float y);
+  static void finish();
+
+ private:
+  static SBitmap* numbers;
+
 };
 
 #endif

@@ -17,12 +17,14 @@
 void displayScreen(char *screen);
 void upscore(int upby);
 
+
 /////////////////////////////////////////////////////////////////////////////
 // Global variables: 
 
 // System Setup
 SBitmap Gbit[NUM_BITMAPS];                // graphics. =)
-SBitmap Gbackdrop;
+SBitmap Backdrops[NUM_BACKS];
+
 SBitmap titleScreen;
 SBitmap extraLives;                       // 1/2 scale ship for extra men.
 
@@ -30,17 +32,24 @@ SBitmap extraLives;                       // 1/2 scale ship for extra men.
 Mix_Chunk *soundSamples[NUM_SOUNDS];               // Sound!
 #endif
 
+
+int use_joystick, num_joysticks;
+
+#ifdef HAVE_JOYSTICK
+SDL_Joystick *js;
+void SDL_JoystickUpdate();
+#endif
+
+
 int G_use_backdrop = 0;
 
 // Global Game Play Variables.
-PShip PlayerShip;	                  // Info about player's ship.
+Player PlayerShip;	                  // Info about player's ship.
 int score, Glevel, numasts, oldscore;     // scoring and level info
 int ClassicMode = 0;                      // classic mode?
 int BackdropOn = 1, wantFullScreen = 0;   // is the backdrop on?
 
 // Power Ups, etc...
-int canShootThree = 1, shieldRecharge = 0;// Has the three shooter powerup?
-int smartZapper;                          // smart teleport
 int deathTimer;                           // Mwahahahahahahh
 
 // These do something.... :D
@@ -107,100 +116,15 @@ void upscore(int up)
 {
     score = score + up;
 
-    if (oldscore + 30000 < score) {
-	PlayerShip.addship();	// TODO: Play sound FX
+    if (oldscore + 60000 < score) {
+	PlayerShip.addship();	
 	oldscore = score;
 	PlaySound(SND_POWERUP);
     }
 }
 
 
-////////////////////////////////////////////////////////////////////////////
-// fire a bullet for player ship
-void Fire()
-{
- int bullet;
-  float fcos, fsin;
-  float rx, ry;
 
-  if(eeggL == 80 && eeggR == 160 && eeggU == 3 && eeggD == 12 ) {
-    CleanUpStuff();
-    eeggL = 0; eeggR = 0; eeggU = 0; eeggD = 0; eeggS = 1;
-  }
-
-  
-  if (PlayerShip.weaponPower() > 10) {
-    PlaySound(SND_FIRE);
-
-    rx = PlayerShip.GetX() + (PlayerShip.GetWidth() / 2);
-    ry = PlayerShip.GetY() + (PlayerShip.GetHeight() / 2);
-     
-    fsin = -FastMath::cos(PlayerShip.getAngle());
-    fcos = FastMath::sin(PlayerShip.getAngle());
-
-    // Give it a bit of a kick back... ehehehheeheh
-    if(!ClassicMode) {
-      PlayerShip.AddVel(-fcos / 10.0f, -fsin / 10.0f);
-      PlayerShip.dischargeWeapon();
-    }
-
-    bullet = GetOpenObject();
-    ObjectList[bullet] = new ScreenObject;
-    ObjectList[bullet]->restore();
-    fsin = -FastMath::cos(PlayerShip.getAngle());
-    fcos = FastMath::sin(PlayerShip.getAngle());
-    ObjectList[bullet]->SetXY(rx + PlayerShip.Size() * fcos,
-				  ry + PlayerShip.Size() * fsin);
-    ObjectList[bullet]->SetVel(PlayerShip.VelX() + BUL_SPEED * fcos,
-			       PlayerShip.VelY() + BUL_SPEED * fsin);
-    ObjectList[bullet]->SetAcc(0.0f, 0.0f);
-    ObjectList[bullet]->SetBitmap(&Gbit[BULLET]);
-    ObjectList[bullet]->SetWrapMoves(false);
-    ObjectList[bullet]->SetMaxSpeed(255.0f);
-    ObjectList[bullet]->settype(SHIP_BUL);     
-    ObjectList[bullet]->setsize(5);
- 
-    if(canShootThree && PlayerShip.weaponPower() > 20) {
-      // Fire 2
-      bullet = GetOpenObject();
-      ObjectList[bullet] = new ScreenObject;
-      ObjectList[bullet]->restore();
-      fsin = -FastMath::cos(PlayerShip.getAngle()+5);
-      fcos = FastMath::sin(PlayerShip.getAngle()+5);
-      ObjectList[bullet]->SetXY(rx + PlayerShip.Size() * fcos,
-				ry + PlayerShip.Size() * fsin);
-      ObjectList[bullet]->SetVel(PlayerShip.VelX() + BUL_SPEED * fcos,
-				 PlayerShip.VelY() + BUL_SPEED * fsin);
-      ObjectList[bullet]->SetAcc(0.0f, 0.0f);
-      ObjectList[bullet]->SetBitmap(&Gbit[BULLET]);
-      ObjectList[bullet]->SetWrapMoves(false);
-      ObjectList[bullet]->SetMaxSpeed(255.0f);
-      ObjectList[bullet]->settype(SHIP_BUL);  
-      ObjectList[bullet]->setsize(5);
-      
-      // Fire 3
-      bullet = GetOpenObject();
-      ObjectList[bullet] = new ScreenObject;
-      ObjectList[bullet]->restore();
-      fsin = -FastMath::cos(PlayerShip.getAngle()-5);
-      fcos = FastMath::sin(PlayerShip.getAngle()-5);
-      ObjectList[bullet]->SetXY(rx + PlayerShip.Size() * fcos,
-				ry + PlayerShip.Size() * fsin);
-      ObjectList[bullet]->SetVel(PlayerShip.VelX() + BUL_SPEED * fcos,
-				 PlayerShip.VelY() + BUL_SPEED * fsin);
-      ObjectList[bullet]->SetAcc(0.0f, 0.0f);
-      ObjectList[bullet]->SetBitmap(&Gbit[BULLET]);
-      ObjectList[bullet]->SetWrapMoves(false);
-      ObjectList[bullet]->SetMaxSpeed(255.0f);
-      ObjectList[bullet]->settype(SHIP_BUL); 
-      ObjectList[bullet]->setsize(5);
-
-      PlayerShip.dischargeWeapon(); // Discharg 2x as fast when shooting 3
-    }
-  } else {
-    // TODO: Do something interesting.
-  }
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // sound display - displays the current mixer level
@@ -217,11 +141,11 @@ void sounddisplay()
   if(!sDisplayTimer) return;
 
   for( x = 0; x < MainVolume; x++ ) {
-    Ui::setpixel(x1+DDIV2CONST(x), y, 255-x, (55)+x, 0);
-    Ui::setpixel(x1+DDIV2CONST(x), y+1, 255-x, 55+x, 0);
-    Ui::setpixel(x1+DDIV2CONST(x), y+2, 255-x, 55+x, 0);
-    Ui::setpixel(x1+DDIV2CONST(x), y+3, 255-x, 55+x, 0);
-    Ui::setpixel(x1+DDIV2CONST(x), y+4, 255-x, 55+x, 0);
+    Ui::setpixel(x1+x, y, 255-x, (55)+x, 0);
+    Ui::setpixel(x1+x, y+1, 255-x, 55+x, 0);
+    Ui::setpixel(x1+x, y+2, 255-x, 55+x, 0);
+    Ui::setpixel(x1+x, y+3, 255-x, 55+x, 0);
+    Ui::setpixel(x1+x, y+4, 255-x, 55+x, 0);
   } 
 
 }
@@ -243,41 +167,43 @@ void botline()
 
     y = 10;
 
-    sprintf(text, "Score:%7d", score);
-    Ui::ShowText(DMULTCONST(5), DMULTCONST(5), text);
+    //    sprintf(text, "Score:%7d", score);
+    //    Ui::ShowText(10, 10, text);
+    IntegerDisplay::display_integer(score, 10.0f, float(Ui::HEIGHT()) - 2.0f);
+
 
     sprintf(text, "Level:%7d", Glevel);
     x1 = Ui::WIDTH() - 120;
-    Ui::ShowText(DDIV2CONST(x1), DDIV2CONST(Ui::HEIGHT()-19), text);
+    Ui::ShowText(x1, Ui::HEIGHT()-19, text);
 
-    x1 = Ui::WIDTH() - DDIV2CONST(205);
+    x1 = Ui::WIDTH() - 205;
     if(!ClassicMode) { 
       // Draw weapon + shield energy meter.
-      Gbit[BULLET].put(DDIVCONST(x1)-DMULTCONST(3), DDIVCONST(y));
+      Gbit[BULLET].put(x1-12, (y));
       for( x = 0; x < (PlayerShip.weaponPercent()*2); x++ ) {
-	Ui::setpixel(x1+DDIV2CONST(x), y, 255-x, (55)+x, 0);
-	Ui::setpixel(x1+DDIV2CONST(x), y+1, 255-x, 55+x, 0);
-	Ui::setpixel(x1+DDIV2CONST(x), y+2, 255-x, 55+x, 0);
-	Ui::setpixel(x1+DDIV2CONST(x), y+3, 255-x, 55+x, 0);
-	Ui::setpixel(x1+DDIV2CONST(x), y+4, 255-x, 55+x, 0);
+	Ui::setpixel(x1+x, y, 255-x, (55)+x, 0);
+	Ui::setpixel(x1+x, y+1, 255-x, 55+x, 0);
+	Ui::setpixel(x1+x, y+2, 255-x, 55+x, 0);
+	Ui::setpixel(x1+x, y+3, 255-x, 55+x, 0);
+	Ui::setpixel(x1+x, y+4, 255-x, 55+x, 0);
       } 
       
       // Draw shield energy meter.
       y += 10;
     }
 
-    Gbit[BULLET].put(DDIVCONST(x1)-DMULTCONST(3), DDIVCONST(y));
+    Gbit[BULLET].put(x1-12, y);
     for( x = 0; x < (PlayerShip.shieldPercent()*2); x++ ) {
-      Ui::setpixel(x1+DDIV2CONST(x), y, 255-x, (55)+x, 0);
-      Ui::setpixel(x1+DDIV2CONST(x), y+1, 255-x, 55+x, 0);
-      Ui::setpixel(x1+DDIV2CONST(x), y+2, 255-x, 55+x, 0);
-      Ui::setpixel(x1+DDIV2CONST(x), y+3, 255-x, 55+x, 0);
-      Ui::setpixel(x1+DDIV2CONST(x), y+4, 255-x, 55+x, 0);
+      Ui::setpixel(x1+(x), y, 255-x, (55)+x, 0);
+      Ui::setpixel(x1+(x), y+1, 255-x, 55+x, 0);
+      Ui::setpixel(x1+(x), y+2, 255-x, 55+x, 0);
+      Ui::setpixel(x1+(x), y+3, 255-x, 55+x, 0);
+      Ui::setpixel(x1+(x), y+4, 255-x, 55+x, 0);
     } 
     
-    y = DDIVCONST(Ui::HEIGHT() - DMULTCONST(12));
+    y = (Ui::HEIGHT() - 24);
     for( x = 0; x < (PlayerShip.ships()-1); x++) {
-      extraLives.put(2+x*10, y);
+      extraLives.put(16+x*20, 15.0f, 0.5f);
     }
 }
 
@@ -287,17 +213,8 @@ void displayScreen(char *file)
 {
   SBitmap backdrop(file);
   Ui::clearscreen();
-  backdrop.put(0, 0);
+  backdrop.putA(0, Ui::HEIGHT());
 }
-
-
-void ResetShip() 
-{
-  canShootThree = 0;
-  shieldRecharge = 0;
-  PlayerShip.Reset();
-}
-
 
 
 
@@ -365,7 +282,7 @@ void PlayGame()
   score = 0;
   oldscore = -1;
 
-  ResetShip();
+  PlayerShip.Reset();
   FreeObjArray();
   Ui::clearscreen();
 
@@ -377,7 +294,6 @@ void PlayGame()
   }
   
   keystatebuffer = SDL_GetKeyState(NULL);
-  Gbackdrop.SetTrans(false);
  
   
   pause = 0;
@@ -399,8 +315,8 @@ void PlayGame()
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
       case SDL_VIDEORESIZE:
-	ScreenLimits.SetXY(DDIVCONST(event.resize.w), 
-			   DDIVCONST(event.resize.h));
+	ScreenLimits.SetXY((event.resize.w), 
+			   (event.resize.h));
 	Ui::resync(event.resize.w, event.resize.h);
 	break;
 	
@@ -433,11 +349,11 @@ void PlayGame()
 	
 	// I prefer space
 	if (event.key.keysym.sym == SDLK_SPACE && !pause)
-	  Fire();
+	  PlayerShip.Fire();
 
 	// but CTRL is the default
 	if (event.key.keysym.sym == SDLK_LCTRL && !pause)
-	  Fire();
+	  PlayerShip.Fire();
 	
 	if (event.key.keysym.sym == SDLK_f)
 	  Ui::FullScreen();
@@ -478,7 +394,7 @@ void PlayGame()
 
 	if(event.key.keysym.sym == SDLK_s && !finalDead) {
 	  if(dead) {
-	    ResetShip();
+	    PlayerShip.Reset();
 	    dead = 0;
 	  }
 	}
@@ -541,6 +457,87 @@ void PlayGame()
 	exit(0);
 	break;
       
+
+
+#ifdef HAVE_JOYSTICK
+
+      case SDL_JOYBUTTONDOWN:
+	if (event.type == SDL_JOYBUTTONDOWN) {
+	  if (event.jbutton.button == JOY_E && !pause && !dead) {
+	    PlaySound(SND_WARP);
+	    PlayerShip.Hyper();
+	  }
+	}
+	
+	if (event.type == SDL_JOYBUTTONDOWN) {
+	  if (event.jbutton.button == JOY_C && !pause) {
+	    PlayerShip.Fire();
+	  }
+	}
+
+	if (event.type == SDL_JOYBUTTONDOWN) {
+	  if (event.jbutton.button == JOY_A && !dead) {
+	    PlayerShip.Thrust(0.15f);
+#ifdef HAVE_SOUND
+	    if(!chOn) {
+	      Mix_PlayChannel(0, soundSamples[SND_ENGINE], -1);
+	      chOn = 1;
+	    }
+#endif
+	  } else {
+#ifdef HAVE_SOUND
+	    Mix_ExpireChannel(0, 10);
+	    chOn = 0;
+#endif	  
+	  }
+	}
+	
+	if (event.type == SDL_JOYBUTTONDOWN) {
+	  if (event.jbutton.button == JOY_B) {
+	    PlayerShip.Brake();
+	  }
+	}
+	
+	if (event.type == SDL_JOYBUTTONDOWN) {
+	  if (event.jbutton.button == JOY_D) {
+	    PlayerShip.shieldOn();
+	  }
+	}
+	
+	if (event.type == SDL_JOYBUTTONUP) {
+	  if (event.jbutton.button == JOY_D) {
+	    PlayerShip.shieldOff();
+	  }
+	}
+	break;
+	
+      case SDL_JOYAXISMOTION:
+	if (event.type == SDL_JOYAXISMOTION) {
+	  if (event.jaxis.axis == JOY_X) {
+	    if (event.jaxis.value < -256) {
+	      PlayerShip.rotateLeft(); 
+	    }
+	    else
+	      if (event.jaxis.value > 256) {
+		PlayerShip.rotateRight();
+	      }
+	  }
+	}
+	
+	if (event.type == SDL_JOYAXISMOTION) {
+	  if (event.jaxis.axis == JOY_Y && !dead) {
+	    if (event.jaxis.value > -256) {
+	      PlayerShip.shieldOn();
+	    }
+	    else
+	      if (event.jaxis.value < 256) {
+		PlayerShip.Thrust(0.15f);
+	      }
+	  }
+	}
+	break;
+#endif
+
       case SDL_USEREVENT:	      
 	if(gMsgTimeLeft > 0) gMsgTimeLeft-=5;
 	if(gMsgTimeLeft < 0) gMsgTimeLeft = 0;
@@ -551,10 +548,10 @@ void PlayGame()
 	if(finalDead && finalDead > 2) finalDead--;
 
 	if (keystatebuffer[SDLK_RIGHT])
-	  PlayerShip.rotRight(1);
+	  PlayerShip.rotateRight();
 	
 	if (keystatebuffer[SDLK_LEFT])
-	  PlayerShip.rotLeft(1);
+	  PlayerShip.rotateLeft();
 	
 	if (keystatebuffer[SDLK_UP] && !dead) {
 	  PlayerShip.Thrust(0.15f);
@@ -631,7 +628,7 @@ void PlayGame()
 					 PlayerShip.VelX(),
 					 PlayerShip.VelY());
 	  dead++;
-	  ResetShip();
+	  PlayerShip.Reset();
 	  shipInvasion = 0;
 	  PlayerShip.SetDeadStick(1);
 	} else if(dead > 1) { 
@@ -642,9 +639,10 @@ void PlayGame()
 	FinishedLastCall = 1;
       }
       
-      if(BackdropOn && Ui::WIDTH() <= DMULTCONST(320) &&
-	 Ui::HEIGHT() <= DMULTCONST(200)) {
-	Gbackdrop.put(0, 0);
+      Ui::predraw();
+      if(BackdropOn && Ui::WIDTH() <= 640 &&
+	 Ui::HEIGHT() <= 400) {
+	Backdrops[0].putA(0, Ui::HEIGHT());
       } else {
 	Ui::clearscreen();
       }
@@ -654,8 +652,8 @@ void PlayGame()
       if(dead) {
 	int x, y, width, height;
 
-	width = ShipBitmaps[0].width(); 
-	height = ShipBitmaps[0].height();
+	width = Gbit[BIT_PLAYER].width(); 
+	height = Gbit[BIT_PLAYER].height();
 	x = int(ScreenLimits.GetX()) - width;
 	y = int(ScreenLimits.GetY()) - height;
 	x = x / 2;
@@ -665,7 +663,7 @@ void PlayGame()
 	flashShip++;
 	
 	if(flashShip >  12 && !finalDead) {
-	  ShipBitmaps[0].put(x, y);
+	  Gbit[BIT_PLAYER].put(x, y);
 	}
 	
 	if(finalDead) {
@@ -743,85 +741,87 @@ void ShowInfo()
 
 
 
-/////////////////////////////////////////////////
-// Show the Game Title... 
-void ShowTitle(int selected)
-{
-  const int xstart = 40, ystart = 90;
-  const int yinc = 10;
-  int cstring;
-  
-  char *tStringList[] =
-    { "SDL Sasteroids Version " VERSION,
-      "(I) INFORMATION",
-      //      "(H) HIGH SCORES",
-      "(S) START GAME",
-      "(Q) QUIT",
-      NULL
-    };
-      
-  titleScreen.put(0,0);
- 
-  for(cstring = 0; tStringList[cstring] != 0; cstring++) {
-    Ui::ShowTextColor(DMULTCONST(xstart),
-		      DMULTCONST(ystart+(yinc*cstring)),
-		      tStringList[cstring],
-		      255, 255, 255);
-    if(selected == cstring)
-      Ui::ShowTextColor(DMULTCONST(xstart)+1,
-			DMULTCONST(ystart+(yinc*cstring))+1,
-			tStringList[cstring],
-			255, 255, 0);
-  }
-  
-  Ui::updateScreen();
-}
 
-
-
-// ///////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 void showScoringInfo()
 {
     displayScreen(BINDIR "/graphics/back.bmp");	// TODO, rewrite this screen
 }
 
 
-// //////////////////////////////////////////////////////////////////////////
-// show high scores screen
-// void showScores( HiScore &s )
-// { 
-// TODO: Hi Score code rewrite
-// }
-
-
-
-//////////////////////////////////////////////////////////
-// Load ze Wavs!
-void LoadWavs()
-{
-#ifdef HAVE_SOUND
-  soundSamples[SND_BOOM_A] = Mix_LoadWAV(BINDIR "/sounds/boom1.wav");
-  soundSamples[SND_BOOM_B] = Mix_LoadWAV(BINDIR "/sounds/boom2.wav");
-  soundSamples[SND_BOOM_C] = Mix_LoadWAV(BINDIR "/sounds/shipexplode.wav");
-  soundSamples[SND_FIRE]   = Mix_LoadWAV(BINDIR "/sounds/zap.wav");
-  soundSamples[SND_WARP]   = Mix_LoadWAV(BINDIR "/sounds/warp.wav");
-  soundSamples[SND_ENEMY]  = Mix_LoadWAV(BINDIR "/sounds/flash.wav");
-  soundSamples[SND_POWERUP] = Mix_LoadWAV(BINDIR "/sounds/powerup.wav");
-  soundSamples[SND_ENGINE] = Mix_LoadWAV(BINDIR "/sounds/engine.wav");
-#endif
-}
-
-
 /////////////////////////////////////////////////////////
-// Initialize the System
-// 
+// Initialize the System 
 void InitializeSDL()
 {
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0) {
-    cerr << "Couldn't initialize SDL!" << endl;
-    exit(-1);
+  // Init SDL Video: 
+  {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+      cerr << "Couldn't initialize video!" << endl;
+      exit(-1);
+    }
+    atexit (SDL_Quit);
+  }
+
+  // Init SDL Audio: 
+  { 
+    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+      cerr << "Couldn't initialize audio!" << endl;
+      exit(-1);
+    }
+    
+    atexit (SDL_Quit);
   }
   
+  // Init SDL Timer: 
+  { 
+    if (SDL_Init(SDL_INIT_TIMER) < 0) {
+      cerr << "Could'nt initialize timer!" << endl;
+      exit(-1);
+    }
+    
+    atexit (SDL_Quit);
+  }
+
+  // Init joystick:
+  {
+    use_joystick = 0;
+    num_joysticks = 0;
+    
+#ifdef HAVE_JOYSTICK
+    use_joystick = 1; 
+    
+    if (SDL_Init(SDL_INIT_JOYSTICK) < 0) {
+      cerr << "Couldn't initialize joystick." << endl;
+      
+      use_joystick = 0;
+    }
+    else
+      {
+	/* Look for joysticks: */
+	
+	num_joysticks = SDL_NumJoysticks();
+	
+	if (num_joysticks <= 0) {
+	  cerr << "No joysticks available." << endl;
+	  
+	  use_joystick = 0;
+	}
+	else
+	  {
+	    /* Open joystick: */
+	    
+	    js = SDL_JoystickOpen(0);
+	    
+	    if (js == NULL) {
+	      cerr << "Couldn't open joystick 1." << endl;
+	      
+	      use_joystick = 0;
+	    }
+	  }
+      }
+#endif
+  }
+
   atexit(SDL_Quit);
 }
 
@@ -841,6 +841,22 @@ void HandleCommandLine(int argc, char** argv)
 }
 
 
+///////////////////////////////////////////////////////////
+// Actions for the main menu
+
+void MainMenuQuit(int* done) 
+{
+  *done = 1;
+}
+
+
+void MainMenuPlay(int* done) 
+{
+  PlayGame();
+}
+
+
+
 
 /////////////////////////////////////////////////////////
 // Main Program Starts Here 
@@ -850,18 +866,30 @@ int main(int argc, char *argv[])
   char c;
   int done = 0, dirty = 1, mode = 1, menu = 1;
   SDL_Event event;
+
+  
+  char *tStringList[] =
+    { "SDL Sasteroids Version " VERSION,
+      "INFORMATION",
+      // "HIGH SCORES",
+      "START GAME",
+      "QUIT",
+      NULL
+    };
   
   srand((unsigned int) time(NULL));
+
   
   InitializeSDL();
+
+
   HandleCommandLine(argc, argv);
   InitializeHiScores();
 
 
 #ifdef HAVE_SOUND
   if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024)==-1) {
-    cout << "No sound? Ieeyayayyaaaa: " << Mix_GetError() << endl;
-    exit(-1);
+    throw "Couldn't initialize sound";
   }
 
   Mix_AllocateChannels(16);
@@ -872,135 +900,38 @@ int main(int argc, char *argv[])
   FastMath::init(1); 
   Ui::init();
   SetupObjArray();
+
+  cout << "Loading Bitmaps" << endl;
   LoadBitmaps();
-  ShowTitle(menu);
+  cout << "done." << endl;
+  
   LoadWavs();
 
-  while (!done) {
-    dirty = 0;
-    c = 0;
-    
-    while (SDL_PollEvent(&event)) {
-      switch (event.type) {
+  IntegerDisplay::initialize();
 
-      case SDL_VIDEORESIZE:
-	ScreenLimits.SetXY(DDIVCONST(event.resize.w), 
-			   DDIVCONST(event.resize.h));
-	Ui::resync(event.resize.w, event.resize.h);
-	break;
-	
-      case SDL_QUIT:
-	exit(0);
-	break;
+  SBitmap mouse(GAMEDIR "/graphics/mouse.png");
+  GraphicsMenu MainMenu(&mouse, &titleScreen, tStringList);
 
-      case SDL_KEYDOWN:
-	if (event.key.keysym.sym == SDLK_f) {
-	  Ui::FullScreen(); dirty = 1;
-	}
+  /* Run the Main Menu */
 
-	if (event.key.keysym.sym == SDLK_h) {
-	  c = 'h';
-	  PlaySound(SND_BOOM_C);
-	}
-
-	if (event.key.keysym.sym == SDLK_i) {
-	  c = 'i';
-	  PlaySound(SND_BOOM_C);
-	}
-
-	if (event.key.keysym.sym == SDLK_q) {
-	  c = 'q';
-	  PlaySound(SND_BOOM_C);
-	}
-
-	if (event.key.keysym.sym == SDLK_s) {
-	  c = 's';
-	  PlaySound(SND_BOOM_C);
-	}
-
-	if (event.key.keysym.sym == SDLK_RETURN) {
-	  PlaySound(SND_BOOM_C);
-	  if(menu == 1) c = 'i';
-	  //	  if(menu == 2) c = 'h';
-	  if(menu == 2) c = 's';
-	  if(menu == 3) c = 'q';
-	}
-	
-	if (event.key.keysym.sym == SDLK_DOWN) 
-	  if(menu < 3 && mode == 1) {
-	    PlaySound(SND_FIRE);
-	    menu++, dirty = 1;
-	  } else if(mode == 1) {
-	    PlaySound(SND_FIRE);
-	    menu = 1, dirty = 1;
-	  }
-	
-	if (event.key.keysym.sym == SDLK_UP) 
-	  if(menu > 1 && mode == 1) {
-	    PlaySound(SND_FIRE);
-	    menu--, dirty = 1;
-	  } else if(mode == 1) {
-	    PlaySound(SND_FIRE);
-	    menu = 3; dirty = 1;
-	  }
-	
-	if (mode != 1)
-	  mode = 1, dirty = 1;
-	break;
-      case SDL_ACTIVEEVENT:
-	dirty = 1;	// Redraw the screen.....
-      }
-    }
-    
-    
-    switch (c) {
-    case 'h':
-      mode = 3;
-      dirty = 1;
-      break;
-      
-    case 'i':
-      mode = 2;
-      dirty = 1;
-      break;
-      
-    case 's':
-      mode = 1;
-      dirty = 1;
-      PlayGame();
-      SaveHiScores();
-      break;
-      
-    case 'q':
-    case 'Q':
-      done = 1;
-      break;
-    }
-
-    
-    if (dirty) {
-      switch (mode) {
-      case 1:
-	ShowTitle(menu);
-	break;
-      case 2:
-	ShowInfo();
-	break;
-      case 3:
-	showScoringInfo();
-	break;
-      }
-    }
-    
-  }
+  MainMenu.setAction(2, MainMenuPlay);
+  MainMenu.setAction(3, MainMenuQuit);
   
+  MainMenu.enableSound(SND_FIRE);
+  MainMenu.setTopPad(26.0f);
+  MainMenu.setMinSelectable(1);
+  MainMenu.RunMenu();
 
 #ifdef HAVE_SOUND
   Mix_CloseAudio();
 #endif 
 
+#ifdef HAVE_JOYSTICK
+  SDL_JoystickClose(0);
+#endif
+
   // shutdown & restore text mode
   Ui::restore();
-  
+ 
   return 0;
 }

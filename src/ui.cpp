@@ -31,15 +31,13 @@ void Ui::init()
   SDL_ShowCursor(0);
   
   if (TTF_Init() < 0) {
-    fprintf(stderr, "Couldn't initialize TTF library!\n");
-    exit(-1);
+    throw "Couldn't initialize True type font library";
   }
   atexit(TTF_Quit);
-  
-  myfont = TTF_OpenFont(BINDIR "/fonts/Wargames.ttf", DMULTCONST(9));
+
+  myfont = TTF_OpenFont(BINDIR "/fonts/nicefont.ttf", 24);
   if (!myfont) {
-    fprintf(stderr, "Couldn't grab TTF font!\n");
-    exit(-1);
+    throw "Couldn't open font file";
   }
 
   TTF_SetFontStyle(myfont, TTF_STYLE_NORMAL);
@@ -50,7 +48,7 @@ void Ui::init()
 
 void Ui::restore()
 {
-    TTF_CloseFont(myfont);
+  TTF_CloseFont(myfont);
 }
 
 
@@ -60,14 +58,14 @@ void Ui::restore()
 void Ui::CenterText(char* msg)
 {
   int y, x, height, width;
-
+  
   TTF_SizeText(myfont, msg, &width, &height);
-
+  
   x = WIDTH() - width;
   y = HEIGHT() - height;
   x /= 2;
   y /= 2;
-
+  
   ShowText(x, y, msg);
 }
 
@@ -75,12 +73,12 @@ void Ui::CenterText(char* msg)
 void Ui::CenterXText(int y, char* msg)
 {
   int x, height, width;
-
+  
   TTF_SizeText(myfont, msg, &width, &height);
-
+  
   x = WIDTH() - width;
   x /= 2;
-
+  
   ShowText(x, y, msg); 
 }
 
@@ -93,24 +91,38 @@ void Ui::ShowText(int x, int y, char *msg)
 
 void Ui::ShowTextColor(int x, int y, char *msg, char r, char g, char b)
 {
-    SDL_Surface *surface = 0;
-    SDL_Rect dest;
-    SDL_Color mycolor = {
+  /* Note: for compatibility with old code, new code should create bitmaps,
+     and cache the results.... */
+
+  SDL_Surface *surface = 0;
+  SDL_Rect dest;
+  SDL_Color mycolor = {
     r, g, b};
 
-    dest.x = x;
-    dest.y = y;
+  dest.x = x;
+  dest.y = y;
 
 #ifndef QUICK_FONTS
-    surface = TTF_RenderText_Blended(myfont, msg, mycolor);
+  surface = TTF_RenderText_Blended(myfont, msg, mycolor);
 #else
-    surface = TTF_RenderText_Solid(myfont, msg, mycolor);
+  surface = TTF_RenderText_Solid(myfont, msg, mycolor);
 #endif
 
-    if(!surface) return;
+  if(!surface) return;
 
-    SDL_BlitSurface(surface, NULL, myscreen, &dest);
-    SDL_FreeSurface(surface);
+  SBitmap text(surface);
+  text.putA(float(x), Ui::HEIGHT() - float(y));
+  
+}
+
+
+SDL_Surface* Ui::get_text(char* msg, char r, char g, char b)
+{
+  SDL_Surface* surface = 0;
+  SDL_Color mycolor = { r, g, b};
+
+  surface = TTF_RenderText_Blended(myfont, msg, mycolor);
+  return surface;
 }
 
 
@@ -118,39 +130,48 @@ void Ui::resync(int newX, int newY)
 {
   Uint32 flags;
 
-  flags = SDL_HWSURFACE | SDL_ANYFORMAT | WANT_RESIZE | WANT_FULLSCREEN;
+#ifdef WANT_OPENGL
+  SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 5 );
+  SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 5 );
+  SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 5 );
+  SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
+  SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+
+  flags = SDL_OPENGL | SDL_ANYFORMAT | WANT_FULLSCREEN;
   if(wantFullScreen) flags |= SDL_FULLSCREEN;
   myscreen = SDL_SetVideoMode(newX, newY, 16, flags);
 
   if(!myscreen) {
-    cerr << "Resize Failed, Bailing out." << endl;
-    exit(-1);
+    throw "Resize Failed, Bailing out.";
   }
 
-  switch(myscreen->format->BytesPerPixel) {
-  case 1:
-    pixelDriver = g_setpixelB1;
-    break;
-  case 2:
-    pixelDriver = g_setpixelB2;
-    break;
-  case 3:
-    pixelDriver = g_setpixelB3;
-    break;
-  case 4:
-      pixelDriver = g_setpixelB4;
-      break;
-  default:
-    cerr << "Unsupported pixel depth!" << endl;
-    exit(-1);
-  } 
+  predraw();
+
+#else
+  
+  flags = SDL_HWSURFACE | SDL_ANYFORMAT | WANT_FULLSCREEN;
+  if(wantFullScreen) flags |= SDL_FULLSCREEN;
+  myscreen = SDL_SetVideoMode(newX, newY, 16, flags);
+
+  if(!myscreen) {
+    throw "Resize Failed, Bailing out.";
+  }
+
+#endif
+
+
+
 }
 
 
 // update physical screen from virtualScn
 void Ui::updateScreen()
 {
-    SDL_Flip(myscreen);
+#ifdef WANT_OPENGL
+  SDL_GL_SwapBuffers();
+#else
+  SDL_Flip(myscreen);
+#endif
 }
 
 
@@ -318,6 +339,24 @@ void setpixel(SDL_Surface *visual, int x, int y, char r, char g, char b)
 }
 
 
+
+void Ui::predraw() {
+#ifdef WANT_OPENGL
+  glEnable(GL_TEXTURE_2D);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
+  
+  glLoadIdentity();
+  glViewport(0, 0, 640, 400);
+  glOrtho(0, 640, 0, 400, -1, 1);
+#endif
+}
+  
+
+
 void GraphicsStartDraw(SDL_Surface* visual)
 {
   if(SDL_MUSTLOCK(visual))
@@ -328,4 +367,62 @@ void GraphicsStopDraw(SDL_Surface* visual)
 {
   if(SDL_MUSTLOCK(visual))
     SDL_UnlockSurface(visual);
+}
+
+
+
+
+
+//////////////////////////////////////
+// Integer Display
+
+SBitmap *IntegerDisplay::numbers;
+
+
+void IntegerDisplay::initialize() 
+{
+  int i;
+  char sstring[2] = { 0, 0 };
+  numbers = new SBitmap[10];
+
+  for(i = 0; i < 10; i++) {
+    SDL_Surface* tmp;
+
+    sstring[0] = i + '0';
+    tmp = Ui::get_text(sstring, 255, 255, 255);
+    numbers[i].LoadSurface(tmp);
+    SDL_FreeSurface(tmp);
+  }
+}
+
+
+void IntegerDisplay::finish() 
+{
+  delete [] numbers;
+}
+
+
+void IntegerDisplay::display_integer(int num, float x, float y) 
+{
+  int tenPower = 1;
+  int tnum;
+  float cx;
+
+
+  if(num < 0) num = 0;
+  while(tenPower <= num) tenPower *= 10;
+
+  cx = x;
+  do {
+    tnum = num % tenPower;
+    
+    if(tenPower != 1) tenPower = tenPower / 10;
+    tnum = tnum / tenPower;
+    if(tnum < 0) tnum = 0;
+    if(tnum > 9) tnum = 9;
+    
+    numbers[tnum].putA(cx, y);
+    cx += numbers[tnum].width();
+
+  } while(tenPower > 1);
 }

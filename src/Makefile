@@ -5,9 +5,9 @@
 CC = g++
 INCLUDE = -I/usr/include
 OPTIMIZE = -fomit-frame-pointer -O2 -ffast-math -funroll-loops -march=pentium -mcpu=pentium
-OPTS = -Wall -pipe
-GDIR=\"$(GAMEDIR)\"
-#GDIR=\"/usr/share/sasteroids/\"
+OPTS = -Wall -pipe -O3 
+#GDIR=\"$(GAMEDIR)\"
+GDIR=\"/usr/share/sasteroids/\"
 DEFINES = -DGAMEDIR=$(GDIR)
 
 
@@ -15,15 +15,19 @@ DEFINES = -DGAMEDIR=$(GDIR)
 #CFLAGS	 = -Wall $(INC) $(DEBUG) $(OPTS) 
 #DEBUG = -g -pg
 
+# otherwise
+CFLAGS = -Wall $(INC) $(OPTS)
+
+
 #LFLAGS   = -static
 
 SASTEROIDS = sasteroids
-SASTEROIDS_O = fastmath.o obj.o sasteroids.o sbitmap.o ui.o ships.o
+SASTEROIDS_O = fastmath.o obj.o sasteroids.o sbitmap.o ui.o ships.o screenobject.o player.o asteroid.o menu.o
 
-LIBS = `sdl-config --libs` -lSDL_ttf -lfreetype -lSDL_mixer
+LIBS = `sdl-config --libs` -lSDL_ttf -lfreetype -lSDL_mixer -lSDL_image -lGL -lSDL_gfx
 
 $(SASTEROIDS): $(SASTEROIDS_O)
-	g++ -Wall -o $(SASTEROIDS) $(SASTEROIDS_O) $(DEFINES) $(DEBUG) $(LIBS)
+	g++ -Wall -o $(SASTEROIDS) $(SASTEROIDS_O) $(DEFINES) $(DEBUG) $(OPTS) $(CFLAGS) $(LIBS)
 
 
 .cpp.o:

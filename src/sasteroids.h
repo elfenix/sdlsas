@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
+
+
 #include <math.h>
 #include <time.h>
 #include <ctype.h>
@@ -16,6 +18,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <SDL/SDL_image.h>
 
 #include "gameconf.h"
 
@@ -38,7 +41,11 @@ using namespace std;
 #include <glob.h>
 #endif
 
-#define NUM_BITMAPS 14
+#define NUM_BITMAPS 17
+#define NUM_BACKS   5
+
+
+
 #define SMALLAST 0
 #define MEDAST   1
 #define BIGAST   2
@@ -51,24 +58,33 @@ using namespace std;
 #define P_WENG   9
 #define P_WTHR   10
 #define ESMAST   11
-#define P_SHLD   12
-#define P_SRCG   13
+#define P_SHLD      12
+#define P_SRCG      13
+#define BIT_PLAYER  14
+#define BIT_PLAYERT 15
+#define BIT_SPINNER 16
+
 #define PLAYERSHIP 253
 #define SHIP_BUL 254
 #define P_TYPE   8
 
 
-#include "fastmath.h"
-#include "vector.h"
-#include "ui.h"
-#include "sbitmap.h"
-#include "fastmath.h"
-#include "obj.h"
-#include "sasteroids.h"
 
-// load 'file' from Gcf into bitmap b.
-void LoadBitmap( SBitmap &b, const char* file);
-int LevelOdds(int lvlMax, int maxChance = 1, int lvlStep = 1);
+#ifdef HAVE_JOYSTICK
+#include <SDL/SDL_joystick.h> 
+#define JOY_A 0
+#define JOY_B 1
+#define JOY_C 2
+#define JOY_D 3
+#define JOY_E 4
+#define JOY_X 0
+#define JOY_Y 1
+#endif
+
+
+
+
+
 
 
 const int SND_BOOM_A = 0;
@@ -95,28 +111,37 @@ const float MassEnemy     = 1.0f;
 const float MassBullet    = 1.0f / 8.0f;
 const float MassSpinner   = 2.0f;
 
-const float BUL_SPEED     = 7.5f;
+const float BUL_SPEED     = 15.0f;
 
-const float BigAstMax     = 2.0f;
-const float MedAstMax     = 6.0f;
-const float SmallAstMax   = 10.0f;
+const float BigAstMax     = 4.0f;
+const float MedAstMax     = 12.0f;
+const float SmallAstMax   = 20.0f;
+
+const int MAX_OBJECTS = 256;
+const int SHIPTURNS = 32;
+const int TURNANGLE = 256/SHIPTURNS;
+const int EXPLODE_TYPE = 255;
+
 
 class SBitmap;
 class Ship;
-class PShip;
+class ScreenObject;
+class Player;
+class Vector;
 
+extern SBitmap morphBitmaps[10];
+extern SBitmap spinnerBitmaps[32];
+extern Vector ScreenLimits;
 extern SBitmap Gbit[NUM_BITMAPS];
 extern SBitmap extraLives;
-extern SBitmap Gbackdrop;
+extern SBitmap Backdrops[NUM_BACKS];
 extern SBitmap titleScreen;
 extern int ClassicMode;
-extern PShip PlayerShip;
+extern Player PlayerShip;
 
 extern int score, Glevel, numasts, oldscore;
 extern int BackdropOn, wantFullScreen;
 
-extern int canShootThree, shieldRecharge;
-extern int smartZapper;
 extern int deathTimer;
 
 extern int eeggU, eeggD, eeggL, eeggR, eeggS;
@@ -128,7 +153,7 @@ extern char globalMessage[256];
 extern int gMsgTimeLeft;
 
 
-#ifdef HAV_SOUND
+#ifdef HAVE_SOUND
 extern Mix_Chunk *soundSamples[NUM_SOUNDS];
 #endif
 
@@ -141,6 +166,22 @@ void CleanUpStuff();
 void GenerateAsteroids();
 int MoveObjects();
 void LoadBitmaps();
+void LoadWavs();
 void MakeGlobalMessage(char* Tstring);
+void LoadBitmap( SBitmap &b, const char* file);
+int LevelOdds(int lvlMax, int maxChance = 1, int lvlStep = 1);
+
+
+#include "fastmath.h"
+#include "vector.h"
+#include "ui.h"
+#include "sbitmap.h"
+#include "fastmath.h"
+#include "screenobject.h"
+#include "obj.h"
+#include "sasteroids.h"
+#include "menu.h"
+
+
 
 #endif
