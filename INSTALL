@@ -12,6 +12,8 @@ Requirements:
 		SDL 1.2+
 		SDL_ttf 
 		SDL_mixer
+		SDL_image
+		Either SDL_gfx or OpenGL
 	
 	Everything else should work standard out-of-the-box.
 

@@ -277,7 +277,6 @@ void SBitmap::LoadImage(char* file)
   SDL_Surface* mySurface;
 
   mySurface = IMG_Load(file);
-  cout << "Trying to load: " << file << endl;
   if(!mySurface) {
     throw "[Fatal] Could not load bitmap";
   }

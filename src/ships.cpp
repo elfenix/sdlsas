@@ -216,7 +216,7 @@ void Enemy::tick()
     temp.SetXY( PlayerShip.GetX()-GetX()+PlayerShip.VelX(), 
 		PlayerShip.GetY()-GetY()+PlayerShip.VelY());  
     temp /= temp.length();
-    temp *= 2.5f;
+    temp *= 5.0f;
     
     ObjectList[j] = new ScreenObject;
     ObjectList[j]->restore();

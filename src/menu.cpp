@@ -70,7 +70,7 @@ void GraphicsMenu::enableSound(int soundNum)
 
 void GraphicsMenu::RunMenu() 
 {
-  int done = 0, dirty = 0, playsound = 0;
+  int done = 0, dirty = 0, playsound = 0, tX, tY;
   int j, execute = 0;
   SDL_Event event;
   float start_height, start_width;
@@ -99,6 +99,9 @@ void GraphicsMenu::RunMenu()
 
   }
 
+  SDL_GetMouseState(&tX, &tY);
+  mouseX = float(tX);
+  mouseY = float(tY);
 
   while(!done) {
     execute = 0;

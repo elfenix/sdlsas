@@ -5,8 +5,16 @@ GAMEDIR=/usr/share/sasteroids/
 BINDIR=/usr/bin/
 MANDIR=/usr/man
 
+# For OpenGL
+EXTRA_DEFINES=-DWANT_OPENGL
+EXTRA_LIBS=-lGL
+
+# For SDL_gfx
+# EXTRA_DEFINES=
+# EXTRA_LIBS=-lSDL_gfx
+
 all: 
-	make GAMEDIR=$(GAMEDIR) -C src
+	make GAMEDIR=$(GAMEDIR) EXTRA_DEFINES=$(EXTRA_DEFINES) EXTRA_LIBS=$(EXTRA_LIBS) -C src
 
 install: 
 	make GAMEDIR=$(GAMEDIR) -C src
@@ -21,7 +29,7 @@ install:
 	install --mode=644 sounds/*.wav $(GAMEDIR)/sounds/
 	install --mode=644 graphics/*.png $(GAMEDIR)/graphics
 	install --mode=644 graphics/sprite/*.png $(GAMEDIR)/graphics
-	install --mode=644 graphics/backdrops/* $(GAMEDIR)/graphics
+	install --mode=644 graphics/backdrops/*.jpg $(GAMEDIR)/graphics
 
 	make GAMEDIR=$(GAMEDIR) -C src
 

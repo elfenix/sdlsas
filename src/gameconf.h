@@ -44,10 +44,6 @@
 // Run in fullscreen mode by default? (Comment to disable)
 // #define WANT_FULLSCREEN SDL_FULLSCREEN
 
-// Use OpenGL, or use SDL_gfx (OpenGL is faster on supported systems!)
-#define WANT_OPENGL
-
-
 
 #ifndef WANT_FULLSCREEN
 #define WANT_FULLSCREEN 0 

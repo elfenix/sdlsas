@@ -162,20 +162,12 @@ void sounddisplay()
 // botline - modified from xasteroids
 void botline()
 {
-    char text[256] = { 0 };
     int y, x, x1;
 
-    y = 10;
-
-    //    sprintf(text, "Score:%7d", score);
-    //    Ui::ShowText(10, 10, text);
     IntegerDisplay::display_integer(score, 10.0f, float(Ui::HEIGHT()) - 2.0f);
+    IntegerDisplay::display_integer(Glevel, Ui::WIDTH()- 40.0f, 20.0f);
 
-
-    sprintf(text, "Level:%7d", Glevel);
-    x1 = Ui::WIDTH() - 120;
-    Ui::ShowText(x1, Ui::HEIGHT()-19, text);
-
+    y = Ui::HEIGHT() - 20;
     x1 = Ui::WIDTH() - 205;
     if(!ClassicMode) { 
       // Draw weapon + shield energy meter.
@@ -458,86 +450,6 @@ void PlayGame()
 	break;
       
 
-
-#ifdef HAVE_JOYSTICK
-
-      case SDL_JOYBUTTONDOWN:
-	if (event.type == SDL_JOYBUTTONDOWN) {
-	  if (event.jbutton.button == JOY_E && !pause && !dead) {
-	    PlaySound(SND_WARP);
-	    PlayerShip.Hyper();
-	  }
-	}
-	
-	if (event.type == SDL_JOYBUTTONDOWN) {
-	  if (event.jbutton.button == JOY_C && !pause) {
-	    PlayerShip.Fire();
-	  }
-	}
-
-	if (event.type == SDL_JOYBUTTONDOWN) {
-	  if (event.jbutton.button == JOY_A && !dead) {
-	    PlayerShip.Thrust(0.15f);
-#ifdef HAVE_SOUND
-	    if(!chOn) {
-	      Mix_PlayChannel(0, soundSamples[SND_ENGINE], -1);
-	      chOn = 1;
-	    }
-#endif
-	  } else {
-#ifdef HAVE_SOUND
-	    Mix_ExpireChannel(0, 10);
-	    chOn = 0;
-#endif	  
-	  }
-	}
-	
-	if (event.type == SDL_JOYBUTTONDOWN) {
-	  if (event.jbutton.button == JOY_B) {
-	    PlayerShip.Brake();
-	  }
-	}
-	
-	if (event.type == SDL_JOYBUTTONDOWN) {
-	  if (event.jbutton.button == JOY_D) {
-	    PlayerShip.shieldOn();
-	  }
-	}
-	
-	if (event.type == SDL_JOYBUTTONUP) {
-	  if (event.jbutton.button == JOY_D) {
-	    PlayerShip.shieldOff();
-	  }
-	}
-	break;
-	
-      case SDL_JOYAXISMOTION:
-	if (event.type == SDL_JOYAXISMOTION) {
-	  if (event.jaxis.axis == JOY_X) {
-	    if (event.jaxis.value < -256) {
-	      PlayerShip.rotateLeft(); 
-	    }
-	    else
-	      if (event.jaxis.value > 256) {
-		PlayerShip.rotateRight();
-	      }
-	  }
-	}
-	
-	if (event.type == SDL_JOYAXISMOTION) {
-	  if (event.jaxis.axis == JOY_Y && !dead) {
-	    if (event.jaxis.value > -256) {
-	      PlayerShip.shieldOn();
-	    }
-	    else
-	      if (event.jaxis.value < 256) {
-		PlayerShip.Thrust(0.15f);
-	      }
-	  }
-	}
-	break;
-#endif
-
       case SDL_USEREVENT:	      
 	if(gMsgTimeLeft > 0) gMsgTimeLeft-=5;
 	if(gMsgTimeLeft < 0) gMsgTimeLeft = 0;
@@ -589,9 +501,10 @@ void PlayGame()
 	  PlayerShip.addRegPower(1);
 	}
 
-
+	
 	if(!(rand()%LevelOdds(32, 4050, 1)) || (shipInvasion && !(rand()%50))) {
-	  if(Glevel > 6 && !(rand()%15) && !shipInvasion) shipInvasion = 11;
+	
+	  if(Glevel > 6 && !(rand()%15) && !shipInvasion) shipInvasion = 10;
 	  if(shipInvasion) shipInvasion--;
 	  if(shipInvasion < 0) shipInvasion = 0;
 	  int j;
@@ -642,7 +555,7 @@ void PlayGame()
       Ui::predraw();
       if(BackdropOn && Ui::WIDTH() <= 640 &&
 	 Ui::HEIGHT() <= 400) {
-	Backdrops[0].putA(0, Ui::HEIGHT());
+	Backdrops[Glevel%NUM_BACKS].putA(0, Ui::HEIGHT());
       } else {
 	Ui::clearscreen();
       }
@@ -715,28 +628,7 @@ int selectGame()
 // //////////////////////////////////////////////////////////////////////////
 void ShowInfo()
 {
-    displayScreen(BINDIR "/graphics/back.bmp");
-    int x, y;
 
-    x = 0;
-    y = 0;
-
-    Ui::CenterXText( y + 0, "SASTEROIDS");
-    Ui::CenterXText( y + 40, "TO PLAY THE GAME");
-   
-    Ui::CenterXText( y + 80, "-------------------------");
-    Ui::CenterXText( y + 100, " LEFT ARROW Turn ship Left");
-    Ui::CenterXText( y + 120, " RIGHT ARRW Turn ship Right");
-    Ui::CenterXText( y + 140, " SPACE Fire");
-    Ui::CenterXText( y + 160, " UP ARROW Thrust ");
-    Ui::CenterXText( y + 180, " DOWN ARROW Shield");
-    Ui::CenterXText( y + 200, " LEFT ALT Hyperspace");
-    Ui::CenterXText( y + 220, " F Toggle Full Screen");
-    Ui::CenterXText( y + 240, " P Pause");
-    Ui::CenterXText( y + 260, " -/+ Volume Down/Up");
-    Ui::CenterXText( y + 280, " Q - Quit");
-
-    Ui::updateScreen();
 }
 
 
@@ -856,6 +748,67 @@ void MainMenuPlay(int* done)
 }
 
 
+void MainMenuInformation(int* done)
+{
+  char *tStringList[] =
+    { "SDL Sasteroids Version " VERSION,
+      " ",
+      " LEFT ARROW Turn ship Left",
+      " RIGHT ARRW Turn ship Right",
+      " SPACE Fire",
+      " UP ARROW Thrust ",
+      " DOWN ARROW Shield",
+      " LEFT ALT Hyperspace",
+      " F Toggle Full Screen",
+      " P Pause",
+      " -/+ Volume Down/Up",
+      " Q - Quit",
+      " ",
+      "Return to Game",
+      NULL};
+
+  SBitmap mouse(GAMEDIR "/graphics/mouse.png");
+  GraphicsMenu MainMenu(&mouse, &titleScreen, tStringList);
+  
+  /* Run the Main Menu */
+  
+  MainMenu.setAction(13, MainMenuQuit);
+  
+  MainMenu.enableSound(SND_FIRE);
+  MainMenu.setTopPad(26.0f);
+  MainMenu.setMinSelectable(13);
+  MainMenu.RunMenu();
+}
+
+
+void MainMenuCredits(int *done)
+{
+  char *tStringList[] =
+    {
+      "SDL Sasteroids Version " VERSION,     // 0
+      " ",                                   // 1
+      " ",                                   // 2
+      "(C)opyright 1991 - 2003",             // 3
+      "Contributers:",                       // 4
+      "Andrew McCall, Brad Pitzel, Digisin", // 5
+      " ",                                   // 6
+      "Backdrops:",                          // 7
+      "From Nasa Image Collection",          // 8
+      " ",                                   // 9
+      "Return to Game",                      // 10
+      NULL
+    };
+
+  SBitmap mouse(GAMEDIR "/graphics/mouse.png");
+  GraphicsMenu MainMenu(&mouse, &titleScreen, tStringList);
+  
+  MainMenu.setAction(10, MainMenuQuit);
+
+  MainMenu.enableSound(SND_FIRE);
+  MainMenu.setTopPad(26.0f);
+  MainMenu.setMinSelectable(10);
+  MainMenu.RunMenu();
+}
 
 
 /////////////////////////////////////////////////////////
@@ -863,15 +816,10 @@ void MainMenuPlay(int* done)
 // Starts all the tasks, etc...
 int main(int argc, char *argv[])
 {
-  char c;
-  int done = 0, dirty = 1, mode = 1, menu = 1;
-  SDL_Event event;
-
-  
   char *tStringList[] =
     { "SDL Sasteroids Version " VERSION,
       "INFORMATION",
-      // "HIGH SCORES",
+      "CREDITS",
       "START GAME",
       "QUIT",
       NULL
@@ -881,8 +829,6 @@ int main(int argc, char *argv[])
 
   
   InitializeSDL();
-
-
   HandleCommandLine(argc, argv);
   InitializeHiScores();
 
@@ -901,12 +847,8 @@ int main(int argc, char *argv[])
   Ui::init();
   SetupObjArray();
 
-  cout << "Loading Bitmaps" << endl;
   LoadBitmaps();
-  cout << "done." << endl;
-  
   LoadWavs();
-
   IntegerDisplay::initialize();
 
   SBitmap mouse(GAMEDIR "/graphics/mouse.png");
@@ -914,8 +856,10 @@ int main(int argc, char *argv[])
 
   /* Run the Main Menu */
 
-  MainMenu.setAction(2, MainMenuPlay);
-  MainMenu.setAction(3, MainMenuQuit);
+  MainMenu.setAction(1, MainMenuInformation);
+  MainMenu.setAction(2, MainMenuCredits);
+  MainMenu.setAction(3, MainMenuPlay);
+  MainMenu.setAction(4, MainMenuQuit);
   
   MainMenu.enableSound(SND_FIRE);
   MainMenu.setTopPad(26.0f);

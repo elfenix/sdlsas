@@ -36,7 +36,7 @@ void Asteroid::create_explosion()
 
 int Asteroid::CreateAsteroid(float x, float y, float xv, float yv, int type)
 {
-    ScreenObject *newobject;
+    ScreenObject *newobject = 0;
     int openObject;
 
     openObject = GetOpenObject();
@@ -288,15 +288,15 @@ void LargeAsteroid::Explode(int killedby)
 		  FastMath::sin(rA1) * 2.0f + vx,
 		  FastMath::cos(rA1) * 2.0f + vy, MEDAST );
   
-  //  if(!(rand()%LevelOdds(16,7))) { 
+  if(!(rand()%LevelOdds(16,7))) { 
     int j = GetOpenObject();
     ObjectList[j] = new Spinner;
     ObjectList[j]->SetXY(px, py);
     ObjectList[j]->SetVel(FastMath::sin(rA2)*2.0f + vx, 
 			  FastMath::cos(rA2)*2.0f + vy);
-			  /*			  } else { 
+  } else { 
     CreateAsteroid( px, py, 
 		    FastMath::sin(rA2) * 2.0f + vx,
 		    FastMath::cos(rA2) * 2.0f + vy, MEDAST );
-		     }    */
+  }    
 }
