@@ -25,6 +25,7 @@ Ship::Ship() : ScreenObject()
 
   size.SetXY(14,14);
   setsize(8);
+  setmass(MassShip);
   SetBitmap();
 }
 
@@ -102,7 +103,7 @@ void Ship::Reset()
   pos = 0; SetBitmap(); angle = 0; bounce = 0;
   maxPower = 220;
   wPower = maxPower + (2*Glevel);                // As level goes up, 
-  rechargeRate = 1 + (int(0.5f*float(Glevel)));  // so does weapon. 
+  rechargeRate = 2 + (int(0.5f*float(Glevel)));  // so does weapon. 
   shieldMax = 280;
   shieldTimeLeft = shieldMax;
   shieldStatus = 0;
@@ -188,27 +189,21 @@ void Spinner::tick()
 	morphStage--;
 
     // Just for fun... mwahahhahahaha
-    if(isEvil && !ClassicMode) {
-      float ax, ay;
-      
-      ax = PlayerShip.GetX() - GetX();  // Find the distance.  
-      ay = PlayerShip.GetY() - GetY();
-      
-      ax = ax / 160;
-      ay = ay / 100;
-
-      if(ax < 0) ax -= 0.5f;
-      if(ax > 0) ax += 0.5f;
-      if(ay < 0) ay -= 0.5f;
-      if(ay > 0) ay += 0.5f;
- 
-      velocity.SetXY(ax, ay);  
-    } else {
-      if(!(rand()%100)) {
-	velocity.SetXY(velocity.GetX(), -velocity.GetY());
-      }
-    }
-     
+    
+    float ax, ay;
+    
+    ax = PlayerShip.GetX() - GetX();  // Find the distance.  
+    ay = PlayerShip.GetY() - GetY();
+    
+    ax = ax / 160;
+    ay = ay / 100;
+    
+    if(ax < 0) ax -= 0.5f;
+    if(ax > 0) ax += 0.5f;
+    if(ay < 0) ay -= 0.5f;
+    if(ay > 0) ay += 0.5f;
+    
+    velocity.SetXY(ax, ay);    
 
     wrapMoves = 1;
     SetBitmap();
@@ -322,6 +317,7 @@ Enemy::Enemy()
   objtype = ENEMY;
   mysize = 10;
   SetBitmap(&Gbit[ENEMY]);
+  setmass(5.0f/4.0f);
 }
 
 

@@ -33,7 +33,7 @@ Mix_Chunk *soundSamples[8];               // Sound!
 int G_use_backdrop = 0;
 
 // Global Game Play Variables.
-Ship PlayerShip;	                  // Info about player's ship.
+PShip PlayerShip;	                  // Info about player's ship.
 int score, Glevel, numasts, oldscore;     // scoring and level info
 int ClassicMode = 0;                      // classic mode?
 int BackdropOn = 1, wantFullScreen = 0;   // is the backdrop on?

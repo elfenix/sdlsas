@@ -67,16 +67,15 @@ void ScreenObject::tick()
     float vlimit;
 
     // Good enough for a game..
+    tchd = 0;
     position += velocity;
     velocity += accelleration;
 
     vlimit = velocity.lengthSqrd();
 
     if (vlimit > maxspeed) {
-	velocity -= accelleration;
-	accelleration.SetXY(0.0f, 0.0f);
-	velocity *= sqrt(maxspeed);
-	velocity /= sqrt(vlimit);
+      velocity /= sqrt(vlimit);
+      velocity *= sqrt(maxspeed);
     }
 
     // Look to see if we are visible...
@@ -243,7 +242,7 @@ int GetOpenObject()
 }
 
 
-// //////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////
 // Draw objects
 void DrawObjects()
 {
@@ -254,24 +253,6 @@ void DrawObjects()
     }
   }
 }
-
-
-///////////////////////////////////////////
-// Loop through and move every object. 
-void AllObjectsTick()
-{
-  for (int i = 0; i < MAX_OBJECTS; i++) {
-    if (ObjectList[i]) {
-      ObjectList[i]->tick();
-      
-      if (!ObjectList[i]->alive()) {
-	delete ObjectList[i];
-	ObjectList[i] = 0;     
-      }
-    }
-  }
-}
-
 
 
 ///////////////////////////////////////////////////////
@@ -385,7 +366,7 @@ void KillAsteroid(int number, int killedBy, bool killChildren = false)
 
 
 
-/////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 // Create an asteroid - does no checking of variables, just makes it
 int CreateAsteroid(float x, float y, float xv, float yv, int type)
 {
@@ -396,11 +377,12 @@ int CreateAsteroid(float x, float y, float xv, float yv, int type)
     openObject = GetOpenObject();
     if (openObject == -1)
 	return -1;
-    numasts++;
 
     newobject = new ScreenObject(type);
     if (!newobject)
 	return -1;
+
+    numasts++;
 
     if((type == SMALLAST && !(rand()%LevelOdds(30,3))) && !ClassicMode
        && (Glevel > 3))
@@ -420,15 +402,18 @@ int CreateAsteroid(float x, float y, float xv, float yv, int type)
     case BIGAST:
       newobject->SetSize(40, 40);
       newobject->setsize(20);
+      newobject->setmass(MassBigAst);
       break;
     case SMALLAST:
     case ESMAST:
       newobject->SetSize(10, 10);
       newobject->setsize(7);
+      newobject->setmass(MassSmallAst);
       break;
     case MEDAST:
       newobject->setsize(10);
       newobject->SetSize(20,20);
+      newobject->setmass(MassMedAst);
       break;
     }
 
@@ -520,102 +505,151 @@ void PowerUpF(int i)
 }
 
 
+//////////////////////////////////////////////////////////////
+// What to do when objects hit....
+void ObjectsHit(int i, int j, int& touched, int& crash)
+{
+  int t;
+
+  if(!ObjectList[i]->alive()) return;
+  if(!ObjectList[j]->alive()) return;
+
+  // First, Swap objects so we only need 1 set of code
+  switch(ObjectList[i]->type()) {
+  case SMALLAST:
+  case MEDAST:
+  case BIGAST:
+  case ESMAST:
+    t = i; i = j; j = t;
+  }
+
+  switch(ObjectList[j]->type()) {
+  case SHIP_BUL:
+  case BULLET2:
+    t = i; i = j; j = t;
+  }
+
+  if(ObjectList[j]->type() == PLAYERSHIP) {
+    t = i; i = j; j = t;
+  }
 
 
-// /////////////////////////////////////////////////////////////////////////
+  // Perform ze actions!
+  switch(ObjectList[i]->type()) {
+  case PLAYERSHIP:
+    // Check to make sure the ship can actually collide.
+    if(touched) break; 
+    if(PlayerShip.isDeadStick()) break;
+    switch(ObjectList[j]->type()) {
+    case SHIP_BUL:
+      break;
+    case BULLET2:
+      ObjectList[j]->die();
+      if(!PlayerShip.shielded()) {
+	crash = 1; touched++;
+      }
+      break;
+    case SMALLAST:
+    case MEDAST:
+    case BIGAST:
+    case ESMAST:
+      if(!PlayerShip.shielded()) {
+      	KillAsteroid(j, i);
+      	crash = 1; touched++;
+      } else {
+	//	BounceObjects(i, j);
+      }
+      break;
+    case SPINNER: 
+      if(!PlayerShip.shielded()) { 
+	HitSpinner(j, i);
+	HitSpinner(j, i);
+	HitSpinner(j, i);
+	HitSpinner(j, i);
+	HitSpinner(j, i);
+	crash = 1; touched++;
+      } else {
+	//	BounceObjects(i, j); 
+      }
+      break; 
+    case ENEMY:
+      if(!PlayerShip.shielded()) {
+	crash = 1; touched = 1;
+	ObjectList[j]->die();
+      } else {
+	//	BounceObjects(i, j);
+      }
+      break;
+    case P_TYPE:
+      ObjectList[j]->die();
+      PowerUpF(j);
+      break;
+    }
+    break;
+  case SHIP_BUL:
+  case BULLET2:
+    switch (ObjectList[j]->type()) {
+    case SMALLAST:
+    case BIGAST:
+    case MEDAST:
+    case ESMAST:
+      KillAsteroid(j, i);
+      ObjectList[i]->die();
+      break;
+    case SPINNER:
+      HitSpinner(j, i);
+      ObjectList[i]->die();
+      break;
+    case ENEMY:
+      if(ObjectList[i]->type() != BULLET2) {
+	HitEnemy(j, i);
+	ObjectList[i]->die();
+      }
+    }
+    break; 
+  case ENEMY:	
+    if(ObjectList[j]->type() == BULLET2) break;
+    // BounceObjects(i, j);
+    break;
+  case SPINNER:
+    Spinner* t = (Spinner*)ObjectList[i];
+    if(t->morph()!=-1) break;
+    // BounceObjects(i, j);
+  }
+}
+
+
+//////////////////////////////////////////////////////////////
 // Move all the game objects, check for collisions... etc...
 int MoveObjects()
 {
   
-  int i = 0, crash = 0, touched = 0;
-  
-  AllObjectsTick();
+  int i = 0, crash = 0, touched = 0, j = 0;
   
   // Loop through every object.
-  for (i = 1; i < MAX_OBJECTS; i++) {
-    if (ObjectList[i]) {
+  for (i = 0; i < MAX_OBJECTS; i++) {
+    if(ObjectList[i] && ObjectList[i]->alive()) {
+      ObjectList[i]->tick();
       
-      // Check for ship collision....
-      if (collide(*ObjectList[i], *ObjectList[0])
-	  && ObjectList[i]->type() != 254
-	  && ObjectList[i]->type() != 255
-	  && ObjectList[i]->alive()) {
-	crash = 1;
-	if(PlayerShip.shielded()) {
-	  PlayerShip.SetBounce();
-	  crash = 0; touched--;
-	} else	if(!PlayerShip.isDeadStick() && !touched) {
-	  switch(ObjectList[i]->type()) {
-	  case SMALLAST:
-	  case MEDAST:
-	  case BIGAST:
-	  case ESMAST:
-	    KillAsteroid(i, 0);
-	    break;
-	  case SPINNER:
-	    HitSpinner(i, 0);
-	    HitSpinner(i, 0);
-	    HitSpinner(i, 0);
-	    HitSpinner(i, 0);
-	    HitSpinner(i, 0);
-	    break;
-	  case BULLET2:
-	    ObjectList[i]->die();
-	    break;
-	  case P_TYPE:
-	    ObjectList[i]->die();
-	    PowerUpF(i);
-	    crash = 0; touched--;
-	  } 
-	  touched++;
+      for(j = 1; j < MAX_OBJECTS; j++) {
+	if(!ObjectList[j]) continue;
+	if(!ObjectList[j]->alive()) continue;
+
+      	if(collide(ObjectList[i], ObjectList[j])) {
+      	  ObjectsHit(i, j, touched, crash);
 	}
       }
-      
-      // Check for asteroid collisions... etc...
-      for (int j = 1; j < MAX_OBJECTS; j++) {
-	if (ObjectList[j]) {
-	  
-	  // Check every object against every other here 
-	  if (i == j)
-	    continue;	/* Don't check against self */
-	  
-	  if (ObjectList[i]->alive() && ObjectList[j]->alive()
-	      && (ObjectList[i]->type() == 254 || 
-		  ObjectList[i]->type() == BULLET2)
-	      && collide(*ObjectList[i], *ObjectList[j])) {
-	    switch (ObjectList[j]->type()) {
-	    case SMALLAST:
-	    case BIGAST:
-	    case MEDAST:
-	    case ESMAST:
-	      KillAsteroid(j, i);
-	      ObjectList[i]->die();
-	      break;
-	    case SPINNER:
-	      HitSpinner(j, i);
-	      ObjectList[i]->die();
-	      break;
-	    case ENEMY:
-	      if(ObjectList[i]->type() != BULLET2) 
-		HitEnemy(j, i);
-	    }
-	  } else {
-	    if(ObjectList[i]->type() == SPINNER || 
-	       ObjectList[j]->type() == SPINNER) {
-	      BounceObjects(i, j);
-	    }    
-	  }
-	  
-	} // end if(ObjectList[i])
-      }
-      
+    } else if(ObjectList[i] && i != 0) {
+      delete ObjectList[i];
+      ObjectList[i] = 0;
     }
   }
-  
+
   return crash;
 }
 
 
+///////////////////////////////////////////////////////
 // Utility Function.
 void CleanUpStuff() 
 {
@@ -681,8 +715,53 @@ void LoadBitmaps()
 
 //////////////////////////////////////////////////////
 // Bounce Objects? Why Yes!
+// This is the commonly used algo, you can pick up from
+// any good physics tutorial. :) This does the exact
+// same thing as the original, only it's a lot more 
+// readable.
 void BounceObjects(int i, int j) 
 {
-  // TODO: BOUNCE OBJECTS
+  float ti, tj, t;
+  Vector vi, vj;
+  Vector t1, t2;
+
+  if(ObjectList[j]->GetX()==ObjectList[i]->GetX() &&
+     ObjectList[j]->GetY()==ObjectList[i]->GetY()) return;
+
+  int xt1 = int(ObjectList[j]->GetX()) - int(ObjectList[i]->GetX());
+  int yt1 = int(ObjectList[j]->GetY()) - int(ObjectList[i]->GetY());
+  if(xt1 == 0 || yt1 == 0) return;
+
+  Vector ij(ObjectList[j]->GetX()-ObjectList[i]->GetX(),
+	      ObjectList[j]->GetY()-ObjectList[i]->GetY());
+  if(ij.length()<0.01f) return;
+
+  ij /= ij.length();
+  
+  t = ij.length();
+  if(t < 1.0f) return;
+  
+  vi = ObjectList[i]->GetVel();
+  vj = ObjectList[j]->GetVel();
+
+  ti = vi * ij; 
+  tj = vj * ij;
+
+  float t3 = (2.0f*(ti-tj))/
+    (ObjectList[i]->getMass()+ObjectList[j]->getMass());
+  
+  if(t3 < 0) t3 = -t3;
+
+  t1 = vi;
+  t1 -= (t3 * ObjectList[j]->getMass()) * ij;
+  
+  t2 = vj;
+  t2 += (t3 * ObjectList[i]->getMass()) * ij;
+
+  // Make sure we put in only valid numbers.
+  if(isnan(t1.length()) || isnan(t2.length())) return;
+    
+  ObjectList[i]->SetVel(t1);
+  ObjectList[j]->SetVel(t2);   
 }
 

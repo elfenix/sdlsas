@@ -52,8 +52,8 @@ using namespace std;
 #define P_WTHR   10
 #define ESMAST   11
 #define P_SHLD   12
+#define PLAYERSHIP 253
 #define SHIP_BUL 254
-
 #define P_TYPE   8
 
 
@@ -94,13 +94,14 @@ const float BUL_SPEED     = 7.5f;
 
 class SBitmap;
 class Ship;
+class PShip;
 
 extern SBitmap Gbit[NUM_BITMAPS];
 extern SBitmap extraLives;
 extern SBitmap Gbackdrop;
 extern SBitmap titleScreen;
 extern int ClassicMode;
-extern Ship PlayerShip;
+extern PShip PlayerShip;
 
 extern int score, Glevel, numasts, oldscore;
 extern int BackdropOn, wantFullScreen;

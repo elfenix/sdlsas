@@ -21,7 +21,7 @@ const int EXPLODE_TYPE = 255;
 class SBitmap;
 class ScreenObject;
 class Ship;
-
+class Vector;
 
 extern SBitmap ShipBitmaps[32];
 extern SBitmap ShipThrusts[32];
@@ -30,15 +30,10 @@ extern SBitmap spinnerBitmaps[32];
 extern Vector ScreenLimits;
 
 void InitShips();
-
-extern ScreenObject* ObjectList[MAX_OBJECTS];
-extern Ship PlayerShip;
-
 void SetupObjArray();
 void FreeObjArray();
 int GetOpenObject();
 void DrawObjects();
-void AllObjectsTick();
 int CreateAsteroid(float x, float y, float xv, float yv, int type);
 
 
@@ -50,7 +45,9 @@ class ScreenObject {
   virtual ~ScreenObject();
   
   inline bool alive()
-    { return isAlive; }
+    { 
+      return isAlive; 
+    }
   
   void die(); 
   void restore();
@@ -62,82 +59,149 @@ class ScreenObject {
   virtual void tick();	// Move the object for one time tick
 
   inline void SetWrapMoves(bool a) 
-    { wrapMoves = a; }
+    { 
+      wrapMoves = a; 
+    }
   
   inline static void SetLimits(float x, float y) 
-    { ScreenLimits.SetXY(x,y); }
+    { 
+      ScreenLimits.SetXY(x,y); 
+    }
   
   inline void SetSize(int x, int y)
-    { size.SetXY((float)x,(float)y); }
+    { 
+      size.SetXY((float)x,(float)y); 
+    }
   
   inline void SetVel(float x, float y) 
-    { velocity.SetXY(x,y); }
+    { 
+      velocity.SetXY(x,y); 
+    }
   
   inline void SetAcc(float x, float y)
-    { accelleration.SetXY(x,y); }
+    {
+      accelleration.SetXY(x,y); 
+    }
   
   inline void SetXY(float x, float y)
-    { position.SetXY(x,y); }
+    { 
+      position.SetXY(x,y); 
+    }
   
   inline float GetX() const
-    { return position.GetX(); }
+    { 
+      return position.GetX(); 
+    }
   
   inline float GetY() const
-    { return position.GetY(); }
+    { 
+      return position.GetY(); 
+    }
   
   inline float GetCenX() const
-    { return myCenXRef + position.GetX(); }
+    { 
+      return myCenXRef + position.GetX(); 
+    }
   
   inline float GetCenY() const 
-    { return myCenYRef + position.GetY(); }
+    { 
+      return myCenYRef + position.GetY(); 
+    }
   
   inline float GetWidth() const
-    { return (float)mysprite->width(); }
+    { 
+      return (float)mysprite->width(); 
+    }
   
   inline float GetHeight() const
-    { return (float)mysprite->height(); }
+    { 
+      return (float)mysprite->height(); 
+    }
   
   inline const Vector& GetXYVec() const
-    { return position; }
+    { 
+      return position; 
+    }
 
   inline const Vector& GetVel() const
-    { return velocity; }
+    { 
+      return velocity; 
+    }
   
   inline void SetMaxSpeed(float a) 
-    { maxspeed = a*a; }
+    { 
+      maxspeed = a*a; 
+    }
   
   inline int type() 
-    { return objtype; }
+    { 
+      return objtype; 
+    }
   
   inline void settype(int a) 
-    { objtype = a; }
+    { 
+      objtype = a; 
+    }
   
   inline void setsize(int i) 
-    { mysize = i; }
+    { 
+      mysize = i; 
+    }
   
   inline int Size() 
-    { return mysize; }
+    { 
+      return mysize; 
+    }
   
   inline float VelX() 
-    { return velocity.GetX(); }
+    { 
+      return velocity.GetX(); 
+    }
   
   inline float VelY() 
-    { return velocity.GetY(); }
+    { 
+      return velocity.GetY(); 
+    }
   
   inline void AddVel(float x, float y)
-    { velocity.SetXY(VelX()+x,VelY()+y); }
+    { 
+      velocity.SetXY(VelX()+x,VelY()+y); 
+    }
+
+  inline float getMass() 
+    {
+      return mass;
+    }
+
+  inline void setmass(float a)
+    {
+      mass = a;
+    }
   
+  inline void SetVel(const Vector& nVelocity)
+    {
+      velocity = nVelocity;
+    }
+
+  inline void touch() {
+    tchd = 1;
+  }
+
+  inline int isTouched() {
+    return tchd;
+  }
+
  protected:
   bool wrapMoves;
   bool isAlive;
-  float maxspeed;
+  float maxspeed, mass;
   float myCenXRef, myCenYRef;
   Vector position;
   Vector velocity;
   Vector accelleration;
   Vector size;
   SBitmap* mysprite;
-  int objtype, mysize;
+  int objtype, mysize, tchd;
 };
 
 
@@ -246,6 +310,11 @@ class Ship : public ScreenObject
 };
 
 
+class PShip : public Ship
+{
+ public:
+  PShip() { objtype = PLAYERSHIP; }
+};
 
 
 class Spinner : public Ship 
@@ -262,6 +331,10 @@ class Spinner : public Ship
   virtual void tick();
   virtual void draw();
   virtual void hit();
+
+  inline int morph() {
+    return morphStage;
+  }
 
  private:
   int morphStage, isEvil, hitCount;		 
@@ -322,11 +395,11 @@ class PowerUp : public ScreenObject
 
 // Simple collision function
 // TODO: make more accurate
-inline bool collide(ScreenObject b1, ScreenObject b2)
+inline bool collide(ScreenObject* b1, ScreenObject* b2)
 {
-  float d = (float)b1.Size() + (float)b2.Size();
-  float dx= float(b1.GetCenX() - (b2.GetCenX()));
-  float dy= float(b1.GetCenY() - (b2.GetCenY()));
+  float d = (float)b1->Size() + (float)b2->Size();
+  float dx= float(b1->GetCenX() - (b2->GetCenX()));
+  float dy= float(b1->GetCenY() - (b2->GetCenY()));
   
   d *= d;
   dx *= dx;
@@ -340,7 +413,8 @@ inline bool collide(ScreenObject b1, ScreenObject b2)
 }
 
 
-extern Ship PlayerShip;
+extern ScreenObject* ObjectList[MAX_OBJECTS];
+extern PShip PlayerShip;
 extern int ClassicMode;
 
 #endif

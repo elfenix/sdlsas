@@ -237,7 +237,7 @@ class Vector {
 };
 
 
-inline const Vector operator*(float x, const Vector& rh) 
+inline const Vector operator*(const float x, const Vector& rh) 
 {
   Vector temp;
   temp.myX = rh.myX * x;
