@@ -338,7 +338,6 @@ Enemy::Enemy()
   objtype = ENEMY;
   mysize = 10;
   SetBitmap(&Gbit[ENEMY]);
-  cout << "I've been made!" << endl;
 }
 
 

@@ -1,5 +1,7 @@
 # Makefile for sasteroids
 
+# TODO: Add System options.....
+
 all: src/sasteroids
 
 install: src/sasteroids

@@ -2,6 +2,20 @@ Sasteroids ChangeLog
 
 (See bottom of README file for credits)
 
+
+v1.96.1 to v1.96.2
+===========
+	Changed layout of header files(more managable).
+	Double sizing is now user configurable.
+	Added some support for Win32(thanks Rainer Koschnick).
+	User configuration actually means something now.
+	
+	
+v1.96 to v1.96.1
+===========
+	Removed editor .swp files from distribution.
+
+
 v1.5 to SDL Sasteroids 1.96
 ===========
 	Where to begin?

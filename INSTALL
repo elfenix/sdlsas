@@ -1,10 +1,21 @@
 
-Sasteroids v1.5  - source distribution
-=======================================
+Installation Directions For SDL-Sasteroids:
 
-Needed		:  gcc 2.95.x, gcc 3.x or higher, root access
+Currently, SDL Sasteroids uses it's (mostly) original build system.
 
+To install:
 
-********************************BACKGROUND**********************************
+First edit the Makefile, using a text editor,
+edit major installation options there.
+
+If you want, you can then edit src/gameconf.h to change several
+game play options and values. 
+
+From the SDLSasteroids directory(where this file resides)
+
+run 'make'
+run './installbin'
+
+The binary should now be installed. 
 
 

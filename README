@@ -91,6 +91,8 @@ access to any others, well, except SunOs :-).
 <"Merlin: ironically since I used SDL this program will probably run under
 Windows too.">
 
+<"Merlin: UPDATE, just got a patch, it DOES run in Windows. (Evil, eh?)">
+
 ****************** NOTE: IF THE GAME SEEMS TO RUN TOO SLOW ******************
 
 NOTE: The following timing info only applies if there are no CPU intensive

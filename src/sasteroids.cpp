@@ -760,11 +760,22 @@ void showInfo()
 void ShowTitle()
 {
     displayScreen("title.raw");
-    Ui::ShowText(80, 80 + 100, "SDL Sasteroids Version " VERSION);
-    Ui::ShowText(80, 100 + 100, "'I' FOR INFORMATION");
-    Ui::ShowText( 80, 120+100, "'H' FOR HIGH SCORES" );
-    Ui::ShowText(80, 140 + 100, "'S' TO START GAME");
-    Ui::ShowText(80, 160 + 100, "'Q' TO QUIT");
+
+    Ui::ShowText(DMULTCONST(40), DMULTCONST(90),
+		 "SDL Sasteroids Version " VERSION);
+    
+    Ui::ShowText(DMULTCONST(40), DMULTCONST(100),
+		 "'I' FOR INFORMATION");
+
+    Ui::ShowText(DMULTCONST(40), DMULTCONST(110),
+		 "'H' FOR HIGH SCORES" );
+    
+    Ui::ShowText(DMULTCONST(40), DMULTCONST(120),
+		 "'S' TO START GAME");
+
+    Ui::ShowText(DMULTCONST(40), DMULTCONST(130),
+		 "'Q' TO QUIT");
+
     updateScreen();
 }
 

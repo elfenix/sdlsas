@@ -28,45 +28,21 @@ default setting.
 
 .SH REQUIREMENTS
 
-You need a VGA adaptor that supports 320x200 graphics in 256 colors. The
-game runs under the linux console, not under X.
-
-For sound support you need a sound card capable of 8-bit digital
-sound and at least version 2.9 of the Voxware sound drivers in the
-Linux kernel.
-
-For joystick support you need to have the joystick patches compiled
-into the kernel (or use the newer loadable device driver for
-joysticks). Joystick control is as follows:
-
-.IP
-UP              Thrust
-.br
-LEFT            Rotate Left
-.br
-RIGHT           Rotate Right
-.br
-DOWN            Shield On
-.br
-BUTTON A        Fire, and start new ship
-.br
-BUTTON B        Hyperspace
-.br
-.RE
+This game requires SDL, as well as the true type font addon to 
+SDL. 
 
 .SH PORTABILITY
 
-The program is written in C++ and uses the svgalib graphics
-library. No attempt was made to make this program portable to any
-operating systems other than Linux.
+The program is written in C++ and SDL. It has been ported to several 
+different enviroments.
 
 .SH BUGS/LIMITATIONS
 
-Saving of high scores fails in kernels > 1.1.37 due to changes in the
-setuid() call that affects svgalib. Get version 1.2.0 of svgalib or greater
-to fix this problem.
+Too many to list here.
 
 .SH AUTHOR
+
+This revision of SDL Sasteroids is by Andrew M.
 
 The author of sasteroids is Brad pitzel (pitzel@cs.sfu.ca).
 

@@ -89,7 +89,7 @@ void Ui::init()
     }
     atexit(TTF_Quit);
 
-    myfont = TTF_OpenFont(BINDIR "Wargames.ttf", 18);
+    myfont = TTF_OpenFont(BINDIR "Wargames.ttf", DMULTCONST(9));
     if (!myfont) {
 	fprintf(stderr, "Couldn't grab TTF font!\n");
 	exit(-1);
