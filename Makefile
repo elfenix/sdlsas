@@ -13,7 +13,7 @@ install: src/sasteroids
 	install -d $(GAMEDIR)/sounds
 	install -d $(GAMEDIR)/fonts
 	install -d $(BINDIR)
-	install --strip --mode=4755 src/sasteroids $(BINDIR)
+	install --strip --mode=755 src/sasteroids $(BINDIR)
 	install --mode=644 sasteroids.6 $(MANDIR)/man6
 	install --mode=644 fonts/Wargames.ttf $(GAMEDIR)/fonts/
 	install --mode=644 sounds/*.wav $(GAMEDIR)/sounds/
