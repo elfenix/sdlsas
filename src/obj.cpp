@@ -378,7 +378,7 @@ void InitShips()
   
   for (j = 0; j < k; j++) {
    ShipBitmaps[j].LoadImage(BINDIR "/graphics/ship0.bmp");
-   ShipThrusts[j].LoadImage(BINDIR "/graphics/eship1.bmp");
+   ShipThrusts[j].LoadImage(BINDIR "/graphics/ship1.bmp");
    spinnerBitmaps[j].LoadImage(BINDIR "/graphics/spinner.bmp");
    
    // since our angles are 0..255, 64 is 90 normal degrees
