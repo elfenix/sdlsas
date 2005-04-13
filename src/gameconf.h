@@ -26,9 +26,6 @@
 // Use Joystick?
 #define HAVE_JOYSTICK
 
-// Double Size 320x200 displays?
-// #define DOUBLE_SIZE	
-
 // Use non original enhanced behavoir?
 #define NON_ORIGINAL 
 

@@ -11,10 +11,7 @@
 
 
 // Global
-// SBitmap spinnerBitmaps[SHIPTURNS];
- SBitmap morphBitmaps[10];
-// SBitmap ShipBitmaps[SHIPTURNS];
-// SBitmap ShipThrusts[SHIPTURNS];
+SBitmap morphBitmaps[10];
 
 Vector ScreenLimits(PLAY_X, PLAY_Y);
 

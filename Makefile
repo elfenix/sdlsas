@@ -17,8 +17,8 @@ EXTRA_LIBS=-lGL
 all: 
 	make GAMEDIR=$(GAMEDIR) EXTRA_DEFINES=$(EXTRA_DEFINES) EXTRA_LIBS=$(EXTRA_LIBS) -C src
 
-install: 
-	make GAMEDIR=$(GAMEDIR) -C src
+install:
+	make GAMEDIR=$(GAMEDIR) EXTRA_DEFINES=$(EXTRA_DEFINES) EXTRA_LIBS=$(EXTRA_LIBS) -C src
 	install -d $(GAMEDIR)
 	install -d $(GAMEDIR)/graphics
 	install -d $(GAMEDIR)/sounds
