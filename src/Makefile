@@ -5,19 +5,19 @@
 CC = g++
 INCLUDE = -I/usr/include
 OPTIMIZE = -fomit-frame-pointer -O2 -ffast-math -funroll-loops -march=pentium -mcpu=pentium
-OPTS = -Wall -pipe -O3 
+OPTS = -pipe -O3 
 GDIR=\"$(GAMEDIR)\"
 #GDIR=\"/usr/share/sasteroids/\"
 DEFINES = -DGAMEDIR=$(GDIR) $(EXTRA_DEFINES)
 
 
 # for debugging
-CFLAGS	 = -Wall $(INC) $(DEBUG) $(OPTS) 
-DEBUG = -g -pg
+# CFLAGS	 = -Wall $(INC) $(DEBUG) $(OPTS) 
+# DEBUG = -g -pg
 
 # otherwise
-# CFLAGS = -Wall $(INC) $(OPTS) 
-# DEBUG = 
+CFLAGS = -Wall $(INC) $(OPTS) 
+DEBUG = 
 
 SASTEROIDS = sasteroids
 SASTEROIDS_O = fastmath.o obj.o sasteroids.o sbitmap.o ui.o ships.o screenobject.o player.o asteroid.o menu.o

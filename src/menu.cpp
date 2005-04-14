@@ -70,7 +70,7 @@ void GraphicsMenu::enableSound(int soundNum)
 
 void GraphicsMenu::RunMenu() 
 {
-  int done = 0, dirty = 0, playsound = 0, tX, tY;
+  int done = 0, playsound = 0, tX, tY;
   int j, execute = 0;
   SDL_Event event;
   float start_height, start_width;

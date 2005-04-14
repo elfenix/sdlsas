@@ -31,9 +31,9 @@ void Spinner::tick()
     float ax, ay;
 
     if(!bounce) {    
-      if(!(rand()%20)) {
+      if(!(rand()%5)) {
 	ax = PlayerShip.GetX() - GetX();  // Find the distance.  
-	ay = PlayerShip.GetY() - GetY();
+	ay = (PlayerShip.GetY() - GetY());
 	
 	ax = ax / 200;
 	ay = ay / 200;
@@ -57,9 +57,7 @@ void Spinner::tick()
       ax = (float(rand()%100)-50.0f)/50.0f;
       ay = (float(rand()%100)-50.0f)/50.0f;
       velocity.SetXY(ax, ay);
-    }
 
-    if(bounce) {
       bounce -= 2;
       if(bounce < 0) bounce = 0;
     }
@@ -131,9 +129,9 @@ void Explosion::draw()
 
     distance = distance / 64.0f;
     
-    Ui::setpixel(x, y, 255, 255, (char) distance);
-    Ui::setpixel(x + 1, y + 1, 255, 255, (char) distance);
-    Ui::setpixel(x, y + 1, 255, 255, 0);
+    Ui::setpixel((int)x, (int)y, 255, 255, (char) distance);
+    Ui::setpixel((int)x + 1, (int)y + 1, 255, 255, (char) distance);
+    Ui::setpixel((int)x, (int)y + 1, 255, 255, 0);
   }
   Ui::stoppixels();
 }
@@ -178,8 +176,8 @@ void Explosion::initExplosion()
 
 Enemy::Enemy() 
 {
-  velocity.SetXY(1.0f, 0.25f);
-  position.SetXY(4, 30);
+  velocity.SetXY(2.0f, -0.25f);
+  position.SetXY(20.0f, 390.0f);
   accelleration.SetXY(0.0f, 0.0f);
   isAlive = true;	       
   objtype = ENEMY;
@@ -200,15 +198,18 @@ void Enemy::tick()
     else vChange = 1;
   }
 
-  if(GetY() < 2) vChange = 0;
-  if(GetY() > 60) vChange = 1;
+  if(GetY() > 395.0f) vChange = 0;
+  if(GetY() < 340.0f) vChange = 1;
   if(!bounce) {
     if(vChange) {
-      velocity.SetXY(0.6f, -0.8f);
-    } else {
       velocity.SetXY(0.6f, 0.8f);
+    } else {
+      velocity.SetXY(0.6f, -0.8f);
     }
-  } else bounce -= 2;
+  } else {
+    bounce -= 2;
+    if(bounce < 0) bounce = 0;
+  }
 
   ScreenObject::tick(); 
 

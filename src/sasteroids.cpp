@@ -518,7 +518,6 @@ void PlayGame()
 
 	
 	if(!(rand()%LevelOdds(32, 4050, 1)) || (shipInvasion && !(rand()%50))) {
-	
 	  if(Glevel > 6 && !(rand()%15) && !shipInvasion) shipInvasion = 10;
 	  if(shipInvasion) shipInvasion--;
 	  if(shipInvasion < 0) shipInvasion = 0;

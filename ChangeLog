@@ -2,6 +2,13 @@ Sasteroids ChangeLog
 
 (See bottom of README file for credits)
 
+v3.0 BETA 2 to v3.0 
+==================
+	Fixed enemy ship not showing up
+	Fixed nVidia OpenGL differences
+	Fixed spinner to be more aggressive
+	More code cleanup, note that some functions still need C++-ized.
+	
 
 v3.0 BETA 1 to v3.0 BETA 2
 ==================

@@ -117,8 +117,6 @@ void Player::Reset()
   restore();
   SetDeadStick(0);
 
-  int width = Gbit[BIT_PLAYER].width();
-  int height = Gbit[BIT_PLAYER].height();
   int x = int(ScreenLimits.GetX());
   int y = int(ScreenLimits.GetY());
   x = x / 2; y = y / 2;
