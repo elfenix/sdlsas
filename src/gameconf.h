@@ -7,21 +7,7 @@
 // Information about the Game
 
 // Set the version string for SDL Sasteroids
-#define VERSION "2.99"
-
-// Where do we want the game files?
-// Note: This is NOT the place to edit this, use the *MAKEFILE*
-#ifndef GAMEDIR
-#define BINDIR "/usr/share/sasteroids/"
-#else
-#define BINDIR GAMEDIR
-#endif
-
-// Uncomment line bellow if your using an old C++ compiler
-// #define _OLD_CPP_HEADERS
-
-// Use Sound?
-// #define HAVE_SOUND
+#define VERSION "3.1.0"
 
 // Use Joystick?
 #define HAVE_JOYSTICK
@@ -57,15 +43,7 @@
 ///////////////////////////////////////////////////////
 // Don't Edit bellow this line for standard configuration
 
-#define SCREEN_X 640
-#define SCREEN_Y 400
-#define PLAY_X SCREEN_X
-#define PLAY_Y	SCREEN_Y
-
-
-
-// Where do we want the game files?
-// Note: This is NOT the place to edit this, use the *MAKEFILE*
-#ifndef BINDIR
-#define BINDIR "/usr/share/sasteroids/"
-#endif
+#define SCREEN_X	640
+#define SCREEN_Y	400
+#define PLAY_X 		SCREEN_X
+#define PLAY_Y		SCREEN_Y

@@ -10,11 +10,16 @@
 // SDL Sasteroids Code by Andrew M. (aka Merlin262)
 
 #include "sasteroids.h"
+#include <PlayingField.hpp>
+using namespace std;
 
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
 
 /////////////////////////////////////////////////////////////////////////////
 // Function Declarations:
-void displayScreen(char *screen);
+void displayScreen(const char *screen);
 void upscore(int upby);
 
 
@@ -23,23 +28,14 @@ void upscore(int upby);
 
 // System Setup
 
-SBitmap Gbit[NUM_BITMAPS];                // graphics. =)
-SBitmap Backdrops[NUM_BACKS];
 
-SBitmap titleScreen;
-SBitmap extraLives;                       // 1/2 scale ship for extra men.
 
-#ifdef HAVE_SOUND
-Mix_Chunk *soundSamples[NUM_SOUNDS];               // Sound!
-#endif
-
+PlayingField m_manager;
 
 int use_joystick, num_joysticks;
-
-#ifdef HAVE_JOYSTICK
 SDL_Joystick *js;
 void SDL_JoystickUpdate();
-#endif
+
 
 
 int G_use_backdrop = 0;
@@ -49,9 +45,6 @@ Player PlayerShip;	                  // Info about player's ship.
 int score, Glevel, numasts, oldscore;     // scoring and level info
 int ClassicMode = 0;                      // classic mode?
 int BackdropOn = 1, wantFullScreen = 0;   // is the backdrop on?
-
-// Power Ups, etc...
-int deathTimer;                           // Mwahahahahahahh
 
 // These do something.... :D
 int eeggU = 0, eeggD = 0, eeggL = 0, eeggR = 0;
@@ -104,10 +97,8 @@ int LevelOdds(int lvlMax, int maxChance, int lvlStep)
 //
 void PlaySound(int soundNumber)
 {
-#ifdef HAVE_SOUND
-  if(soundSamples[soundNumber])
-    Mix_PlayChannel(-1, soundSamples[soundNumber], 0);
-#endif
+	if( soundSamples[soundNumber] )
+		Mix_PlayChannel(-1, soundSamples[soundNumber], 0);
 }
 
 
@@ -169,56 +160,97 @@ void botline()
     static int animstage = 200;
     static int animdir = -2;
 
-    IntegerDisplay::display_integer(score, 10.0f, float(Ui::HEIGHT()) - 2.0f);
-    IntegerDisplay::display_integer(Glevel, Ui::WIDTH()- 40.0f, 20.0f);
+    IntegerDisplay::display_integer( PlayerShip.get_score(), 10.0f, float(Ui::HEIGHT()) - 2.0f);
+    IntegerDisplay::display_integer( Glevel, Ui::WIDTH()- 40.0f, 20.0f );
 
     animstage += animdir;
     if(animstage < 155)  animdir = -animdir;
     if(animstage > 205) animdir = -animdir;
-    
+    GLfloat anim_alpha = GLfloat( double( animstage ) / 255.0 );
 
     y = Ui::HEIGHT() - 20;
     x1 = Ui::WIDTH() - 205;
-    if(!ClassicMode) { 
-      // Draw weapon + shield energy meter.
-      Gbit[BULLET].put(x1-12, (y));
-      Ui::startpixels();
-      for( x = 0; x < (PlayerShip.weaponPercent()*2); x++ ) {
-	Ui::setpixel(x1+x, y, 255-x, (55)+x, 0, animstage);
-	Ui::setpixel(x1+x, y+1, 255-x, 55+x, 0, animstage);
-	Ui::setpixel(x1+x, y+2, 255-x, 55+x, 0, animstage);
-	Ui::setpixel(x1+x, y+3, 255-x, 55+x, 0, animstage);
-	Ui::setpixel(x1+x, y+4, 255-x, 55+x, 0, animstage);
-      } 
-      Ui::stoppixels();
-      // Draw shield energy meter.
+
+    // Draw weapon meter
+    if(!ClassicMode)
+    {
+    	bmp_bullet.draw(x1-12, (y));
+
+    	glBindTexture( GL_TEXTURE_2D, 0 );
+    	glBegin( GL_QUADS );
+    		glColor4f( 1.0, 0.25, 0, anim_alpha  );
+    		glVertex2f( GLfloat( x1 ), GLfloat( y ) );
+
+    		GLfloat maxX = std::max(
+    					GLfloat( x1 + PlayerShip.weaponPercent() * 2 ),
+    					GLfloat( x1 )
+    				);
+
+    		glColor4f( GLfloat( std::max(
+    					double( 1.0 - ( PlayerShip.weaponPercent() * 0.01 ) ),
+    					0.0
+    					) ),
+    				   GLfloat( std::min(
+						double( 0.25 + PlayerShip.weaponPercent() * 0.01 ),
+    						1.0
+    						) ),
+    				   GLfloat( 0.0 ),
+    				   anim_alpha
+    				   );
+    		glVertex2f( maxX, GLfloat( y ) );
+    		glVertex2f( maxX, GLfloat( y + 4 ) );
+
+    		glColor4f( 1.0, 0.25, 0, anim_alpha );
+    		glVertex2f( GLfloat( x1 ), GLfloat( y + 4 ) );
+    	glEnd();
       y += 10;
     }
 
-    Gbit[BULLET].put(x1-12, y);
-    Ui::startpixels();
-    for( x = 0; x < (PlayerShip.shieldPercent()*2); x++ ) {
-      Ui::setpixel(x1+(x), y, 255-x, (55)+x, 0, animstage);
-      Ui::setpixel(x1+(x), y+1, 255-x, 55+x, 0, animstage);
-      Ui::setpixel(x1+(x), y+2, 255-x, 55+x, 0, animstage);
-      Ui::setpixel(x1+(x), y+3, 255-x, 55+x, 0, animstage);
-      Ui::setpixel(x1+(x), y+4, 255-x, 55+x, 0, animstage);
-    } 
-    Ui::stoppixels();
+    bmp_bullet.draw(x1-12, y);
+    {
+		glBindTexture( GL_TEXTURE_2D, 0 );
+		glBegin( GL_QUADS );
+			glColor4f( 1.0, 0.25, 0, anim_alpha  );
+			glVertex2f( GLfloat( x1 ), GLfloat( y ) );
+
+			GLfloat maxX = std::max(
+						GLfloat( x1 + PlayerShip.shieldPercent() * 2 ),
+						GLfloat( x1 )
+					);
+
+			glColor4f( GLfloat( std::max(
+						double( 1.0 - ( PlayerShip.shieldPercent() * 0.01 ) ),
+						0.0
+						) ),
+					   GLfloat( std::min(
+						double( 0.25 + PlayerShip.shieldPercent() * 0.01 ),
+							1.0
+							) ),
+					   GLfloat( 0.0 ),
+					   anim_alpha
+					   );
+			glVertex2f( maxX, GLfloat( y ) );
+			glVertex2f( maxX, GLfloat( y + 4 ) );
+
+			glColor4f( 1.0, 0.25, 0, anim_alpha );
+			glVertex2f( GLfloat( x1 ), GLfloat( y + 4 ) );
+		glEnd();
+    }
     
     y = (Ui::HEIGHT() - 24);
-    for( x = 0; x < (PlayerShip.ships()-1); x++) {
-      extraLives.put(16+x*20, 15.0f, 0.5f);
+    for( x = 0; x < (PlayerShip.ships()-1); x++ )
+    {
+    	extraLives.draw(16+x*20, 15.0f, 0.5f);
     }
 }
 
 
 //////////////////////////////////////////////////////////////////////////
-void displayScreen(char *file)
+void displayScreen( const char *file )
 {
-  SBitmap backdrop(file);
+  ScreenBitmap backdrop(file);
   Ui::clearscreen();
-  backdrop.putA(0, Ui::HEIGHT());
+  backdrop.draw_alpha(0, Ui::HEIGHT());
 }
 
 
@@ -227,28 +259,9 @@ void displayScreen(char *file)
 // This might be an issue if we're on slow machines that can't
 // respond to this event faster than the timer
 // TODO: BugFix this..
-static int sastWantTicks = 0;
 static int FinishedLastCall = 0;
 char globalMessage[256];
 int gMsgTimeLeft = 0;
-
-Uint32 TimerTick(Uint32 interval, void* param)
-{
-  SDL_Event myEvent;
-  
-  if(sastWantTicks && FinishedLastCall) {
-    FinishedLastCall = 0;
-    myEvent.type = SDL_USEREVENT;
-    SDL_PushEvent(&myEvent);
-  } else if(!FinishedLastCall) {
-#ifdef PRINT_DIAG
-    cerr << "[Diag] Dropped Frame!" << endl;
-#endif
-  }
-
-  return GAME_CLOCK;
-}
-
 
 void MakeGlobalMessage(char* Tstring)
 {
@@ -259,376 +272,530 @@ void MakeGlobalMessage(char* Tstring)
 
 /////////////////////////////////////////////////////////////////////////////
 // play a game..
-void PlayGame()
+
+class Sasteroids
 {
-  char pstr[256];
-  int pause = 0;
-  int dead = 0;
-  int finalDead = 0;
-  int aegg = 0;
-  int chOn;
-  int shipInvasion = 0;
-  float alpha_anim = -1.0f;
-  SDL_Event event;
-  SDL_TimerID timer;
-  
-  Uint8 *keystatebuffer;
-  
-  char GameOver = 0, cReq, flashShip = 0;
-  
-  // get starting skill level, <DELETED>
-  Glevel = 0;
-  
-  numasts = 0;
-  score = 0;
-  oldscore = 0;
-  dead = 0;
-  
-  PlayerShip.setships(3);
-  score = 0;
-  oldscore = -1;
+public:
+	Sasteroids();
+	virtual ~Sasteroids();
 
-  PlayerShip.Reset();
-  FreeObjArray();
-  Ui::clearscreen();
+	void run();
 
-  timer = SDL_AddTimer( GAME_CLOCK, TimerTick, 0 );
-  
-  if(!timer) {
-    cout << "Fatal: Couldn't Create Timer!" << endl;
-    exit(-1);
-  }
-  
-  keystatebuffer = SDL_GetKeyState(NULL);
- 
-  
-  pause = 0;
-  GameOver = 0;
-  cReq = 0;
-  sastWantTicks = 1;
-  finalDead = 0;
-  FinishedLastCall = 1;
-  deathTimer = -1;
-  gMsgTimeLeft = 0;
-  chOn = 1;
-  shipInvasion = 0;
-  
-#ifdef HAVE_SOUND
-  Mix_ExpireChannel(0, 0);
-#endif  
-
-  while (!GameOver) {
-    while (SDL_PollEvent(&event)) {
-      switch (event.type) {
-      case SDL_VIDEORESIZE:
-	ScreenLimits.SetXY((event.resize.w), 
-			   (event.resize.h));
-	Ui::resync(event.resize.w, event.resize.h);
-	break;
-	
-      case SDL_KEYDOWN:
-	if(finalDead && !(finalDead > 2)) {
-	  sastWantTicks = 0;
-	  GameOver = 1;
+	void set_scrolling_message( const std::string& p_str )
+	{
+		scrolling_message = p_str;
+		scrolling_message_pos = Ui::HEIGHT();
 	}
 
-	if (event.key.keysym.sym == SDLK_LALT && !pause && !dead) {
-	  PlaySound(SND_WARP);
-	  PlayerShip.Hyper();
-	}
-	
-	if (event.key.keysym.sym == SDLK_RALT && !pause && !dead) {
-	  PlaySound(SND_WARP);
-	  PlayerShip.Hyper();
-	}
-
-	// I hate cheaters... Do something fun with the old cheat code. :D
-	if (event.key.keysym.sym == SDLK_o && 
-	    (keystatebuffer[SDLK_LSHIFT] || keystatebuffer[SDLK_RSHIFT])  &&
-	    !pause) {
-	  deathTimer = 3; 
-	  MakeGlobalMessage("CHEATER!!! C H E A T E R!!! CHEATER!!!");
+	void reset_center_message()
+	{
+		if( quit_request )
+			center_message = "Press y to quit, any other key to return to game";
+		else if( is_game_over() )
+			center_message = "Press any key to return to main menu";
+		else if( pause_request )
+			center_message = "Press any key to return to game";
+		else if( PlayerShip.get_disabled() )
+			center_message = "Fire to relaunch!";
+		else
+			center_message = "";
 	}
 
-	// Leave this cheat code in, nice for debugging.
-	if (event.key.keysym.sym == SDLK_n && !pause) { Glevel++; alpha_anim = 1.0f; }
-	
-	// I prefer space
-	if (event.key.keysym.sym == SDLK_SPACE && !pause)
-	  PlayerShip.Fire();
+	void redraw_screen();
 
-	// but CTRL is the default
-	if (event.key.keysym.sym == SDLK_LCTRL && !pause)
-	  PlayerShip.Fire();
-	
-	if (event.key.keysym.sym == SDLK_f)
-	  Ui::FullScreen();
-	
-	if (event.key.keysym.sym == SDLK_y) {
-	  if (cReq) {
-	    sastWantTicks = 0;
-	    pause = 1;
-	    GameOver = 1;
-	  }
-	}
-	
-	if (event.key.keysym.sym == SDLK_p && !dead) {
-	  strcpy(pstr, "Press any key to continue.");
-	  if (!pause) {
-	    sastWantTicks = 0;
-	    pause = 1;
-	  } else { 
-	    pause = 0;
-	    sastWantTicks = 1;
-	  }
-	} else {
-	  pause = 0;
-	  if (!GameOver)
-	    cReq = 0;
-	  sastWantTicks = 1;
-	}
-	
-	if (event.key.keysym.sym == SDLK_q && !dead && !pause) {
-	  if (!pause) {
-	    sastWantTicks = 0;
-	    pause = 2;
-	    cReq = 1;
-	    strcpy(pstr,
-		   "Press any 'Y' to quit, any other key to continue.");
-	  }
+	static Uint32 timer_tick( Uint32 interval, void* param );
+
+protected:
+	bool is_play_paused() const
+	{
+		return is_game_over() || quit_request || pause_request;
 	}
 
-	if(event.key.keysym.sym == SDLK_s && !finalDead) {
-	  if(dead) {
-	    PlayerShip.Reset();
-	    dead = 0;
-	  }
+	bool is_game_over() const
+	{
+		return game_over;
 	}
 
-	if(event.key.keysym.sym == SDLK_PLUS || event.key.keysym.sym == SDLK_EQUALS) {
-	  if(MainVolume < 128) MainVolume+=8;
-	  if(MainVolume > 128) MainVolume=128;
-	  DispVolume = 64;
-#ifdef HAVE_SOUND
-	  Mix_Volume( -1, MainVolume);
-	  sDisplayTimer = 35;
-#endif
+	bool can_control_ship()
+	{
+		return PlayerShip.get_disabled() || is_play_paused();
 	}
 
-	if(event.key.keysym.sym == SDLK_MINUS) {
-	  if(MainVolume > 0) MainVolume-=8;
-	  if(MainVolume < 0) MainVolume=0;
-	  DispVolume = 64;
-#ifdef HAVE_SOUND
-	  Mix_Volume( -1, MainVolume );
-	  sDisplayTimer = 35;
-#endif	 
+	void keystate_actions();
+
+	void play_timer();
+
+private:
+	SDL_TimerID timer;
+	Uint8 *keystatebuffer;
+
+	std::string scrolling_message;
+	int scrolling_message_pos;
+
+	std::string center_message;
+
+	int keylock_timer;
+
+	float backdrop_alpha;
+
+	bool game_over;
+
+	bool quit_request;
+
+	bool pause_request;
+
+	bool death_displayed;
+
+	int shipInvasion;
+
+	int chOn;
+};
+
+
+Sasteroids::Sasteroids()
+{
+	timer = SDL_AddTimer( GAME_CLOCK, &Sasteroids::timer_tick, 0 );
+	if( !timer )
+	{
+		throw std::runtime_error("Unable to create SDL timer");
 	}
 
-#ifdef SAS_EXTRAS	
-	if(!dead && !pause) {
-	  if(event.key.keysym.sym == SDLK_UP) {
-	    if(eeggU != 1 || eeggS != 2) {
-	      eeggU = 0; eeggD = 0; eeggL = 0; eeggR = 0; eeggS = 1;
-	    }
-	    eeggU |= eeggS;
-	    eeggS = eeggS << 1;
-	  }
+	keystatebuffer = SDL_GetKeyState(NULL);
+	Mix_ExpireChannel(0, 0);
 
-	  if(event.key.keysym.sym == SDLK_DOWN) {
-	    eeggD |= eeggS; eeggS = eeggS << 1;
-	  }
-	  
-	  if(event.key.keysym.sym == SDLK_LEFT) {
-	    eeggL |= eeggS; eeggS = eeggS << 1;
-	  }
+	PlayerShip.Reset();
+	PlayerShip.setships(3);
+	PlayerShip.reset_score();
 
-	  if(event.key.keysym.sym == SDLK_RIGHT) {
-	    eeggR |= eeggS; eeggS = eeggS << 1;
-	  }
+	backdrop_alpha = 0.0;
+	death_displayed = false;
+	game_over = false;
+	shipInvasion = 0;
+	chOn = 0;
+	keylock_timer = 0;
+	pause_request = false;
+	quit_request = false;
+}
 
-	  if(eeggS > 512) {
-	    eeggS = 1; eeggU = 0; eeggD = 0; eeggL = 0; eeggR = 0;
-	  }
+Sasteroids::~Sasteroids()
+{
+	SDL_RemoveTimer(timer);
+	Mix_ExpireChannel(0, 0); // Always kill jet sound.
+}
+
+
+Uint32 Sasteroids::timer_tick(Uint32 interval, void* param)
+{
+	SDL_Event event;
+
+	if( FinishedLastCall )
+	{
+		FinishedLastCall = 0;
+		event.type = SDL_USEREVENT;
+		SDL_PushEvent(&event);
+	} else if(!FinishedLastCall) {
+		//#ifdef PRINT_DIAG
+		cerr << "[Diag] Dropped Frame!" << endl;
+		//#endif
 	}
-#endif
-	
 
-	break;
-      case SDL_ACTIVEEVENT:
-	;
-	break;
+	return GAME_CLOCK;
+}
 
-      case SDL_QUIT:
-	exit(0);
-	break;
-      
 
-      case SDL_USEREVENT:	      
-	if(gMsgTimeLeft > 0) gMsgTimeLeft-=5;
-	if(gMsgTimeLeft < 0) gMsgTimeLeft = 0;
+void Sasteroids::redraw_screen()
+{
+	Ui::predraw();
+
+	// Paint the backdrop
+	if (BackdropOn && Ui::WIDTH() <= 640 && Ui::HEIGHT() <= 400)
+	{
+		Backdrops[Glevel % NUM_BACKS].draw_alpha(0, Ui::HEIGHT());
+
+		if (backdrop_alpha > 0.0f )
+		{
+			Backdrops[(Glevel - 1) % NUM_BACKS].draw_alpha(0, Ui::HEIGHT(), 0.0f, backdrop_alpha );
+			backdrop_alpha -= 0.05f;
+		}
+	}
+	else
+	{
+		Ui::clearscreen();
+	}
+
+
+	// Draw all the screen objects
+	m_manager.draw_objects();
+
+	// Draw the bottom line
+	botline();
+
+	// Draw the player's ship - and restart message
+	if( PlayerShip.get_disabled() && !is_game_over() )
+	{
+		int x = int(ScreenLimits.GetX());
+		int y = int(ScreenLimits.GetY());
+		x = x / 2;
+		y = y / 2;
+
+		if( PlayerShip.ships() >= 0 )
+		{
+			Uint32 seconds = (SDL_GetTicks() / 1000);
+			if( (seconds % 2) > 0 )
+			{
+				bmp_player.draw( x, y );
+			}
+		}
+	}
+
+	// Show active messages
+	if( scrolling_message.size() > 0 && scrolling_message_pos > 0 )
+	{
+		Ui::CenterXText( scrolling_message_pos, scrolling_message );
+	}
+
+	reset_center_message();
+	if( center_message.size() > 0 )
+	{
+		Ui::CenterText( center_message );
+	}
+
+	sounddisplay();
+	Ui::updateScreen();
+}
+
+void Sasteroids::run()
+{
+	char pstr[256];
+	int pause = 0;
+	int dead = 0;
+	int aegg = 0;
+	float alpha_anim = -1.0f;
+	SDL_Event event;
+	bool need_redraw;
+
+	// get starting skill level, <DELETED>
+	Glevel = 0;
+
+	numasts = 0;
+	score = 0;
+	oldscore = 0;
+	dead = 0;
+
+	PlayerShip.setships(3);
+	score = 0;
+	oldscore = -1;
+
+	PlayerShip.Reset();
+	m_manager.free_objects();
+	Ui::clearscreen();
+
+	bool end_game = false;
+	bool key_consumed = false;
+
+	FinishedLastCall = 1;
+	gMsgTimeLeft = 0;
+	chOn = 1;
+	shipInvasion = 0;
+
+	while( !end_game )
+	{
+		while (SDL_PollEvent(&event))
+		{
+			keystate_actions();
+			if( need_redraw )
+			{
+				redraw_screen();
+				need_redraw = false;
+			}
+
+			switch (event.type)
+			{
+			case SDL_VIDEORESIZE:
+				ScreenLimits.SetXY((event.resize.w), (event.resize.h));
+				Ui::resync(event.resize.w, event.resize.h);
+				need_redraw = true;
+				break;
+
+			case SDL_KEYDOWN:
+				need_redraw = true;
+				key_consumed = false;
+
+				if( is_game_over() )
+				{
+					if( keylock_timer <= 0 )
+					{
+						end_game = true;
+						key_consumed = true;
+					}
+				}
+				else if( quit_request )
+				{
+					// Displaying quit menu
+					if (event.key.keysym.sym == SDLK_y)
+					{
+						end_game = true;
+						key_consumed = true;
+					}
+				}
+				else if( !pause_request && !PlayerShip.get_disabled() )
+				{
+					// We're playing the game
+					if (event.key.keysym.sym == SDLK_LALT )
+					{
+						PlaySound(SND_WARP);
+						PlayerShip.Hyper();
+						key_consumed = true;
+					}
+					else if( event.key.keysym.sym == SDLK_RALT )
+					{
+						PlaySound(SND_WARP);
+						PlayerShip.Hyper();
+						key_consumed = true;
+					}
+					else if( event.key.keysym.sym == SDLK_o
+							 && (keystatebuffer[SDLK_LSHIFT] || keystatebuffer[SDLK_RSHIFT]) )
+					{
+						// Sasteroids had a nice little cheat code,
+						// I'm not a fan of cheat codes in general, so do something fun instead.
+						set_scrolling_message("CHEATER!!! C H E A T E R!!! CHEATER!!!");
+						key_consumed = true;
+					}
+					else if (event.key.keysym.sym == SDLK_SPACE )
+					{
+						PlayerShip.Fire();
+						key_consumed = true;
+					}
+					else if (event.key.keysym.sym == SDLK_LCTRL )
+					{
+						PlayerShip.Fire();
+						key_consumed = true;
+					}
+					else if( event.key.keysym.sym == SDLK_p )
+					{
+						pause_request = true;
+						key_consumed = true;
+					}
+				} else if( !pause_request && PlayerShip.ships() > 0 ) {
+					std::cout << "Restarting!" << keylock_timer << std::endl;
+					// We're dead, but we can go again
+					if ((event.key.keysym.sym == SDLK_SPACE ||
+						event.key.keysym.sym == SDLK_s ||
+						event.key.keysym.sym == SDLK_LCTRL) &&
+						keylock_timer <= 0
+						)
+					{
+						PlayerShip.Reset();
+						key_consumed = true;
+						death_displayed = false;
+					}
+				} else {
+					std::cout << "Mkay?" << PlayerShip.ships() << std::endl;
+				}
+
+
+				// Generic Actions -> Happen in any mode
+				// Leave this cheat code in, nice for debugging.
+				if( !key_consumed && event.key.keysym.sym == SDLK_n && (keystatebuffer[SDLK_LSHIFT] || keystatebuffer[SDLK_RSHIFT]) )
+				{
+					Glevel++;
+					alpha_anim = 1.0f;
+					key_consumed = true;
+				}
+
+				if( !key_consumed && event.key.keysym.sym == SDLK_f )
+				{
+					Ui::FullScreen();
+					key_consumed = true;
+				}
+
+				if( (!key_consumed || pause_request) && event.key.keysym.sym == SDLK_q )
+				{
+					quit_request = true;
+					pause_request = false;
+					key_consumed = true;
+				}
+
+				if (event.key.keysym.sym == SDLK_PLUS || event.key.keysym.sym == SDLK_EQUALS )
+				{
+					if (MainVolume < 128)
+						MainVolume += 8;
+					if (MainVolume > 128)
+						MainVolume = 128;
+					DispVolume = 64;
+					Mix_Volume(-1, MainVolume);
+					sDisplayTimer = 35;
+					key_consumed = true;
+				}
+
+				if( event.key.keysym.sym == SDLK_MINUS )
+				{
+					if (MainVolume > 0)
+						MainVolume -= 8;
+					if (MainVolume < 0)
+						MainVolume = 0;
+					DispVolume = 64;
+					Mix_Volume(-1, MainVolume);
+					sDisplayTimer = 35;
+					key_consumed = true;
+				}
+
+				if( (pause_request || quit_request ) && !key_consumed )
+				{
+					pause_request = false;
+					quit_request = false;
+				}
+
+				break;
+
+			case SDL_QUIT:
+				need_redraw = true;
+				exit(0);
+				break;
+
+			case SDL_USEREVENT:
+				need_redraw = true;
+				play_timer();
+				break;
+			}
+		}
+	}
+}
+
+
+void Sasteroids::play_timer()
+{
+	scrolling_message_pos -= 5;
+
+	if( keylock_timer > 0 )
+	{
+		keylock_timer--;
+	}
+
+	// Everything past this point is game play
+	if( is_play_paused() )
+	{
+		FinishedLastCall = 1;
+		return;
+	}
 
 	// This only gets called while the GAME CLOCK ITSELF is ticking =)
-	deathTimer--;
-	if(deathTimer < -128) deathTimer = -1;
-	if(finalDead && finalDead > 2) finalDead--;
+	//deathTimer--;
+	//				if (deathTimer < -128)
+//						deathTimer = -1;
+					//if (finalDead && finalDead > 2)
+//						finalDead--;
 
-	if (keystatebuffer[SDLK_RIGHT])
-	  PlayerShip.rotateRight();
-	
-	if (keystatebuffer[SDLK_LEFT])
-	  PlayerShip.rotateLeft();
-	
-	if (keystatebuffer[SDLK_UP] && !dead) {
-	  PlayerShip.Thrust(0.15f);
-#ifdef HAVE_SOUND
-	  if(!chOn) {
-	    Mix_PlayChannel(0, soundSamples[SND_ENGINE], -1);
-	    chOn = 1;
-	  } 
-#endif
-	} else {
-#ifdef HAVE_SOUND
-	  Mix_ExpireChannel(0, 10);
-	  chOn = 0;
-#endif
+	//-------------------------------------------
+	// Move level as applicable
+	if (numasts <= 0)
+	{
+		char tempString[256];
+		Glevel++;
+
+		std::ostringstream ss;
+		ss << "Entering Level " << Glevel;
+		std::string st = ss.str();
+		set_scrolling_message( st );
+
+		numasts = 0;
+		GenerateAsteroids();
+		PlayerShip.addMaxPower(2);
+		PlayerShip.addRegPower(1);
+		if (Glevel != 1)
+			backdrop_alpha = 1.0f;
 	}
 
-	if (keystatebuffer[SDLK_DOWN])
-	  PlayerShip.shieldOn();
-	else
-	  PlayerShip.shieldOff();
-	
-	if (keystatebuffer[SDLK_b])
-	  PlayerShip.Brake();
-
-	
-	
-	if (numasts <= 0) {
-	  char tempString[256];
-	  Glevel++;
-	  sprintf(tempString, "Entering Level %d", Glevel);
-	  MakeGlobalMessage(tempString);
-	  numasts = 0;
-	  GenerateAsteroids();
-	  PlayerShip.addMaxPower(2);
-	  PlayerShip.addRegPower(1);
-	  if(Glevel != 1) alpha_anim = 1.0f;
+	//---------------------------------------------
+	// Generate Aliens
+	if (!( rand() % LevelOdds(32, 4050, 1) )
+			|| (shipInvasion && !(rand() % 50)))
+	{
+		if (Glevel > 6 && !(rand() % 15) && !shipInvasion)
+			shipInvasion = 10;
+		if (shipInvasion)
+			shipInvasion--;
+		if (shipInvasion < 0)
+			shipInvasion = 0;
+		int j;
+		m_manager.register_object( new Alien );
+		PlaySound(SND_ENEMY);
 	}
 
-	
-	if(!(rand()%LevelOdds(32, 4050, 1)) || (shipInvasion && !(rand()%50))) {
-	  if(Glevel > 6 && !(rand()%15) && !shipInvasion) shipInvasion = 10;
-	  if(shipInvasion) shipInvasion--;
-	  if(shipInvasion < 0) shipInvasion = 0;
-	  int j;
-	  j = GetOpenObject();
-	  ObjectList[j] = new Enemy;
-	  PlaySound(SND_ENEMY);
-	}
-	
+	//-----------------------------------------------
+	// Generate powerups
 
-	if (!(rand()%250) && !ClassicMode) {
-	  int j;
-	  j = GetOpenObject();
-	  ObjectList[j] = new PowerUp;
+	// Create a power up :)
+	if (!(rand() % /* 250 */ 25 ) && !ClassicMode)
+	{
+		m_manager.register_object( new PowerUp );
 	}
 
-	
-	dead += MoveObjects();
-	if(deathTimer == 0) { dead = 1; deathTimer = -1; aegg = 1; }
 
-	if(dead == 1) {
-	  PlaySound(SND_BOOM_C);
-	  int j;
-	  strcpy(pstr, "Press s to start");
-	  PlayerShip.death();
-	  PlayerShip.SetDeadStick(1);
-	  if(PlayerShip.ships() <= 0) { 
-	    finalDead = 20;
-	    sastWantTicks = 1;
-	  }    
-	  
-	  j = GetOpenObject();
-	  ObjectList[j] = new Explosion( PlayerShip.GetX(),
-					 PlayerShip.GetY(),
-					 PlayerShip.VelX(),
-					 PlayerShip.VelY());
-	  dead++;
-	  PlayerShip.Reset();
-	  shipInvasion = 0;
-	  PlayerShip.SetDeadStick(1);
-	} else if(dead > 1) { 
-	  strcpy(pstr, "Press s to start");
-	  dead = 2;
+	m_manager.move_game_time( 33 );
+	//if (deathTimer == 0)
+	//{
+		//PlayerShip.destroy();
+		//deathTimer = -1;
+		//aegg = 1;
+	//}
+
+	if( PlayerShip.get_disabled() && !death_displayed)
+	{
+		shipInvasion = 0;
+		death_displayed = true;
+		keylock_timer = 10;
+
+		if (PlayerShip.ships() <= 0)
+		{
+			set_scrolling_message( "Game Over!" );
+			game_over = true;
+		}
+
+		Mix_ExpireChannel(0,10);
 	}
-	
+
 	FinishedLastCall = 1;
-      }
-      
-      Ui::predraw();
-      if(BackdropOn && Ui::WIDTH() <= 640 &&
-	 Ui::HEIGHT() <= 400) {
-	Backdrops[Glevel%NUM_BACKS].putA(0, Ui::HEIGHT());
-#ifdef WANT_OPENGL
-	if(alpha_anim > 0.0f) {
-	  Backdrops[(Glevel-1)%NUM_BACKS].putA(0, Ui::HEIGHT(), 0.0f, alpha_anim);
-	  alpha_anim -= 0.05f;
+}
+
+
+
+void Sasteroids::keystate_actions()
+{
+	if( !PlayerShip.get_disabled() )
+	{
+		// Rotation
+		if( keystatebuffer[SDLK_RIGHT])
+			PlayerShip.set_angular_velocity( -10 );
+		else if( keystatebuffer[SDLK_LEFT])
+			PlayerShip.set_angular_velocity( 10 );
+		else
+			PlayerShip.set_angular_velocity( 0 );
+
+		// Thrust
+		if( keystatebuffer[SDLK_UP])
+		{
+			PlayerShip.Thrust(0.15f);
+			if (!chOn)
+			{
+				Mix_PlayChannel(0, soundSamples[SND_ENGINE], -1);
+				chOn = 1;
+			}
+		} else if( chOn ) {
+			Mix_ExpireChannel(0,10);
+			chOn = 0;
+		}
+
+		// Shield
+		if (keystatebuffer[SDLK_DOWN])
+			PlayerShip.shieldOn();
+		else
+			PlayerShip.shieldOff();
+
+		// Brake
+		if (keystatebuffer[SDLK_b])
+			PlayerShip.Brake();
 	}
-#endif
-      } else {
-	Ui::clearscreen();
-      }
-      DrawObjects();
-      botline();
-
-      if(dead) {
-	int x, y;
-
-	x = int(ScreenLimits.GetX());
-	y = int(ScreenLimits.GetY());
-	x = x / 2;
-	y = y / 2;
-	
-	if(flashShip > 24 || flashShip < 0) flashShip = 0;
-	flashShip++;
-	
-	if(flashShip >  12 && !finalDead) {
-	  Gbit[BIT_PLAYER].put(x, y);
-	}
-	
-	if(finalDead) {
-	  strcpy(pstr, "Game Over - Hit a key to return to the menu.");
-	  Ui::CenterXText(180-finalDead*10, pstr);
-	} else {
-	  Ui::CenterXText(180, pstr);
-	}
-
-	if(aegg && finalDead) {
-	  strcpy(pstr, "Strange, the only way to win is to not play.");
-	  Ui::CenterXText(140, pstr);
-	}
-      }
-      
-      if(gMsgTimeLeft > 0) {
-	Ui::CenterXText(gMsgTimeLeft, globalMessage);
-      }
-
-      if(!sastWantTicks) {
-	Ui::CenterText(pstr);
-	FinishedLastCall = 1;
-      }
-      
-      sounddisplay();
-      Ui::updateScreen();
-    }
-  }
-
-#ifdef HAVE_SOUND
-  Mix_ExpireChannel(0, 0); // Always kill jet sound.
-#endif
-
-  SDL_RemoveTimer(timer);
 }
 
 
@@ -754,22 +921,24 @@ void HandleCommandLine(int argc, char** argv)
 ///////////////////////////////////////////////////////////
 // Actions for the main menu
 
-void MainMenuQuit(int* done) 
+void main_menu_quit( int* p_done )
 {
-  *done = 1;
+	*p_done = 1;
 }
 
 
-void MainMenuPlay(int* done) 
+void main_menu_play( int* p_done )
 {
-  PlayGame();
+	Sasteroids game_object;
+	game_object.run();
 }
 
 
-void MainMenuInformation(int* done)
+void main_menu_information( int* done )
 {
-  char *tStringList[] =
-    { "SDL Sasteroids Version " VERSION,
+	const char *information_cstr[14] =
+    {
+      "SDL Sasteroids Version " VERSION,
       " ",
       " LEFT ARROW Turn ship Left",
       " RIGHT ARRW Turn ship Right",
@@ -783,49 +952,50 @@ void MainMenuInformation(int* done)
       " Q - Quit",
       " ",
       "Return to Game",
-      NULL};
+    };
 
-  SBitmap mouse("graphics/mouse.png");
-  GraphicsMenu MainMenu(&mouse, &titleScreen, tStringList);
+	std::vector< std::string > information( &information_cstr[0], &information_cstr[14] );
+	ScreenBitmap mouse("graphics/mouse.png");
+	GraphicsMenu information_menu( &mouse, &titleScreen, information );
   
-  /* Run the Main Menu */
+	/* Run the Main Menu */
   
-  MainMenu.setAction(13, MainMenuQuit);
-  
-  MainMenu.enableSound(SND_FIRE);
-  MainMenu.setTopPad(26.0f);
-  MainMenu.setMinSelectable(13);
-  MainMenu.RunMenu();
+	information_menu.setAction(13, main_menu_quit);
+  	information_menu.enableSound(SND_FIRE);
+	information_menu.setTopPad(26.0f);
+	information_menu.setMinSelectable(13);
+	information_menu.run_menu();
 }
 
 
-void MainMenuCredits(int *done)
+void main_menu_credits(int *done)
 {
-  char *tStringList[] =
+	const char *credits_cstr[11] =
     {
-      "SDL Sasteroids Version " VERSION,     // 0
-      " ",                                   // 1
-      " ",                                   // 2
-      "(C)opyright 1991 - 2003",             // 3
-      "Contributers:",                       // 4
-      "Andrew McCall, Brad Pitzel, Digisin", // 5
-      " ",                                   // 6
-      "Backdrops:",                          // 7
-      "From Nasa Image Collection",          // 8
-      " ",                                   // 9
-      "Return to Game",                      // 10
-      NULL
+    	"SDL Sasteroids Version " VERSION,     	// 0
+    	" ",                                   	// 1
+    	" ",                                   	// 2
+    	"(C)opyright 1991 - 2003",             	// 3
+    	"Contributers:",                       	// 4
+    	"Andrew Mulbrook, Brad Pitzel, Digisin",// 5
+    	" ",                                   	// 6
+    	"Backdrops:",                          	// 7
+    	"From Nasa Image Collection",          	// 8
+    	" ",                                   	// 9
+    	"Return to Game",                      	// 10
     };
 
-  SBitmap mouse("graphics/mouse.png");
-  GraphicsMenu MainMenu(&mouse, &titleScreen, tStringList);
-  
-  MainMenu.setAction(10, MainMenuQuit);
+	std::vector<std::string> credits(&credits_cstr[0], &credits_cstr[11]);
 
-  MainMenu.enableSound(SND_FIRE);
-  MainMenu.setTopPad(26.0f);
-  MainMenu.setMinSelectable(10);
-  MainMenu.RunMenu();
+	ScreenBitmap mouse( "graphics/mouse.png" );
+	GraphicsMenu credits_menu( &mouse, &titleScreen, credits );
+
+	credits_menu.setAction(10, main_menu_quit);
+
+	credits_menu.enableSound(SND_FIRE);
+	credits_menu.setTopPad(26.0f);
+	credits_menu.setMinSelectable(10);
+	credits_menu.run_menu();
 }
 
 
@@ -834,14 +1004,14 @@ void MainMenuCredits(int *done)
 // Starts all the tasks, etc...
 int main(int argc, char *argv[])
 {
-  char *tStringList[] =
+  const char *main_menu_cstr[5] =
     { "SDL Sasteroids Version " VERSION,
       "INFORMATION",
       "CREDITS",
       "START GAME",
-      "QUIT",
-      NULL
+      "QUIT"
     };
+  std::vector< std::string > main_menu_strings( &main_menu_cstr[0], &main_menu_cstr[5] );
   
   srand((unsigned int) time(NULL));
 
@@ -851,8 +1021,6 @@ int main(int argc, char *argv[])
   HandleCommandLine(argc, argv);
   InitializeHiScores();
 
-
-#ifdef HAVE_SOUND
   if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024)==-1) {
     throw "Couldn't initialize sound";
   }
@@ -860,38 +1028,30 @@ int main(int argc, char *argv[])
   Mix_AllocateChannels(16);
   Mix_ReserveChannels(1);  // for jet engine!
   Mix_Volume( -1, MainVolume);
-#endif
 
-  FastMath::init(1); 
   Ui::init();
-  SetupObjArray();
 
   LoadBitmaps();
   LoadWavs();
   IntegerDisplay::initialize();
 
-  SBitmap mouse("graphics/mouse.png");
-  GraphicsMenu MainMenu(&mouse, &titleScreen, tStringList);
+  ScreenBitmap mouse("graphics/mouse.png");
+  GraphicsMenu main_menu( &mouse, &titleScreen, main_menu_strings );
 
   /* Run the Main Menu */
 
-  MainMenu.setAction(1, MainMenuInformation);
-  MainMenu.setAction(2, MainMenuCredits);
-  MainMenu.setAction(3, MainMenuPlay);
-  MainMenu.setAction(4, MainMenuQuit);
+  main_menu.setAction(1, main_menu_information);
+  main_menu.setAction(2, main_menu_credits);
+  main_menu.setAction(3, main_menu_play);
+  main_menu.setAction(4, main_menu_quit);
   
-  MainMenu.enableSound(SND_FIRE);
-  MainMenu.setTopPad(26.0f);
-  MainMenu.setMinSelectable(1);
-  MainMenu.RunMenu();
+  main_menu.enableSound(SND_FIRE);
+  main_menu.setTopPad(26.0f);
+  main_menu.setMinSelectable(1);
+  main_menu.run_menu();
 
-#ifdef HAVE_SOUND
   Mix_CloseAudio();
-#endif 
-
-#ifdef HAVE_JOYSTICK
   SDL_JoystickClose(0);
-#endif
 
   // shutdown & restore text mode
   Ui::restore();

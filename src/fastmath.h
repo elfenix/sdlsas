@@ -1,36 +1,62 @@
-// Copyright 1994 Brad Pitzel
-// Modification Copyright Andrew M.
-//
-// Feel free to use/distribute/modify as long as credit/copyrights for myself 
-// are included.
+/*
+ * Copyright (C) 2012 Andrew Mulbrook
+ * Copyright 1994 Brad Pitzel
+ *
+ * Feel free to use/distribute/modify as long as credit/copyrights for myself
+ * are included.
+ */
 
-// File   : FastMath.h[1.0]
-// Changed: FRI OCT-10-2002
+#ifndef _FASTMATH_H_
+#define _FASTMATH_H_
 
-#ifndef __FastMath__
-#define __FastMath__
+class _f_math_priv;
 
-#include "sasteroids.h"
+class f_math
+{
+public:
+	typedef unsigned char angle;
+	enum { TRIGSIZE = 256 };
 
-// Size of trig table - should be power of 2
-const int TRIGSIZE = 256;
+public:
+	f_math();
 
-// change char to match size of trig table (but always use 'unsigned' )
-typedef unsigned char Angle;
+	static inline int pow2( int i )
+	{
+		return 1 << i;
+	}
 
-class FastMath {
-	public:
-		inline static double cos(Angle d) { 
-			return Vcos[d];
-		}
+	static inline unsigned int next_pow2( unsigned int v )
+	{
+		v--;
+		v |= v >> 1;
+		v |= v >> 2;
+		v |= v >> 4;
+		v |= v >> 8;
+		v |= v >> 16;
+		v++;
 
-		inline static double sin(Angle d) {
-			return Vsin[d];
-		}
+		return v;
+	}
+
+	static inline double cos( angle d )
+	{
+		return m_cos[d];
+	}
+
+	static inline double sin( angle d )
+	{
+		return m_sin[d];
+	}
+
+private:
+	static void init_tables();
 	
-		static void init(int verbose=0);
-    private:
-    	static double Vcos[TRIGSIZE], Vsin[TRIGSIZE];
+private:
+	static double m_cos[ TRIGSIZE ];
+	static double m_sin[ TRIGSIZE ];
+
+	friend class _f_math_priv;
 };
+
 
 #endif

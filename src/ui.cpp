@@ -8,7 +8,9 @@
 // Changed: Friday 11-OCT-2002
 
 #include "sasteroids.h"
+using namespace std;
 
+#include <stdexcept>
 
 ///////////////////////////////////////////////////////
 // Static Class (Global) variables.
@@ -30,14 +32,16 @@ void Ui::init()
   SDL_WM_SetCaption("SDL Sasteroids", "SDL Sasteroids");
   SDL_ShowCursor(0);
   
-  if (TTF_Init() < 0) {
-    throw "Couldn't initialize True type font library";
+  if( TTF_Init() < 0 )
+  {
+	  throw std::runtime_error( "Couldn't initialize True type font library" );
   }
   atexit(TTF_Quit);
 
   myfont = TTF_OpenFont("fonts/nicefont.ttf", 24);
-  if (!myfont) {
-    throw "Couldn't open font file";
+  if( !myfont )
+  {
+	  throw std::runtime_error( "Couldn't open font file" );
   }
 
   TTF_SetFontStyle(myfont, TTF_STYLE_NORMAL);
@@ -49,14 +53,14 @@ void Ui::init()
 
 void Ui::restore()
 {
-  TTF_CloseFont(myfont);
+	TTF_CloseFont(myfont);
 }
 
 
 ////////////////////////////////////////////////
 // Text Manipulation
 
-void Ui::CenterText(char* msg)
+void Ui::CenterText( const char* msg )
 {
   int y, x, height, width;
   
@@ -71,26 +75,26 @@ void Ui::CenterText(char* msg)
 }
 
 
-void Ui::CenterXText(int y, char* msg)
+void Ui::CenterXText(int y, const char* msg)
 {
-  int x, height, width;
-  
-  TTF_SizeText(myfont, msg, &width, &height);
-  
-  x = WIDTH() - width;
-  x /= 2;
-  
-  ShowText(x, y, msg); 
+	int x, height, width;
+
+	TTF_SizeText(myfont, msg, &width, &height);
+
+	x = WIDTH() - width;
+	x /= 2;
+
+	ShowText(x, y, msg);
 }
 
 
-void Ui::ShowText(int x, int y, char *msg)
+void Ui::ShowText(int x, int y, const char *msg)
 {
-  ShowTextColor(x, y, msg, 255, 255, 255);
+	ShowTextColor(x, y, msg, 255, 255, 255);
 }
 
 
-void Ui::ShowTextColor(int x, int y, char *msg, char r, char g, char b)
+void Ui::ShowTextColor(int x, int y, const char *msg, char r, char g, char b)
 {
   /* Note: for compatibility with old code, new code should create bitmaps,
      and cache the results.... */
@@ -103,21 +107,15 @@ void Ui::ShowTextColor(int x, int y, char *msg, char r, char g, char b)
   dest.x = x;
   dest.y = y;
 
-#ifndef QUICK_FONTS
   surface = TTF_RenderText_Blended(myfont, msg, mycolor);
-#else
-  surface = TTF_RenderText_Solid(myfont, msg, mycolor);
-#endif
-
   if(!surface) return;
 
-  SBitmap text(surface);
-  text.putA(float(x), Ui::HEIGHT() - float(y));
-  
+  ScreenBitmap text(surface);
+  text.draw_alpha(float(x), Ui::HEIGHT() - float(y));
 }
 
 
-SDL_Surface* Ui::get_text(char* msg, char r, char g, char b)
+SDL_Surface* Ui::get_text( const char* msg, char r, char g, char b)
 {
   SDL_Surface* surface = 0;
   SDL_Color mycolor = { r, g, b};
@@ -131,7 +129,6 @@ void Ui::resync(int newX, int newY)
 {
   Uint32 flags;
 
-#ifdef WANT_OPENGL
   SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 5 );
   SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 5 );
   SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 5 );
@@ -147,32 +144,13 @@ void Ui::resync(int newX, int newY)
   }
 
   predraw();
-
-#else
-  
-  flags = SDL_HWSURFACE | SDL_ANYFORMAT | WANT_FULLSCREEN;
-  if(wantFullScreen) flags |= SDL_FULLSCREEN;
-  myscreen = SDL_SetVideoMode(newX, newY, 16, flags);
-
-  if(!myscreen) {
-    throw "Resize Failed, Bailing out.";
-  }
-
-#endif
-
-
-
 }
 
 
 // update physical screen from virtualScn
 void Ui::updateScreen()
 {
-#ifdef WANT_OPENGL
   SDL_GL_SwapBuffers();
-#else
-  SDL_Flip(myscreen);
-#endif
 }
 
 
@@ -292,25 +270,31 @@ void g_setpixelB4(SDL_Surface* visual, int x, int y, char r, char g, char b)
 
 void getpixel(SDL_Surface *visual, int x, int y, char *r, char *g, char *b)
 {
-  if(!visual) return;
-  if(x < 0 || y < 0) return;
-  if(x > visual->w || y > visual->h) return; 
+  if( !visual ) return;
+  if( x < 0 || y < 0 ) return;
+  if( x > visual->w || y > visual->h ) return;
    
-  switch (visual->format->BytesPerPixel) {
+  switch (visual->format->BytesPerPixel)
+  {
   case 1:
-    g_getpixelB1(visual, x, y, r, g, b);
-    break;
+	  g_getpixelB1(visual, x, y, r, g, b);
+	  break;
+
   case 2:
-    g_getpixelB2(visual, x, y, r, g, b);
-    break;
+	  g_getpixelB2(visual, x, y, r, g, b);
+	  break;
+
   case 3:
-    g_getpixelB3(visual, x, y, r, g, b);
-    break;
+	  g_getpixelB3(visual, x, y, r, g, b);
+	  break;
+
   case 4:
-    g_getpixelB4(visual, x, y, r, g, b);
-    break;
+	  g_getpixelB4(visual, x, y, r, g, b);
+	  break;
+
   default:
-    cerr << "[Warning] getpixel called with unknown bitdepth" << endl;
+	  std::cerr << "[Warning] getpixel called with unknown bitdepth" << std::endl;
+	  break;
   }
 }
 
@@ -335,14 +319,15 @@ void setpixel(SDL_Surface *visual, int x, int y, char r, char g, char b)
     g_setpixelB4(visual, x, y, r, g, b);
     break;
   default:
-    cerr << "[Warning] setpixel called with unknown bitdepth" << endl;
+    std::cerr << "[Warning] setpixel called with unknown bitdepth" << std::endl;
+    break;
   }
 }
 
 
 
-void Ui::predraw() {
-#ifdef WANT_OPENGL
+void Ui::predraw()
+{
   glEnable(GL_TEXTURE_2D);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -353,7 +338,6 @@ void Ui::predraw() {
   glLoadIdentity();
   glViewport(0, 0, 640, 400);
   glOrtho(0, 640, 0, 400, -1, 1);
-#endif
 }
   
 
@@ -377,21 +361,21 @@ void GraphicsStopDraw(SDL_Surface* visual)
 //////////////////////////////////////
 // Integer Display
 
-SBitmap *IntegerDisplay::numbers;
+ScreenBitmap *IntegerDisplay::numbers;
 
 
 void IntegerDisplay::initialize() 
 {
   int i;
   char sstring[2] = { 0, 0 };
-  numbers = new SBitmap[10];
+  numbers = new ScreenBitmap[10];
 
   for(i = 0; i < 10; i++) {
     SDL_Surface* tmp;
 
     sstring[0] = i + '0';
     tmp = Ui::get_text(sstring, 255, 255, 255);
-    numbers[i].LoadSurface(tmp);
+    numbers[i].load_surface(tmp);
     SDL_FreeSurface(tmp);
   }
 }
@@ -422,7 +406,7 @@ void IntegerDisplay::display_integer(int num, float x, float y)
     if(tnum < 0) tnum = 0;
     if(tnum > 9) tnum = 9;
     
-    numbers[tnum].putA(cx, y);
+    numbers[tnum].draw_alpha(cx, y);
     cx += numbers[tnum].width();
 
   } while(tenPower > 1);

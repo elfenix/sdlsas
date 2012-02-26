@@ -5,7 +5,7 @@
 /**********************************************************/
 
 
-void ScreenObject::SetLimits(float x, float y) 
+void GameEntity::set_limits(float x, float y) 
 { 
   ScreenLimits.SetXY(x,y); 
 }
@@ -15,35 +15,35 @@ void ScreenObject::SetLimits(float x, float y)
 /* Constructors/Destructors */
 /**********************************************************/
 
-void ScreenObject::initialize(int type) 
+void GameEntity::initialize(int type) 
 {
   wrapMoves = false;
   isAlive = false;
   position.SetXY(0, 0);
   velocity.SetXY(0, 0);
   accelleration.SetXY(0, 0);
-  mysprite = 0;
+  m_sprite = 0;
   maxspeed = 64.0f;
   objtype = type;
   mysize = 1;  
   angle = 0;
-  rotVel = 0.0;
+  m_angular_velocity = 0.0;
 }
 
 
-ScreenObject::ScreenObject()
+GameEntity::GameEntity()
 {
   initialize(0);
 }
 
 
-ScreenObject::ScreenObject(int type)
+GameEntity::GameEntity(int type)
 {
   initialize(type);
 }
 
 
-ScreenObject::~ScreenObject()
+GameEntity::~GameEntity()
 {
   // not really anything to do ....
 }
@@ -54,16 +54,16 @@ ScreenObject::~ScreenObject()
 /* It's a matter of life and death */
 /**********************************************************/
 
-bool ScreenObject::alive() {
+bool GameEntity::alive() {
   return isAlive;
 }
 
-void ScreenObject::die() 
+void GameEntity::die() 
 {
   isAlive = false;
 }
 
-void ScreenObject::restore()
+void GameEntity::restore()
 {
   isAlive = true;
 }
@@ -74,15 +74,15 @@ void ScreenObject::restore()
 /* Our more virtual members */
 /**********************************************************/
 
-void ScreenObject::draw()
+void GameEntity::draw()
 {
   if (isAlive)
-    if(mysprite)
-      mysprite->put(position.GetX(), position.GetY(), 1.0f, angle);
+    if(m_sprite)
+      m_sprite->draw(position.GetX(), position.GetY(), 1.0f, angle);
 }
 
 
-void ScreenObject::tick()
+void GameEntity::tick()
 {
     float tx, ty;
     float vlimit;
@@ -98,7 +98,7 @@ void ScreenObject::tick()
     }
 
 
-    angle = angle + rotVel;
+    angle = angle + m_angular_velocity;
     while(angle > 360.0f) angle -= 360.0f;
     while(angle < 0.0f) angle += 360.0f;
     
@@ -148,16 +148,16 @@ void ScreenObject::tick()
 /* Bounce! */
 /**********************************************************/
 
-int ScreenObject::bounceStat() const
+int GameEntity::bounceStat() const
 {
   return bounce;
 }
 
-void ScreenObject::setBounceStat(int i) {
+void GameEntity::setBounceStat(int i) {
   bounce = i;
 }
 
-void ScreenObject::setbounce()
+void GameEntity::setbounce()
 {
   setBounceStat(15);
 }
@@ -168,7 +168,7 @@ void ScreenObject::setbounce()
 /* Let's Move! */
 /**********************************************************/
 
-void ScreenObject::randomSpeed(float start, float stop)
+void GameEntity::randomSpeed(float start, float stop)
 {
   int myMod, rRet;
   float ttmp, ttmp2;
@@ -183,15 +183,15 @@ void ScreenObject::randomSpeed(float start, float stop)
 }
 
 
-void ScreenObject::randomDir(float magn)
+void GameEntity::randomDir(float magn)
 {
   int anglef = rand() % 255;
-  velocity.SetXY(FastMath::sin(anglef)*magn, 
-		 FastMath::cos(anglef)*magn);
+  velocity.SetXY(f_math::sin(anglef)*magn, 
+		 f_math::cos(anglef)*magn);
 }
 
 
-void ScreenObject::trim()
+void GameEntity::trim()
 {
   float vlimit = velocity.lengthSqrd();
 
@@ -212,29 +212,29 @@ void ScreenObject::trim()
 /* Rotate dat thang */
 /**********************************************************/
 
-void ScreenObject::rotateLeft() 
+void GameEntity::rotateLeft() 
 {
   addAngle(10.0f);
 }
 
-void ScreenObject::rotateRight() 
+void GameEntity::rotateRight() 
 {
   addAngle(-10.0f);
 }
 
-void ScreenObject::addAngle(float a) 
+void GameEntity::addAngle(float a) 
 {
   angle += a;
   if(angle < 0) angle += 360.0f;
   if(angle > 360.0f) angle -= 360.0f;
 }
 
-float ScreenObject::getAnglef() const
+float GameEntity::getAnglef() const
 {
   return angle;
 }
 
-int ScreenObject::getAngle() const
+int GameEntity::getAngle() const
 {
   float z;
   int a;
@@ -244,9 +244,9 @@ int ScreenObject::getAngle() const
   return a;
 }
 
-void ScreenObject::setRotVel(float a) 
+void GameEntity::set_angular_velocity(float a) 
 {
-  rotVel = a;
+  m_angular_velocity = a;
 }
 
 
@@ -255,72 +255,72 @@ void ScreenObject::setRotVel(float a)
 /**********************************************************/
 
 
-void ScreenObject::SetBitmap(SBitmap* sprite)
+void GameEntity::set_bitmap(ScreenBitmap* sprite)
 {
-  mysprite = sprite;
+  m_sprite = sprite;
   myCenXRef = float(sprite->width())/2.0f; 
   myCenYRef = float(sprite->height())/2.0f; 
 }
 
 
-void ScreenObject::SetWrapMoves(bool a) 
+void GameEntity::set_wrap_moves(bool a) 
 { 
   wrapMoves = a; 
 }
   
   
-void ScreenObject::SetSize(int x, int y)
+void GameEntity::SetSize(int x, int y)
 { 
   size.SetXY((float)x,(float)y); 
 }
   
-void ScreenObject::SetVel(float x, float y) 
+void GameEntity::SetVel(float x, float y) 
 { 
   velocity.SetXY(x,y); 
 }
 
-void ScreenObject::SetAcc(float x, float y)
+void GameEntity::set_acceleration(float x, float y)
 {
   accelleration.SetXY(x,y); 
 }
   
-void ScreenObject::SetXY(float x, float y)
+void GameEntity::SetXY(float x, float y)
 { 
   position.SetXY(x,y); 
 }
 
-void ScreenObject::AddVel(float x, float y)
+void GameEntity::add_velocity(float x, float y)
 { 
   velocity.SetXY(VelX()+x,VelY()+y); 
 }
 
 
-void ScreenObject::settype(int a) 
+void GameEntity::settype(int a) 
 { 
   objtype = a; 
 }
   
-void ScreenObject::setsize(int i) 
+void GameEntity::set_size(int i) 
 { 
   mysize = i; 
 }
 
-void ScreenObject::SetMaxSpeed(float a) 
+void GameEntity::SetMaxSpeed(float a) 
 { 
   maxspeed = a*a; 
 }
   
-void ScreenObject::setmass(float a)
+void GameEntity::set_mass(float a)
 {
   mass = a;
 }
 
-void ScreenObject::SetVel(const Vector& nVelocity)
+void GameEntity::set_velocity(const Vector& nVelocity)
 {
   velocity = nVelocity;
 }
 
-void ScreenObject::SetXY(const Vector& nXY)
+void GameEntity::set_pos(const Vector& nXY)
 {
   position = nXY;
 }
@@ -331,59 +331,59 @@ void ScreenObject::SetXY(const Vector& nXY)
 /* We have signal! */
 /**********************************************************/
 
-float ScreenObject::GetX() const
+float GameEntity::GetX() const
 { 
   return position.GetX(); 
 }
 
-float ScreenObject::GetY() const
+float GameEntity::GetY() const
 { 
   return position.GetY(); 
 }
 
-float ScreenObject::GetWidth() const
+float GameEntity::GetWidth() const
 { 
-  return (float)mysprite->width(); 
+  return (float)m_sprite->width(); 
 }
   
-float ScreenObject::GetHeight() const
+float GameEntity::GetHeight() const
 { 
-  return (float)mysprite->height(); 
+  return (float)m_sprite->height(); 
 }
 
-const Vector& ScreenObject::GetXYVec() const
+const Vector& GameEntity::get_pos() const
 { 
   return position; 
 }
 
-const Vector& ScreenObject::GetVel() const
+const Vector& GameEntity::get_velocity() const
 { 
   return velocity; 
 }
   
-int ScreenObject::type() const
-{ 
-  return objtype; 
+GameEntity::ObjectType GameEntity::type() const
+{
+  return ObjectType( objtype );
 }
   
   
-int ScreenObject::Size() const
+int GameEntity::Size() const
 { 
   return mysize; 
 }
   
-float ScreenObject::VelX() const
+float GameEntity::VelX() const
 { 
   return velocity.GetX(); 
 }
 
-float ScreenObject::VelY() const
+float GameEntity::VelY() const
 { 
   return velocity.GetY(); 
 }
   
 
-float ScreenObject::getMass() const
+float GameEntity::getMass() const
 {
   return mass;
 }

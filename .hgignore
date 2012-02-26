@@ -1,0 +1,22 @@
+syntax: glob
+aclocal.m4
+autom4te.cache
+autoscan.log
+config.h
+config.log
+config.status
+configure
+configure.in
+depcomp
+install-sh
+Makefile
+Makefile.in
+stamp-h1
+*.o
+src/sasteroids
+src/.deps/*
+missing
+*.swp
+.cproject
+.project
+.settings

@@ -17,12 +17,8 @@
 
 #include "sasteroids.h"
 
-#ifdef WANT_OPENGL
-#   include <GL/gl.h>
-#   include <GL/glu.h>
-#else
-/* TODO: No openGL */
-#endif
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 // call before using setpixel or getpixel. =)
 void GraphicsStartDraw(SDL_Surface* visual);
@@ -44,7 +40,7 @@ void getpixel(SDL_Surface *screen, int x, int y, char *r, char *g, char *b);
 
 // Other integers
 extern int wantFullScreen;
-class SBitmap;
+class ScreenBitmap;
 
 
 class Ui 
@@ -55,15 +51,24 @@ class Ui
   static void restore();
   static void resync(int x, int y);
   
-  static void message( int y, char *msg ); // message centered at line y
-  static void message( char *msg ) { message(0,msg); }
-  static void CenterText(char* msg);
-  static void CenterXText(int y, char* msg);
-  static void ShowText(int x, int y, char* msg );
-  static void ShowTextColor(int x, int y, char* msg, char r, char g, char b);
+  static void message( int y, const char *msg ); // message centered at line y
+  static void message( const char *msg ) { message(0,msg); }
+
+  static void CenterText(const std::string& p_str)
+  {
+	  CenterText(p_str.c_str());
+  }
+
+  static void CenterXText(int y, const std::string& p_str) {
+	  CenterXText(y,p_str.c_str());
+  }
+  static void CenterText( const char* msg);
+  static void CenterXText(int y, const char* msg);
+  static void ShowText(int x, int y, const char* msg );
+  static void ShowTextColor(int x, int y, const char* msg, char r, char g, char b);
   static char yesNo( const char *msg );
 
-  static SDL_Surface* get_text(char* msg, char r,char g, char b);
+  static SDL_Surface* get_text( const char* msg, char r,char g, char b);
   
   static int fontHeight()  
     { 
@@ -73,33 +78,24 @@ class Ui
 
   static void inline startpixels()
     {
-#ifdef WANT_OPENGL
-      glDisable(GL_TEXTURE_2D);
-#endif
+      //glDisable(GL_TEXTURE_2D);
     }
 
   static void inline stoppixels()
     {
-#ifdef WANT_OPENGL
-      glEnable(GL_TEXTURE_2D);
-#endif
+      //glEnable(GL_TEXTURE_2D);
     }
 
 
   static void inline setpixel(int x, int y, char r, char g, char b, char a = 255)
     {
-      if(x < 0 || x >= myscreen->w) return;
-      if(y < 0 || y >= myscreen->h) return;
+      //if(x < 0 || x >= myscreen->w) return;
+      //if(y < 0 || y >= myscreen->h) return;
 
-#ifdef WANT_OPENGL
-      char byteBuffer[4] = { r, g, b, a };
+      //char byteBuffer[4] = { r, g, b, a };
 
-      glRasterPos2i(x, y);
-      glDrawPixels(1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &byteBuffer); 
-      
-#else
-      //      (pixelDriver)(myscreen, x, y, r, g, b);
-#endif
+      //glRasterPos2i(x, y);
+      //glDrawPixels(1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &byteBuffer);
     }
 
   static int fontWidth() { return 19; } // Fudged, shouldn't be used...
@@ -108,9 +104,7 @@ class Ui
   static int HEIGHT() { if(myscreen) return myscreen->h; return 0; }
   
   static void clearscreen() {
-#ifdef WANT_OPENGL
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-#endif
   };
   
   static void FullScreen() {
@@ -121,7 +115,7 @@ class Ui
   static void predraw();
 
   
-  friend class SBitmap;
+  friend class ScreenBitmap;
   friend class Bitmap;
   
   static SDL_Surface* myscreen;
@@ -144,7 +138,7 @@ class IntegerDisplay
   static void finish();
 
  private:
-  static SBitmap* numbers;
+  static ScreenBitmap* numbers;
 
 };
 
