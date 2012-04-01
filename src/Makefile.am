@@ -18,7 +18,7 @@ sasteroids_SOURCES = \
     sasteroids.cpp \
     ScreenBitmap.cpp \
     Spinner.cpp \
-    ui.cpp
+    UserInterfaceManager.cpp
 
 sasteroids_LDADD = $(GL_LIBS) $(SDL_LIBS)
 

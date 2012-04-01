@@ -1,5 +1,5 @@
 #include "GraphicsMenu.hpp"
-#include "ui.h"
+#include "UserInterfaceManager.hpp"
 
 GraphicsMenu::GraphicsMenu( ScreenBitmap* tmouse, ScreenBitmap* tback,
         const std::vector< std::string >& text ) :

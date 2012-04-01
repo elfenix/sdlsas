@@ -72,7 +72,7 @@ int LevelOdds( int lvlMax, int maxChance, int lvlStep = 1 );
 
 #include "fastmath.h"
 #include "vector.h"
-#include "ui.h"
+#include "UserInterfaceManager.hpp"
 #include "ScreenBitmap.hpp"
 #include "fastmath.h"
 #include "GameEntity.hpp"
