@@ -11,28 +11,26 @@
 #include "sasteroids.h"
 #include "GameEntity.hpp"
 
-class Spinner : public GameEntity
+class Spinner: public GameEntity
 {
- public:
-	Spinner();
+public:
+    Spinner();
 
-	virtual bool check_bounce( const GameEntity& p_other ) const;
-	virtual bool check_collide( const GameEntity& p_other ) const;
-	virtual bool destructive_collision( const GameEntity& p_hitter );
+    virtual bool check_bounce( const GameEntity& p_other ) const;
+    virtual bool check_collide( const GameEntity& p_other ) const;
+    virtual bool destructive_collision( const GameEntity& p_hitter );
 
-	virtual void SetBitmap();
-	virtual void tick();
-	virtual void draw();
+    virtual void SetBitmap();
+    virtual void tick();
+    virtual void draw();
 
-
-	inline int morph()
-	{
-		return morphStage;
-	}
+    inline int morph()
+    {
+        return morphStage;
+    }
 
 private:
-	int morphStage, isEvil, hitCount;
+    int morphStage, isEvil, hitCount;
 };
-
 
 #endif /* SPINNER_HPP_ */

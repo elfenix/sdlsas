@@ -28,46 +28,51 @@
 class ScreenBitmap
 {
 private:
-	typedef struct {
-		GLfloat x1, y1;
-		GLfloat x2, y2;
-	} TexCoord;
+    typedef struct
+    {
+        GLfloat x1, y1;
+        GLfloat x2, y2;
+    } TexCoord;
 
 public:
-	ScreenBitmap();
-	ScreenBitmap( const char *file );
-	ScreenBitmap( SDL_Surface* surface );
-	ScreenBitmap( const ScreenBitmap& pb );
+    ScreenBitmap();
+    ScreenBitmap( const char *file );
+    ScreenBitmap( SDL_Surface* surface );
+    ScreenBitmap( const ScreenBitmap& pb );
 
-	~ScreenBitmap();
+    ~ScreenBitmap();
 
-	void load_image( const char* path );
-	void load_surface( SDL_Surface* surface );
+    void load_image( const char* path );
+    void load_surface( SDL_Surface* surface );
 
-	void draw(float x, float y, float sf = 1.0f, float rotate = 1.0f, float layer = 0.0f);
-	void draw_alpha(float x, float y, float layer = 0.0f, float alpha = 1.0f);
+    void draw( float x, float y, float sf = 1.0f, float rotate = 1.0f,
+            float layer = 0.0f );
+    void draw_alpha( float x, float y, float layer = 0.0f, float alpha = 1.0f );
 
-	inline float width() const
-	{
-	  return m_width;
-	};
+    inline float width() const
+    {
+        return m_width;
+    }
+    ;
 
-	inline float height() const
-	{
-	  return m_height;
-	};
+    inline float height() const
+    {
+        return m_height;
+    }
+    ;
 
 private:
-	static GLuint GL_LoadTexture(SDL_Surface *surface, ScreenBitmap::TexCoord& texcoord);
+    static GLuint GL_LoadTexture( SDL_Surface *surface,
+            ScreenBitmap::TexCoord& texcoord );
 
 private:
-	GLuint		m_texture;
-	bool   		m_texture_owned;
-	GLfloat 	m_width;
-	GLfloat		m_height;
-	GLfloat		m_half_width;
-	GLfloat		m_half_height;
-	TexCoord	m_tex_coord;
+    GLuint m_texture;
+    bool m_texture_owned;
+    GLfloat m_width;
+    GLfloat m_height;
+    GLfloat m_half_width;
+    GLfloat m_half_height;
+    TexCoord m_tex_coord;
 };
 
 #endif

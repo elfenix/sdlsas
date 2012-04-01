@@ -8,44 +8,44 @@
 class GraphicsMenu
 {
 public:
-	typedef void (*GraphicsMenuAction)(int* done);
+    typedef void (*GraphicsMenuAction)( int* done );
 
 public:
-	GraphicsMenu(ScreenBitmap* mouse, ScreenBitmap* backdrop,
-			const std::vector< std::string >& textEntries);
-	virtual ~GraphicsMenu();
+    GraphicsMenu( ScreenBitmap* mouse, ScreenBitmap* backdrop,
+            const std::vector< std::string >& textEntries );
+    virtual ~GraphicsMenu();
 
-	void run_menu();
+    void run_menu();
 
-	void setAction(int j, GraphicsMenuAction action);
+    void setAction( int j, GraphicsMenuAction action );
 
-	void setTopPad(float y);
-	void enableSound(int num);
+    void setTopPad( float y );
+    void enableSound( int num );
 
-	void setMinSelectable(int min);
-	void setMaxSelectable(int max);
+    void setMinSelectable( int min );
+    void setMaxSelectable( int max );
 
 private:
-    int get_mouse_selection(float p_x, float p_y );
+    int get_mouse_selection( float p_x, float p_y );
     void get_mouse_state( float& p_x, float& p_y );
 
 private:
-	std::vector<ScreenBitmap>		m_menu_strings;
-	std::vector<ScreenBitmap>		m_highlight_strings;
-	std::vector<GraphicsMenuAction>	m_actions;
+    std::vector< ScreenBitmap > m_menu_strings;
+    std::vector< ScreenBitmap > m_highlight_strings;
+    std::vector< GraphicsMenuAction > m_actions;
 
-	ScreenBitmap* m_mouse;
-	ScreenBitmap* m_backdrop;
-	SDL_Rect* m_activeRegions;
+    ScreenBitmap* m_mouse;
+    ScreenBitmap* m_backdrop;
+    SDL_Rect* m_activeRegions;
 
-	float m_topPad;
+    float m_topPad;
 
-	int m_minSelect;
-	int m_maxSelect;
+    int m_minSelect;
+    int m_maxSelect;
 
-	int m_num_entries;
-	int m_soundOn;
-	float m_menu_height;
+    int m_num_entries;
+    int m_soundOn;
+    float m_menu_height;
 };
 
 #endif

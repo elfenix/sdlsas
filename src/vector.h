@@ -74,213 +74,211 @@ template< typename Ftype >
 class Vector2D
 {
 public:
-	Vector2D(const Ftype& x, const Ftype& y) :
-			m_x(x), m_y(y)
-	{
-		m_x = x;
-		m_y = y;
-	}
+    Vector2D( const Ftype& x, const Ftype& y ) :
+            m_x( x ), m_y( y )
+    {
+        m_x = x;
+        m_y = y;
+    }
 
-	Vector2D(const Ftype a[2]) :
-			m_x(a[0]), m_y(a[1])
-	{
-	}
+    Vector2D( const Ftype a[2] ) :
+            m_x( a[0] ), m_y( a[1] )
+    {
+    }
 
-	Vector2D() :
-			m_x(0.0), m_y(0.0)
-	{
-	}
+    Vector2D() :
+            m_x( 0.0 ), m_y( 0.0 )
+    {
+    }
 
-	Vector2D(const Vector2D<Ftype>& copy) :
-			m_x(copy.m_x), m_y(copy.m_y)
-	{
-	}
+    Vector2D( const Vector2D< Ftype >& copy ) :
+            m_x( copy.m_x ), m_y( copy.m_y )
+    {
+    }
 
-	void SetXY(const Ftype& x, const Ftype& y)
-	{
-		m_x = x;
-		m_y = y;
-	}
+    void SetXY( const Ftype& x, const Ftype& y )
+    {
+        m_x = x;
+        m_y = y;
+    }
 
-	void SetXY(const Ftype a[2])
-	{
-		m_x = a[0];
-		m_y = a[1];
-	}
+    void SetXY( const Ftype a[2] )
+    {
+        m_x = a[0];
+        m_y = a[1];
+    }
 
-	void AddXY(const Ftype& x, const Ftype& y)
-	{
-		m_x += x;
-		m_y += y;
-	}
+    void AddXY( const Ftype& x, const Ftype& y )
+    {
+        m_x += x;
+        m_y += y;
+    }
 
-	void AddXY(const Ftype a[2])
-	{
-		m_x += a[0];
-		m_y += a[1];
-	}
+    void AddXY( const Ftype a[2] )
+    {
+        m_x += a[0];
+        m_y += a[1];
+    }
 
-	inline const Ftype& GetX() const
-	{
-		return m_x;
-	}
+    inline const Ftype& GetX() const
+    {
+        return m_x;
+    }
 
-	inline const Ftype& GetY() const
-	{
-		return m_y;
-	}
+    inline const Ftype& GetY() const
+    {
+        return m_y;
+    }
 
-	Ftype lengthSqrd() const
-	{
-		return m_x * m_x + m_y * m_y;
-	}
+    Ftype lengthSqrd() const
+    {
+        return m_x * m_x + m_y * m_y;
+    }
 
-	Ftype length() const
-	{
-		return sqrt(m_x * m_x + m_y * m_y);
-	}
+    Ftype length() const
+    {
+        return sqrt( m_x * m_x + m_y * m_y );
+    }
 
-	Ftype length_squared(const Vector2D<Ftype>& p_rh) const
-	{
-		double a = m_x - p_rh.GetX();
-		double b = m_y - p_rh.GetY();
-		return float(a * a + b * b);
-	}
+    Ftype length_squared( const Vector2D< Ftype >& p_rh ) const
+            {
+        double a = m_x - p_rh.GetX();
+        double b = m_y - p_rh.GetY();
+        return float( a * a + b * b );
+    }
 
-	Ftype length(const Vector2D<Ftype>& p_rh) const
-	{
-		return std::sqrt(length_squared(p_rh));
-	}
+    Ftype length( const Vector2D< Ftype >& p_rh ) const
+            {
+        return std::sqrt( length_squared( p_rh ) );
+    }
 
-	Vector2D<Ftype>& operator=(const Vector2D<Ftype>& rh)
-	{
-		m_x = rh.m_x;
-		m_y = rh.m_y;
-		return *this;
-	}
+    Vector2D< Ftype >& operator=( const Vector2D< Ftype >& rh )
+    {
+        m_x = rh.m_x;
+        m_y = rh.m_y;
+        return *this;
+    }
 
-	Vector2D<Ftype> operator%(const Vector2D<Ftype>& rh) const
-	{
-		Vector2D<Ftype> temp;
-		temp.m_x = m_x * rh.m_x - m_y * rh.m_x;
-		temp.m_y = m_y * rh.m_x - m_x * rh.m_y;
-		return temp;
-	}
+    Vector2D< Ftype > operator%( const Vector2D< Ftype >& rh ) const
+            {
+        Vector2D< Ftype > temp;
+        temp.m_x = m_x * rh.m_x - m_y * rh.m_x;
+        temp.m_y = m_y * rh.m_x - m_x * rh.m_y;
+        return temp;
+    }
 
-	Vector2D<Ftype> operator+(const Vector2D<Ftype>& rh) const
-	{
-		Vector2D<Ftype> temp;
-		temp.m_x = m_x + rh.m_x;
-		temp.m_y = m_y + rh.m_y;
-		return temp;
-	}
+    Vector2D< Ftype > operator+( const Vector2D< Ftype >& rh ) const
+            {
+        Vector2D< Ftype > temp;
+        temp.m_x = m_x + rh.m_x;
+        temp.m_y = m_y + rh.m_y;
+        return temp;
+    }
 
-	Vector2D<Ftype> operator-(const Vector2D<Ftype>& rh) const
-	{
-		Vector2D<Ftype> temp;
-		temp.m_x = m_x - rh.m_x;
-		temp.m_y = m_y - rh.m_y;
-		return temp;
-	}
+    Vector2D< Ftype > operator-( const Vector2D< Ftype >& rh ) const
+            {
+        Vector2D< Ftype > temp;
+        temp.m_x = m_x - rh.m_x;
+        temp.m_y = m_y - rh.m_y;
+        return temp;
+    }
 
-	Ftype operator*(const Vector2D<Ftype>& rh) const
-	{
-		return rh.m_x * m_x + rh.m_y * m_y;
-	}
+    Ftype operator*( const Vector2D< Ftype >& rh ) const
+            {
+        return rh.m_x * m_x + rh.m_y * m_y;
+    }
 
-	Vector2D<Ftype> operator*(const Ftype& rh) const
-	{
-		Vector2D<Ftype> a;
-		a.m_x = m_x * rh;
-		a.m_y = m_y * rh;
-		return a;
-	}
+    Vector2D< Ftype > operator*( const Ftype& rh ) const
+            {
+        Vector2D< Ftype > a;
+        a.m_x = m_x * rh;
+        a.m_y = m_y * rh;
+        return a;
+    }
 
-	Vector2D<Ftype> operator/(const Ftype& rh) const
-	{
-		Vector2D<Ftype> a;
-		a.m_x = m_x / rh;
-		a.m_y = m_y / rh;
-		return a;
-	}
+    Vector2D< Ftype > operator/( const Ftype& rh ) const
+            {
+        Vector2D< Ftype > a;
+        a.m_x = m_x / rh;
+        a.m_y = m_y / rh;
+        return a;
+    }
 
-	const Vector2D<Ftype>& operator+=(const Vector2D<Ftype>& rh)
-	{
-		m_x = m_x + rh.m_x;
-		m_y = m_y + rh.m_y;
-		return *this;
-	}
+    const Vector2D< Ftype >& operator+=( const Vector2D< Ftype >& rh )
+    {
+        m_x = m_x + rh.m_x;
+        m_y = m_y + rh.m_y;
+        return *this;
+    }
 
-	const Vector2D<Ftype>& operator-=(const Vector2D<Ftype>& rh)
-	{
-		m_x = m_x - rh.m_x;
-		m_y = m_y - rh.m_y;
-		return *this;
-	}
+    const Vector2D< Ftype >& operator-=( const Vector2D< Ftype >& rh )
+    {
+        m_x = m_x - rh.m_x;
+        m_y = m_y - rh.m_y;
+        return *this;
+    }
 
-	const Vector2D<Ftype>& operator*=(const float& rh)
-	{
-		m_x = m_x * rh;
-		m_y = m_y * rh;
-		return *this;
-	}
+    const Vector2D< Ftype >& operator*=( const float& rh )
+    {
+        m_x = m_x * rh;
+        m_y = m_y * rh;
+        return *this;
+    }
 
-	const Vector2D<Ftype>& operator /=(const float& rh)
-	{
-		m_x = m_x / rh;
-		m_y = m_y / rh;
-		return *this;
-	}
+    const Vector2D< Ftype >& operator /=( const float& rh )
+    {
+        m_x = m_x / rh;
+        m_y = m_y / rh;
+        return *this;
+    }
 
-	bool operator==(const Vector2D<Ftype>& rh) const
-	{
-		return m_x == rh.m_x && m_y == rh.m_y;
-	}
+    bool operator==( const Vector2D< Ftype >& rh ) const
+            {
+        return m_x == rh.m_x && m_y == rh.m_y;
+    }
 
-	bool operator!=(const Vector2D<Ftype>& rh) const
-	{
-		return !(operator==(rh));
-	}
+    bool operator!=( const Vector2D< Ftype >& rh ) const
+            {
+        return !(operator==( rh ));
+    }
 
-	bool operator<(const Vector2D<Ftype>& rh) const
-	{
-		return length() < rh.length();
-	}
+    bool operator<( const Vector2D< Ftype >& rh ) const
+            {
+        return length() < rh.length();
+    }
 
-	bool operator<=(const Vector2D<Ftype>& rh) const
-	{
-		return length() <= rh.length();
-	}
+    bool operator<=( const Vector2D< Ftype >& rh ) const
+            {
+        return length() <= rh.length();
+    }
 
-	bool operator>(const Vector2D<Ftype>& rh) const
-	{
-		return length() > rh.length();
-	}
+    bool operator>( const Vector2D< Ftype >& rh ) const
+            {
+        return length() > rh.length();
+    }
 
-	bool operator>=(const Vector2D<Ftype>& rh) const
-	{
-		return length() >= rh.length();
-	}
+    bool operator>=( const Vector2D< Ftype >& rh ) const
+            {
+        return length() >= rh.length();
+    }
 
-	template< typename F>
-	friend const Vector2D<F> operator*(const F& x, const Vector2D<F>& rh);
+    template< typename F >
+    friend const Vector2D< F > operator*( const F& x, const Vector2D< F >& rh );
 
 private:
-	Ftype m_x;
-	Ftype m_y;
+    Ftype m_x;
+    Ftype m_y;
 };
 
-
 template< typename Ftype >
-const Vector2D<Ftype> operator*(const Ftype& x, const Vector2D<Ftype>& rh)
+const Vector2D< Ftype > operator*( const Ftype& x, const Vector2D< Ftype >& rh )
 {
-	Vector2D<Ftype> temp;
-	temp.m_x = rh.m_x * x;
-	temp.m_y = rh.m_y * x;
-	return temp;
+    Vector2D< Ftype > temp;
+    temp.m_x = rh.m_x * x;
+    temp.m_y = rh.m_y * x;
+    return temp;
 }
 
-typedef Vector2D<float> Vector;
-
+typedef Vector2D< float > Vector;
 
 #endif

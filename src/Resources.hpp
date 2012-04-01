@@ -53,6 +53,6 @@ extern ScreenBitmap bmp_player_thrust;
 
 void LoadBitmaps();
 void LoadWavs();
-void PlaySound(int soundNumber);
+void PlaySound( int soundNumber );
 
 #endif /* RESOURCES_HPP_ */

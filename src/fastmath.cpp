@@ -18,7 +18,10 @@ double f_math::m_sin[TRIGSIZE];
 class _f_math_priv
 {
 public:
-	_f_math_priv() { f_math::init_tables(); }
+    _f_math_priv()
+    {
+        f_math::init_tables();
+    }
 };
 
 static _f_math_priv initialize_tables;
@@ -26,14 +29,14 @@ static _f_math_priv initialize_tables;
 // Routine to build tables
 void f_math::init_tables()
 {
-	double radian;
-	int i;
+    double radian;
+    int i;
 
-	for( int i = 0; i < TRIGSIZE; i++ )
-	{
-		radian = (M_PI / 180.0) * (double) i * (360.0 / (double) TRIGSIZE);
+    for( int i = 0; i < TRIGSIZE; i++ )
+    {
+        radian = (M_PI / 180.0) * (double) i * (360.0 / (double) TRIGSIZE);
 
-		m_cos[i] = std::cos(radian);
-		m_sin[i] = std::sin(radian);
-	}
+        m_cos[i] = std::cos( radian );
+        m_sin[i] = std::sin( radian );
+    }
 }

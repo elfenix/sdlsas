@@ -27,7 +27,6 @@
 // Run in fullscreen mode by default? (Comment to disable)
 // #define WANT_FULLSCREEN SDL_FULLSCREEN
 
-
 #ifndef WANT_FULLSCREEN
 #define WANT_FULLSCREEN 0 
 #else

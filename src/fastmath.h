@@ -14,49 +14,51 @@ class _f_math_priv;
 class f_math
 {
 public:
-	typedef unsigned char angle;
-	enum { TRIGSIZE = 256 };
+    typedef unsigned char angle;
+    enum
+    {
+        TRIGSIZE = 256
+    };
 
 public:
-	f_math();
+    f_math();
 
-	static inline int pow2( int i )
-	{
-		return 1 << i;
-	}
+    static inline int pow2( int i )
+    {
+        return 1 << i;
+    }
 
-	static inline unsigned int next_pow2( unsigned int v )
-	{
-		v--;
-		v |= v >> 1;
-		v |= v >> 2;
-		v |= v >> 4;
-		v |= v >> 8;
-		v |= v >> 16;
-		v++;
+    static inline unsigned int next_pow2( unsigned int v )
+    {
+        v--;
+        v |= v >> 1;
+        v |= v >> 2;
+        v |= v >> 4;
+        v |= v >> 8;
+        v |= v >> 16;
+        v++;
 
-		return v;
-	}
+        return v;
+    }
 
-	static inline double cos( angle d )
-	{
-		return m_cos[d];
-	}
+    static inline double cos( angle d )
+    {
+        return m_cos[d];
+    }
 
-	static inline double sin( angle d )
-	{
-		return m_sin[d];
-	}
+    static inline double sin( angle d )
+    {
+        return m_sin[d];
+    }
 
 private:
-	static void init_tables();
-	
-private:
-	static double m_cos[ TRIGSIZE ];
-	static double m_sin[ TRIGSIZE ];
+    static void init_tables();
 
-	friend class _f_math_priv;
+private:
+    static double m_cos[TRIGSIZE];
+    static double m_sin[TRIGSIZE];
+
+    friend class _f_math_priv;
 };
-
 
 #endif

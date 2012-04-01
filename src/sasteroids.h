@@ -35,7 +35,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-
 #define JOY_A 0
 #define JOY_B 1
 #define JOY_C 2
@@ -44,9 +43,8 @@
 #define JOY_X 0
 #define JOY_Y 1
 
-
 // Constants. (tune game here)
-const int   GAME_CLOCK    = 33;           // Number of msec(33) between ticks.
+const int GAME_CLOCK = 33; // Number of msec(33) between ticks.
 
 #include "vector.h"
 
@@ -61,7 +59,6 @@ extern Player PlayerShip;
 extern int score, Glevel, numasts, oldscore;
 extern int BackdropOn, wantFullScreen;
 
-
 extern int eeggU, eeggD, eeggL, eeggR, eeggS;
 
 extern char HiScoreStrings[10][10];
@@ -70,11 +67,8 @@ extern int HiScoreNumbers[10];
 extern char globalMessage[256];
 extern int gMsgTimeLeft;
 
-
-void MakeGlobalMessage(char* Tstring);
-int LevelOdds(int lvlMax, int maxChance, int lvlStep = 1);
-
-
+void MakeGlobalMessage( char* Tstring );
+int LevelOdds( int lvlMax, int maxChance, int lvlStep = 1 );
 
 #include "fastmath.h"
 #include "vector.h"
@@ -83,7 +77,5 @@ int LevelOdds(int lvlMax, int maxChance, int lvlStep = 1);
 #include "fastmath.h"
 #include "GameEntity.hpp"
 #include "GraphicsMenu.hpp"
-
-
 
 #endif

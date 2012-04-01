@@ -10,21 +10,18 @@
 
 #include "GameEntity.hpp"
 
-
-class Alien : public GameEntity
+class Alien: public GameEntity
 {
 public:
-	Alien();
-	virtual void tick();
+    Alien();
+    virtual void tick();
 
-	virtual bool check_bounce( const GameEntity& p_other ) const;
-	virtual bool check_collide( const GameEntity& p_other ) const;
-	virtual bool destructive_collision( const GameEntity& p_hitter );
+    virtual bool check_bounce( const GameEntity& p_other ) const;
+    virtual bool check_collide( const GameEntity& p_other ) const;
+    virtual bool destructive_collision( const GameEntity& p_hitter );
 
 private:
-	int lastFire, cBitmap, vChange;
+    int lastFire, cBitmap, vChange;
 };
-
-
 
 #endif /* ALIEN_HPP_ */
