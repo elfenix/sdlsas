@@ -5,20 +5,20 @@
  *      Author: andrew
  */
 
-#ifndef OBJECTMANAGER_H_
-#define OBJECTMANAGER_H_
+#ifndef PLAYINGFIELD_HPP_
+#define PLAYINGFIELD_HPP_
 
-#include "GameEntity.hpp"
+#include <list>
+#include <vector.h>
 
-const int MAX_OBJECTS = 256;
-//extern GameEntity* ObjectList[MAX_OBJECTS];
+class GameEntity;
 
-int CreateAsteroid( float x, float y, float xv, float yv, int type );
 
 class PlayingField
 {
 public:
-    typedef int object_id;
+    typedef std::list<GameEntity*>::iterator entity_iterator;
+    typedef std::list<GameEntity*>::const_iterator entity_const_iterator;
 
 public:
     PlayingField();
@@ -32,20 +32,31 @@ public:
     {
         return m_field_size;
     }
+
     void set_field_size( const Vector& p_field_size )
     {
         m_field_size = p_field_size;
     }
 
-    static object_id get_open_object();
-    object_id register_object( GameEntity* screen_object );
-    int move_game_time( int p_time_ms );
+    void register_object( GameEntity* screen_object );
+    void move_game_time( int p_time_ms );
 
-    static bool check_current_collision( const GameEntity& p_1,
-            const GameEntity& p_2 );
+    bool check_current_collision( const GameEntity& p_1, const GameEntity& p_2 );
+
+protected:
+    entity_iterator begin_nonplayer_entity() {
+        entity_iterator it = m_game_entities.begin();
+        it++;
+        return it;
+    }
+
+    entity_iterator end_nonplayer_entity() {
+        return m_game_entities.end();
+    }
 
 private:
-    Vector m_field_size;
+    Vector                  m_field_size;       ///< Field Dimensions
+    std::list<GameEntity*>  m_game_entities;    ///< All tracked game elements
 };
 
 #include "Alien.hpp"

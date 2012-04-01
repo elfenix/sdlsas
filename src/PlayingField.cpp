@@ -8,7 +8,6 @@
 #include "PlayingField.hpp"
 #include "sasteroids.h"
 
-GameEntity *ObjectList[MAX_OBJECTS];
 Vector ScreenLimits( PLAY_X, PLAY_Y );
 
 PlayingField::PlayingField()
@@ -16,114 +15,102 @@ PlayingField::PlayingField()
     initialize_list();
 }
 
+
 PlayingField::~PlayingField()
 {
 }
+
 
 void PlayingField::initialize_list()
 {
     int i;
 
-    for( i = 1; i < MAX_OBJECTS; i++ )
-    {
-        ObjectList[i] = 0;
-    }
-
-    ObjectList[0] = (GameEntity*) &PlayerShip;
-    ObjectList[0]->set_field( this );
+    m_game_entities.push_back( &PlayerShip );
+    PlayerShip.set_field(this);
 }
+
 
 void PlayingField::free_objects()
 {
-    int i;
-
-    ObjectList[0] = (GameEntity*) &PlayerShip;
-    for( i = 1; i < MAX_OBJECTS; i++ )
+    for( entity_iterator it = begin_nonplayer_entity(); it != end_nonplayer_entity(); it++)
     {
-        if( ObjectList[i] )
-            delete ObjectList[i];
+        GameEntity* entity_ptr = *it;
 
-        ObjectList[i] = 0;
+        if( entity_ptr )
+            delete entity_ptr;
     }
 }
+
 
 void PlayingField::draw_objects()
 {
-    int i;
-    for( i = 0; i < MAX_OBJECTS; i++ )
+    for( entity_iterator it = m_game_entities.begin(); it != m_game_entities.end(); it++ )
     {
-        if( ObjectList[i] && ObjectList[i]->alive() )
-        {
-            ObjectList[i]->draw();
-        }
+        GameEntity* entity_ptr = *it;
+
+        if( entity_ptr && entity_ptr->alive() )
+            entity_ptr->draw();
     }
 }
 
-PlayingField::object_id PlayingField::get_open_object()
+
+void PlayingField::register_object( GameEntity* screen_object )
 {
-    int i;
-
-    for( i = 1; i < MAX_OBJECTS; i++ )
-    {
-        if( !ObjectList[i] )
-            return i;
-    }
-
-    return -1;
+    screen_object->set_field(this);
+    m_game_entities.push_back(screen_object);
 }
 
-PlayingField::object_id PlayingField::register_object(
-        GameEntity* screen_object )
-{
-    object_id openObject = get_open_object();
-    if( openObject == -1 )
-    {
-        delete screen_object;
-        return -1;
-    }
-    ObjectList[openObject] = screen_object;
-    screen_object->set_field( this );
-    return openObject;
-}
 
-int PlayingField::move_game_time( int p_time_ms )
+void PlayingField::move_game_time( int p_time_ms )
 {
-    int i = 0, crash = 0, touched = 0, j = 0;
+    int i = 0, touched = 0, j = 0;
 
     // Loop through every object.
-    for( i = 0; i < MAX_OBJECTS; i++ )
+    for( entity_iterator it = m_game_entities.begin(); it != m_game_entities.end(); it++ )
     {
-        if( ObjectList[i] && ObjectList[i]->alive() )
+        GameEntity* game_entity = *it;
+
+        if( game_entity && game_entity->alive() )
         {
-            ObjectList[i]->tick();
+            game_entity->tick();
 
-            for( j = 1; j < MAX_OBJECTS; j++ )
+            for( entity_iterator check_it = begin_nonplayer_entity(); check_it != end_nonplayer_entity(); check_it++)
             {
-                if( !ObjectList[j] )
-                    continue;
-                if( !ObjectList[j]->alive() )
-                    continue;
-                if( i == j )
-                    continue;
+                GameEntity* check_entity = *check_it;
 
-                if( check_current_collision( *ObjectList[i], *ObjectList[j] ) )
+                if( !check_entity )
+                    continue;
+                if( !check_entity->alive() )
+                    continue;
+                if( check_it == it )
+                    continue;
+                if( check_current_collision( *game_entity, *check_entity ) )
                 {
-                    ObjectList[i]->collision( *ObjectList[j] );
+                    game_entity->collision( *check_entity );
                 }
             }
         }
-        else if( ObjectList[i] && i != 0 )
-        {
-            delete ObjectList[i];
-            ObjectList[i] = 0;
-        }
     }
 
-    return crash;
+    // Clear dead and null elements
+    for( entity_iterator it = begin_nonplayer_entity(); it != end_nonplayer_entity(); )
+    {
+        GameEntity* game_entity = *it;
+
+        if( !game_entity )
+        {
+            it = m_game_entities.erase(it);
+        } else if( !game_entity->alive() ) {
+            delete game_entity;
+            it = m_game_entities.erase(it);
+        } else {
+            it++;
+        }
+    }
 }
 
-bool PlayingField::check_current_collision( const GameEntity& b1,
-        const GameEntity& b2 )
+
+bool PlayingField::check_current_collision( const GameEntity& b1, const GameEntity& b2 )
 {
     float collision_distance = (float) b1.Size() + (float) b2.Size();
     float collision_distance_squared = collision_distance * collision_distance;

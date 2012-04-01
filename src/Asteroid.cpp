@@ -98,7 +98,6 @@ Asteroid* Asteroid::create_asteroid( PlayingField& p_field, float x, float y,
         float xv, float yv, ObjectType type )
 {
     Asteroid *new_asteroid = 0;
-    PlayingField::object_id id;
 
     switch( type )
     {
@@ -118,12 +117,7 @@ Asteroid* Asteroid::create_asteroid( PlayingField& p_field, float x, float y,
         throw std::runtime_error( "Unknown Asteroid Type in CreateAsteroid" );
     }
 
-    id = p_field.register_object( new_asteroid );
-    if( id < 0 )
-    {
-        new_asteroid = 0;
-    }
-
+    p_field.register_object( new_asteroid );
     return new_asteroid;
 }
 
