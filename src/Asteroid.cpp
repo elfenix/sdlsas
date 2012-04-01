@@ -29,96 +29,97 @@ const float MassMedAst    = 4.0f;
 
 ////////////////////////////////////////////////////////////////////////////
 // create asteroids for beginning of each level/game
-void GenerateAsteroids()
-{
-    int i, obj;
-    float x, y;
-    Vector temp;
+void GenerateAsteroids(PlayingField& p_field) {
+	int i, obj;
+	float x, y;
+	Vector temp;
 
-    for (i = 0; i <= (Glevel / 2 + 1) && i <= MAXASTEROIDS; i++) {
-	do {
-	    x = (float) (rand() % 320);
-	    y = (float) (rand() % 200);
-	    temp.SetXY(x, y);
+	for (i = 0; i <= (Glevel / 2 + 1) && i <= MAXASTEROIDS; i++) {
+		do {
+			x = (float) (rand() % 320);
+			y = (float) (rand() % 200);
+			temp.SetXY(x, y);
+		} while (PlayerShip.get_pos().length(temp) < START_DIST);
+
+		Asteroid::create_asteroid(p_field, x, y, rand()%3, rand()%3, Asteroid::ASTEROID_BIG);
+
+		if (!(rand() % 3) && !ClassicMode) {
+			do {
+				x = (float) (rand() % 640);
+				y = (float) (rand() % 400);
+				temp.SetXY(x, y);
+			} while (PlayerShip.get_pos().length(temp) < START_DIST);
+			Asteroid::create_asteroid(p_field, x, y, rand()%5, rand()%5,
+					Asteroid::ASTEROID_MEDIUM);
+		}
+
+		if (!(rand() % 6) && !ClassicMode) {
+			do {
+				x = (float) (rand() % 320);
+				y = (float) (rand() % 200);
+				temp.SetXY(x, y);
+			} while (PlayerShip.get_pos().length(temp) < START_DIST);
+			Asteroid::create_asteroid(p_field, x, y, rand()%7, rand()%7,
+					Asteroid::ASTEROID_SMALL);
+		}
 	}
-	while (PlayerShip.get_pos().length(temp) < START_DIST);
-
-	obj = Asteroid::CreateAsteroid(x, y, 0, 0, Asteroid::ASTEROID_BIG);
-
-	if(ObjectList[obj]) {
-	  ObjectList[obj]->randomDir(0.80f);
-	}
-
-	if(!(rand()%3) && !ClassicMode) {
-	  do {
-	    x = (float) (rand() % 640);
-	    y = (float) (rand() % 400);
-	    temp.SetXY(x, y);
-	  }
-	  while (PlayerShip.get_pos().length(temp) < START_DIST);
-	  obj = Asteroid::CreateAsteroid(x, y, 0, 0, Asteroid::ASTEROID_MEDIUM);
-	  if(ObjectList[obj]) {
-	    ObjectList[obj]->randomDir(1.00f);
-	  }
-	}
-
-	if(!(rand()%6) && !ClassicMode) {
-	  do {
-	    x = (float) (rand() % 320);
-	    y = (float) (rand() % 200);
-	    temp.SetXY(x, y);
-	  }
-	  while (PlayerShip.get_pos().length(temp) < START_DIST);
-	  obj = Asteroid::CreateAsteroid(x, y, 0, 0, Asteroid::ASTEROID_SMALL);
-	  if(ObjectList[obj]) {
-	    ObjectList[obj]->randomDir(2.80f);
-	  }
-	}
-    }
 }
 
 /********************************************/
-/* Utility Functions */
+/* Asteroid                                 */
 /********************************************/
+
+Asteroid::Asteroid()
+{
+	numasts++;
+}
+
+Asteroid::~Asteroid()
+{
+	numasts--;
+}
 
 void Asteroid::create_explosion()
 {
-	PlayingField::register_object(
+	if( get_field() )
+	{
+		get_field()->register_object(
 			new Explosion(GetX(), GetY(), get_velocity().GetX(),
 					get_velocity().GetY()));
+	}
 	PlaySound(SND_BOOM_B);
 }
 
-int Asteroid::CreateAsteroid(float x, float y, float xv, float yv, ObjectType type)
+Asteroid* Asteroid::create_asteroid( PlayingField& p_field, float x, float y, float xv, float yv, ObjectType type)
 {
-	GameEntity *newobject = 0;
-	int openObject;
+	Asteroid *new_asteroid = 0;
+	PlayingField::object_id id;
 
 	switch (type)
 	{
 	case ASTEROID_BIG:
-		openObject = PlayingField::register_object(
-				new LargeAsteroid(x, y, xv, yv));
+		new_asteroid = new LargeAsteroid( x, y, xv, yv );
 		break;
 
 	case ASTEROID_SMALL:
-		openObject = PlayingField::register_object(
-				new SmallAsteroid(x, y, xv, yv));
+		new_asteroid = new SmallAsteroid(x, y, xv, yv);
 		break;
 
 	case ASTEROID_MEDIUM:
-		openObject = PlayingField::register_object(
-				new MediumAsteroid(x, y, xv, yv));
+		new_asteroid = new MediumAsteroid(x, y, xv, yv);
 		break;
 
 	default:
 		throw std::runtime_error("Unknown Asteroid Type in CreateAsteroid");
 	}
 
-	if (openObject < 0)
-		numasts--;
+	id = p_field.register_object( new_asteroid );
+	if( id < 0 )
+	{
+		new_asteroid = 0;
+	}
 
-	return openObject;
+	return new_asteroid;
 }
 
 bool Asteroid::destructive_collision( const GameEntity& p_other )
@@ -174,11 +175,11 @@ SmallAsteroid::SmallAsteroid(float x, float y, float xv, float yv)
 
 void SmallAsteroid::create_children()
 {
-	if( m_evil )
+	if( m_evil && get_field() )
 	{
 		for (angle = 0; angle < 220; angle += 30)
 		{
-			PlayingField::register_object( new Bullet( this->get_pos(), true, angle, type() ) );
+			get_field()->register_object( new Bullet( this->get_pos(), true, angle, type() ) );
 		}
 	}
 }
@@ -227,23 +228,27 @@ void MediumAsteroid::create_children()
 	vx = get_velocity().GetX();
 	vy = get_velocity().GetY();
 
-	CreateAsteroid(px, py, f_math::sin(rA1) * 2.0f + vx,
-			f_math::cos(rA1) * 2.0f + vy, ASTEROID_SMALL);
-
-	CreateAsteroid(px, py, f_math::sin(rA2) * 2.0f + vx,
-			f_math::cos(rA2) * 2.0f + vy, ASTEROID_SMALL);
-
-	do
+	if( get_field() )
 	{
-		rA2 = rand() % 255;
-	} while (abs(rA2 - rA1) < 10 && abs(rA2 - (rA1 + 124)) < 10);
+		PlayingField& field = *get_field();
+		create_asteroid(field, px, py, f_math::sin(rA1) * 2.0f + vx,
+				f_math::cos(rA1) * 2.0f + vy, ASTEROID_SMALL);
 
-	rA1 = int(rA2 + 128) % 255;
-	CreateAsteroid(px, py, f_math::sin(rA1) * 2.0f + vx,
-			f_math::cos(rA1) * 2.0f + vy, ASTEROID_SMALL);
+		create_asteroid(field, px, py, f_math::sin(rA2) * 2.0f + vx,
+				f_math::cos(rA2) * 2.0f + vy, ASTEROID_SMALL);
 
-	CreateAsteroid(px, py, f_math::sin(rA2) * 2.0f + vx,
-			f_math::cos(rA2) * 2.0f + vy, ASTEROID_SMALL);
+		do
+		{
+			rA2 = rand() % 255;
+		} while (abs(rA2 - rA1) < 10 && abs(rA2 - (rA1 + 124)) < 10);
+
+		rA1 = int(rA2 + 128) % 255;
+		create_asteroid(field, px, py, f_math::sin(rA1) * 2.0f + vx,
+				f_math::cos(rA1) * 2.0f + vy, ASTEROID_SMALL);
+
+		create_asteroid(field, px, py, f_math::sin(rA2) * 2.0f + vx,
+				f_math::cos(rA2) * 2.0f + vy, ASTEROID_SMALL);
+	}
 }
 
 /********************************************/
@@ -290,32 +295,37 @@ void LargeAsteroid::create_children()
 	vx = get_velocity().GetX();
 	vy = get_velocity().GetY();
 
-	CreateAsteroid(px, py, f_math::sin(rA1) * 2.0f + vx,
-			f_math::cos(rA1) * 2.0f + vy, ASTEROID_MEDIUM);
-
-	CreateAsteroid(px, py, f_math::sin(rA2) * 2.0f + vx,
-			f_math::cos(rA2) * 2.0f + vy, ASTEROID_MEDIUM);
-
-	do
+	if( get_field() )
 	{
-		rA2 = rand() % 255;
-	} while (abs(rA2 - rA1) < 10 && abs(rA2 - (rA1 + 124)) < 10);
+		PlayingField& field = *get_field();
 
-	rA1 = int(rA2 + 128) % 255;
-	CreateAsteroid(px, py, f_math::sin(rA1) * 2.0f + vx,
-			f_math::cos(rA1) * 2.0f + vy, ASTEROID_MEDIUM);
+		create_asteroid(field, px, py, f_math::sin(rA1) * 2.0f + vx,
+				f_math::cos(rA1) * 2.0f + vy, ASTEROID_MEDIUM);
 
-	if ( /* !(rand() % LevelOdds(16, 7)) */ true )
-	{
-		GameEntity* spinner_ptr = new Spinner;
-		spinner_ptr->SetXY( px, py );
-		spinner_ptr->SetVel(f_math::sin(rA2) * 2.0f + vx,
-				f_math::cos(rA2) * 2.0f + vy);
-		PlayingField::register_object( spinner_ptr );
-	}
-	else
-	{
-		CreateAsteroid(px, py, f_math::sin(rA2) * 2.0f + vx,
+		create_asteroid(field, px, py, f_math::sin(rA2) * 2.0f + vx,
 				f_math::cos(rA2) * 2.0f + vy, ASTEROID_MEDIUM);
+
+		do
+		{
+			rA2 = rand() % 255;
+		} while (abs(rA2 - rA1) < 10 && abs(rA2 - (rA1 + 124)) < 10);
+
+		rA1 = int(rA2 + 128) % 255;
+		create_asteroid(field, px, py, f_math::sin(rA1) * 2.0f + vx,
+				f_math::cos(rA1) * 2.0f + vy, ASTEROID_MEDIUM);
+
+		if ( /* !(rand() % LevelOdds(16, 7)) */ true )
+		{
+			GameEntity* spinner_ptr = new Spinner;
+			spinner_ptr->SetXY( px, py );
+			spinner_ptr->SetVel(f_math::sin(rA2) * 2.0f + vx,
+					f_math::cos(rA2) * 2.0f + vy);
+			field.register_object( spinner_ptr );
+		}
+		else
+		{
+			create_asteroid(field, px, py, f_math::sin(rA2) * 2.0f + vx,
+					f_math::cos(rA2) * 2.0f + vy, ASTEROID_MEDIUM);
+		}
 	}
 }

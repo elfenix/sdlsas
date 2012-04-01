@@ -6,9 +6,9 @@
 /* copyrights for myself and contributors are included.      */
 /*************************************************************/
 
-#include "sasteroids.h"
-#include "ScreenBitmap.hpp"
-#include "fastmath.h"
+#include <sasteroids.h>
+#include <ScreenBitmap.hpp>
+#include <fastmath.h>
 
 #include <stdexcept>
 #include <cstring>
@@ -87,7 +87,7 @@ static void sb_setpixelB4(SDL_Surface* visual, int x, int y, Uint32 color)
 }
 
 
-static GLuint SDL_GL_LoadTexture(SDL_Surface *surface, ScreenBitmap::TexCoord& texcoord)
+GLuint ScreenBitmap::GL_LoadTexture(SDL_Surface *surface, ScreenBitmap::TexCoord& texcoord)
 {
 	Uint32 x = 0, y = 0;
 	Uint32 w = 0, h = 0;
@@ -222,7 +222,7 @@ void ScreenBitmap::load_surface( SDL_Surface* p_surface )
 	m_half_width = m_width / 2.0f;
 	m_half_height = m_height / 2.0f;
 
-	m_texture = SDL_GL_LoadTexture(p_surface, m_tex_coord);
+	m_texture = GL_LoadTexture(p_surface, m_tex_coord);
 	if(!m_texture)
 	{
 		throw std::runtime_error( "Loading texture from surface failed" );
@@ -243,7 +243,7 @@ void ScreenBitmap::load_image( const char* file )
   m_half_width = m_width / 2.0f;
   m_half_height = m_height / 2.0f;
 
-  m_texture = SDL_GL_LoadTexture(surface, m_tex_coord);
+  m_texture = GL_LoadTexture(surface, m_tex_coord);
   if(!m_texture)
   {
 	  throw std::runtime_error( "Could not load texture" );

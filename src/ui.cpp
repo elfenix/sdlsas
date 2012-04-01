@@ -15,18 +15,18 @@ using namespace std;
 ///////////////////////////////////////////////////////
 // Static Class (Global) variables.
 
-SDL_Surface *Ui::myscreen = 0;
-TTF_Font *Ui::myfont = 0;
-
-void (*Ui::pixelDriver)(SDL_Surface* visual, int x, int y, 
-			char r, char g, char b);
-
+SDL_Surface *UserInterfaceManager::myscreen = 0;
+TTF_Font *UserInterfaceManager::myfont = 0;
+ScreenBitmap *UserInterfaceManager::numbers = 0;
 
 ///////////////////////////////////////////////////////
 // Initialize SDL Library and Fonts
 
-void Ui::init()
+void UserInterfaceManager::init()
 {
+  int i;
+  char sstring[2] = { 0, 0 };
+
   resync(SCREEN_X, SCREEN_Y);
   
   SDL_WM_SetCaption("SDL Sasteroids", "SDL Sasteroids");
@@ -45,22 +45,35 @@ void Ui::init()
   }
 
   TTF_SetFontStyle(myfont, TTF_STYLE_NORMAL);
+
+
+  numbers = new ScreenBitmap[10];
+
+  for(i = 0; i < 10; i++) {
+    SDL_Surface* tmp;
+
+    sstring[0] = i + '0';
+    tmp = UserInterfaceManager::get_text(sstring, 255, 255, 255);
+    numbers[i].load_surface(tmp);
+    SDL_FreeSurface(tmp);
+  }
 }
 
 
 ////////////////////////////////////////////////
 // Called when we are done with this library
 
-void Ui::restore()
+void UserInterfaceManager::restore()
 {
 	TTF_CloseFont(myfont);
+	delete [] numbers;
 }
 
 
 ////////////////////////////////////////////////
 // Text Manipulation
 
-void Ui::CenterText( const char* msg )
+void UserInterfaceManager::CenterText( const char* msg )
 {
   int y, x, height, width;
   
@@ -75,7 +88,7 @@ void Ui::CenterText( const char* msg )
 }
 
 
-void Ui::CenterXText(int y, const char* msg)
+void UserInterfaceManager::CenterXText(int y, const char* msg)
 {
 	int x, height, width;
 
@@ -88,13 +101,13 @@ void Ui::CenterXText(int y, const char* msg)
 }
 
 
-void Ui::ShowText(int x, int y, const char *msg)
+void UserInterfaceManager::ShowText(int x, int y, const char *msg)
 {
 	ShowTextColor(x, y, msg, 255, 255, 255);
 }
 
 
-void Ui::ShowTextColor(int x, int y, const char *msg, char r, char g, char b)
+void UserInterfaceManager::ShowTextColor(int x, int y, const char *msg, char r, char g, char b)
 {
   /* Note: for compatibility with old code, new code should create bitmaps,
      and cache the results.... */
@@ -111,11 +124,11 @@ void Ui::ShowTextColor(int x, int y, const char *msg, char r, char g, char b)
   if(!surface) return;
 
   ScreenBitmap text(surface);
-  text.draw_alpha(float(x), Ui::HEIGHT() - float(y));
+  text.draw_alpha(float(x), UserInterfaceManager::HEIGHT() - float(y));
 }
 
 
-SDL_Surface* Ui::get_text( const char* msg, char r, char g, char b)
+SDL_Surface* UserInterfaceManager::get_text( const char* msg, char r, char g, char b)
 {
   SDL_Surface* surface = 0;
   SDL_Color mycolor = { r, g, b};
@@ -125,7 +138,7 @@ SDL_Surface* Ui::get_text( const char* msg, char r, char g, char b)
 }
 
 
-void Ui::resync(int newX, int newY)
+void UserInterfaceManager::resync(int newX, int newY)
 {
   Uint32 flags;
 
@@ -148,185 +161,13 @@ void Ui::resync(int newX, int newY)
 
 
 // update physical screen from virtualScn
-void Ui::updateScreen()
+void UserInterfaceManager::updateScreen()
 {
   SDL_GL_SwapBuffers();
 }
 
 
-///////////////////////////////////////////////////
-// Pixel Functions and drivers.
-
-void g_getpixelB1(SDL_Surface* visual, int x, int y, char *r, char *g, char *b)
-{
-  Uint32 color;
-  Uint8 *ubuff8;
-  
-  ubuff8 = (Uint8 *) visual->pixels;
-  ubuff8 += (y * visual->pitch) + x;
-  color = (Uint32) (*ubuff8);
-  SDL_GetRGB(color, visual->format, (Uint8*) r, (Uint8*) g, (Uint8*) b);
-}
-
-
-void g_setpixelB1(SDL_Surface* visual, int x, int y, char r, char g, char b)
-{
-  Uint32 color;
-  Uint8 *ubuff8;
-  
-  color = SDL_MapRGB(visual->format, r, g, b);
-  ubuff8 = (Uint8 *) visual->pixels;
-  ubuff8 += (y * visual->pitch) + x;
-  *ubuff8 = (Uint8) color;
-}
-
-
-void g_getpixelB2(SDL_Surface* visual, int x, int y, char *r, char *g, char *b)
-{
-  Uint32 color;
-  Uint8 *ubuff8;
-  Uint16 *ubuff16;
-
-  ubuff8 = (Uint8 *) visual->pixels;
-  ubuff8 += (y * visual->pitch) + (x * visual->format->BytesPerPixel);
-  ubuff16 = (Uint16 *) ubuff8;
-  color = (Uint32) *ubuff16;
-  SDL_GetRGB(color, visual->format, (Uint8*) r, (Uint8*) g, (Uint8*) b);
-}
-
-
-void g_setpixelB2(SDL_Surface* visual, int x, int y, char r, char g, char b)
-{
-  Uint32 color;
-  Uint8 *ubuff8;
-  Uint16 *ubuff16;
-
-  color = SDL_MapRGB(visual->format, r, g, b);
-  ubuff8 = (Uint8 *) visual->pixels;
-  ubuff8 += (y * visual->pitch) + (x * visual->format->BytesPerPixel);
-  ubuff16 = (Uint16 *) ubuff8;
-
-  *ubuff16 = (Uint16) color;
-}
-
-
-void g_getpixelB3(SDL_Surface* visual, int x, int y, char *r, char *g, char *b)
-{
-  Uint8 *ubuff8;
-  Uint32 color;
-  
-  ubuff8 = (Uint8 *) visual->pixels;        // This is probably broken.
-  ubuff8 += (y * visual->pitch) + (x * 3);  // TODO: Fix this.
-  
-  color = ((Uint32)ubuff8[2]) << 16;
-  color |= ((Uint32)ubuff8[1]) << 8;
-  color |= ((Uint32)ubuff8[0]);
-  
-  SDL_GetRGB(color, visual->format, (Uint8*)r, (Uint8*)g, (Uint8*)b);  
-}
-
-
-void g_setpixelB3(SDL_Surface* visual, int x, int y, char r, char g, char b)
-{
-  Uint32 color;
-  Uint8 *ubuff8;
-
-  color = SDL_MapRGB(visual->format, r, g, b);
-  ubuff8 = (Uint8 *) visual->pixels;
-  ubuff8 += (y * visual->pitch) + (x * 3);
-  r = (color >> visual->format->Rshift) & 0xFF;
-  g = (color >> visual->format->Gshift) & 0xFF;
-  b = (color >> visual->format->Bshift) & 0xFF;
-  ubuff8[0] = r;
-  ubuff8[1] = g;
-  ubuff8[2] = b;
-}
-
-
-void g_getpixelB4(SDL_Surface* visual, int x, int y, char *r, char *g, char *b)
-{
-  Uint32 color;
-  Uint32* ubuff32;
-
-  ubuff32 = (Uint32 *) visual->pixels;
-  ubuff32 += ((y*visual->pitch) >> 2) + x;
-  color = *ubuff32;
-  
-  SDL_GetRGB(color, visual->format, (Uint8*)r, (Uint8*)g, (Uint8*)b);
-}
-
-
-void g_setpixelB4(SDL_Surface* visual, int x, int y, char r, char g, char b)
-{
-  Uint32 color;
-  Uint32 *ubuff32;
-
-  color = SDL_MapRGB(visual->format, r, g, b);
-  ubuff32 = (Uint32 *) visual->pixels;
-  ubuff32 += ((y * visual->pitch) >> 2) + x;
-  *ubuff32 = color;
-}
-
-
-void getpixel(SDL_Surface *visual, int x, int y, char *r, char *g, char *b)
-{
-  if( !visual ) return;
-  if( x < 0 || y < 0 ) return;
-  if( x > visual->w || y > visual->h ) return;
-   
-  switch (visual->format->BytesPerPixel)
-  {
-  case 1:
-	  g_getpixelB1(visual, x, y, r, g, b);
-	  break;
-
-  case 2:
-	  g_getpixelB2(visual, x, y, r, g, b);
-	  break;
-
-  case 3:
-	  g_getpixelB3(visual, x, y, r, g, b);
-	  break;
-
-  case 4:
-	  g_getpixelB4(visual, x, y, r, g, b);
-	  break;
-
-  default:
-	  std::cerr << "[Warning] getpixel called with unknown bitdepth" << std::endl;
-	  break;
-  }
-}
-
-
-void setpixel(SDL_Surface *visual, int x, int y, char r, char g, char b)
-{
-  if(!visual) return;
-  if(x < 0 || y < 0) return;
-  if(x > visual->w || y > visual->h) return; 
-   
-  switch (visual->format->BytesPerPixel) {
-  case 1:
-    g_setpixelB1(visual, x, y, r, g, b);
-    break;
-  case 2:
-    g_setpixelB2(visual, x, y, r, g, b);
-    break;
-  case 3:
-    g_setpixelB3(visual, x, y, r, g, b);
-    break;
-  case 4:
-    g_setpixelB4(visual, x, y, r, g, b);
-    break;
-  default:
-    std::cerr << "[Warning] setpixel called with unknown bitdepth" << std::endl;
-    break;
-  }
-}
-
-
-
-void Ui::predraw()
+void UserInterfaceManager::predraw()
 {
   glEnable(GL_TEXTURE_2D);
   glEnable(GL_BLEND);
@@ -339,75 +180,37 @@ void Ui::predraw()
   glViewport(0, 0, 640, 400);
   glOrtho(0, 640, 0, 400, -1, 1);
 }
-  
 
 
-void GraphicsStartDraw(SDL_Surface* visual)
-{
-  if(SDL_MUSTLOCK(visual))
-     SDL_LockSurface(visual);
-}
+void UserInterfaceManager::display_integer(int num, float x, float y) {
+	int tenPower = 1;
+	int tnum;
+	float cx;
 
-void GraphicsStopDraw(SDL_Surface* visual)
-{
-  if(SDL_MUSTLOCK(visual))
-    SDL_UnlockSurface(visual);
-}
+	if (num < 0)
+		num = 0;
+	while (tenPower <= num)
+		tenPower *= 10;
 
+	cx = x;
+	do {
+		tnum = num % tenPower;
 
+		if (tenPower != 1)
+			tenPower = tenPower / 10;
+		tnum = tnum / tenPower;
+		if (tnum < 0)
+			tnum = 0;
+		if (tnum > 9)
+			tnum = 9;
 
+		numbers[tnum].draw_alpha(cx, y);
+		cx += numbers[tnum].width();
 
-
-//////////////////////////////////////
-// Integer Display
-
-ScreenBitmap *IntegerDisplay::numbers;
-
-
-void IntegerDisplay::initialize() 
-{
-  int i;
-  char sstring[2] = { 0, 0 };
-  numbers = new ScreenBitmap[10];
-
-  for(i = 0; i < 10; i++) {
-    SDL_Surface* tmp;
-
-    sstring[0] = i + '0';
-    tmp = Ui::get_text(sstring, 255, 255, 255);
-    numbers[i].load_surface(tmp);
-    SDL_FreeSurface(tmp);
-  }
+	} while (tenPower > 1);
 }
 
 
-void IntegerDisplay::finish() 
-{
-  delete [] numbers;
-}
 
 
-void IntegerDisplay::display_integer(int num, float x, float y) 
-{
-  int tenPower = 1;
-  int tnum;
-  float cx;
 
-
-  if(num < 0) num = 0;
-  while(tenPower <= num) tenPower *= 10;
-
-  cx = x;
-  do {
-    tnum = num % tenPower;
-    
-    if(tenPower != 1) tenPower = tenPower / 10;
-    tnum = tnum / tenPower;
-    if(tnum < 0) tnum = 0;
-    if(tnum > 9) tnum = 9;
-    
-    numbers[tnum].draw_alpha(cx, y);
-    cx += numbers[tnum].width();
-
-  } while(tenPower > 1);
-}

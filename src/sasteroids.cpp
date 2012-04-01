@@ -30,7 +30,7 @@ void upscore(int upby);
 
 
 
-PlayingField m_manager;
+PlayingField *m_manager_ptr;
 
 int use_joystick, num_joysticks;
 SDL_Joystick *js;
@@ -118,34 +118,6 @@ void upscore(int up)
 
 
 
-/////////////////////////////////////////////////////////////////////////////
-// sound display - displays the current mixer level
-int sDisplayTimer = 0;
-
-
-void sounddisplay() 
-{
-  int x, x1 = 24;
-  int y = 36;
-
-  if(sDisplayTimer > 0) sDisplayTimer--;
-  if(sDisplayTimer < 0) sDisplayTimer = 0;
-  if(!sDisplayTimer) return;
-
-  Ui::startpixels();
-  for( x = 0; x < MainVolume; x++ ) {
-    Ui::setpixel(x1+x, y, 255-x, (55)+x, 0);
-    Ui::setpixel(x1+x, y+1, 255-x, 55+x, 0);
-    Ui::setpixel(x1+x, y+2, 255-x, 55+x, 0);
-    Ui::setpixel(x1+x, y+3, 255-x, 55+x, 0);
-    Ui::setpixel(x1+x, y+4, 255-x, 55+x, 0);
-  } 
-  Ui::stoppixels();
-
-}
-
-
-
 
 
 
@@ -160,16 +132,16 @@ void botline()
     static int animstage = 200;
     static int animdir = -2;
 
-    IntegerDisplay::display_integer( PlayerShip.get_score(), 10.0f, float(Ui::HEIGHT()) - 2.0f);
-    IntegerDisplay::display_integer( Glevel, Ui::WIDTH()- 40.0f, 20.0f );
+    UserInterfaceManager::display_integer( PlayerShip.get_score(), 10.0f, float(UserInterfaceManager::HEIGHT()) - 2.0f);
+    UserInterfaceManager::display_integer( Glevel, UserInterfaceManager::WIDTH()- 40.0f, 20.0f );
 
     animstage += animdir;
     if(animstage < 155)  animdir = -animdir;
     if(animstage > 205) animdir = -animdir;
     GLfloat anim_alpha = GLfloat( double( animstage ) / 255.0 );
 
-    y = Ui::HEIGHT() - 20;
-    x1 = Ui::WIDTH() - 205;
+    y = UserInterfaceManager::HEIGHT() - 20;
+    x1 = UserInterfaceManager::WIDTH() - 205;
 
     // Draw weapon meter
     if(!ClassicMode)
@@ -237,7 +209,7 @@ void botline()
 		glEnd();
     }
     
-    y = (Ui::HEIGHT() - 24);
+    y = (UserInterfaceManager::HEIGHT() - 24);
     for( x = 0; x < (PlayerShip.ships()-1); x++ )
     {
     	extraLives.draw(16+x*20, 15.0f, 0.5f);
@@ -249,8 +221,8 @@ void botline()
 void displayScreen( const char *file )
 {
   ScreenBitmap backdrop(file);
-  Ui::clearscreen();
-  backdrop.draw_alpha(0, Ui::HEIGHT());
+  UserInterfaceManager::clearscreen();
+  backdrop.draw_alpha(0, UserInterfaceManager::HEIGHT());
 }
 
 
@@ -266,7 +238,7 @@ int gMsgTimeLeft = 0;
 void MakeGlobalMessage(char* Tstring)
 {
   strcpy(globalMessage, Tstring);
-  gMsgTimeLeft = Ui::HEIGHT();
+  gMsgTimeLeft = UserInterfaceManager::HEIGHT();
 }
 
 
@@ -284,7 +256,7 @@ public:
 	void set_scrolling_message( const std::string& p_str )
 	{
 		scrolling_message = p_str;
-		scrolling_message_pos = Ui::HEIGHT();
+		scrolling_message_pos = UserInterfaceManager::HEIGHT();
 	}
 
 	void reset_center_message()
@@ -405,27 +377,27 @@ Uint32 Sasteroids::timer_tick(Uint32 interval, void* param)
 
 void Sasteroids::redraw_screen()
 {
-	Ui::predraw();
+	UserInterfaceManager::predraw();
 
 	// Paint the backdrop
-	if (BackdropOn && Ui::WIDTH() <= 640 && Ui::HEIGHT() <= 400)
+	if (BackdropOn && UserInterfaceManager::WIDTH() <= 640 && UserInterfaceManager::HEIGHT() <= 400)
 	{
-		Backdrops[Glevel % NUM_BACKS].draw_alpha(0, Ui::HEIGHT());
+		Backdrops[Glevel % NUM_BACKS].draw_alpha(0, UserInterfaceManager::HEIGHT());
 
 		if (backdrop_alpha > 0.0f )
 		{
-			Backdrops[(Glevel - 1) % NUM_BACKS].draw_alpha(0, Ui::HEIGHT(), 0.0f, backdrop_alpha );
+			Backdrops[(Glevel - 1) % NUM_BACKS].draw_alpha(0, UserInterfaceManager::HEIGHT(), 0.0f, backdrop_alpha );
 			backdrop_alpha -= 0.05f;
 		}
 	}
 	else
 	{
-		Ui::clearscreen();
+		UserInterfaceManager::clearscreen();
 	}
 
 
 	// Draw all the screen objects
-	m_manager.draw_objects();
+	m_manager_ptr->draw_objects();
 
 	// Draw the bottom line
 	botline();
@@ -451,17 +423,16 @@ void Sasteroids::redraw_screen()
 	// Show active messages
 	if( scrolling_message.size() > 0 && scrolling_message_pos > 0 )
 	{
-		Ui::CenterXText( scrolling_message_pos, scrolling_message );
+		UserInterfaceManager::CenterXText( scrolling_message_pos, scrolling_message );
 	}
 
 	reset_center_message();
 	if( center_message.size() > 0 )
 	{
-		Ui::CenterText( center_message );
+		UserInterfaceManager::CenterText( center_message );
 	}
 
-	sounddisplay();
-	Ui::updateScreen();
+	UserInterfaceManager::updateScreen();
 }
 
 void Sasteroids::run()
@@ -487,8 +458,8 @@ void Sasteroids::run()
 	oldscore = -1;
 
 	PlayerShip.Reset();
-	m_manager.free_objects();
-	Ui::clearscreen();
+	m_manager_ptr->free_objects();
+	UserInterfaceManager::clearscreen();
 
 	bool end_game = false;
 	bool key_consumed = false;
@@ -513,7 +484,7 @@ void Sasteroids::run()
 			{
 			case SDL_VIDEORESIZE:
 				ScreenLimits.SetXY((event.resize.w), (event.resize.h));
-				Ui::resync(event.resize.w, event.resize.h);
+				UserInterfaceManager::resync(event.resize.w, event.resize.h);
 				need_redraw = true;
 				break;
 
@@ -577,7 +548,6 @@ void Sasteroids::run()
 						key_consumed = true;
 					}
 				} else if( !pause_request && PlayerShip.ships() > 0 ) {
-					std::cout << "Restarting!" << keylock_timer << std::endl;
 					// We're dead, but we can go again
 					if ((event.key.keysym.sym == SDLK_SPACE ||
 						event.key.keysym.sym == SDLK_s ||
@@ -605,7 +575,7 @@ void Sasteroids::run()
 
 				if( !key_consumed && event.key.keysym.sym == SDLK_f )
 				{
-					Ui::FullScreen();
+					UserInterfaceManager::FullScreen();
 					key_consumed = true;
 				}
 
@@ -624,7 +594,6 @@ void Sasteroids::run()
 						MainVolume = 128;
 					DispVolume = 64;
 					Mix_Volume(-1, MainVolume);
-					sDisplayTimer = 35;
 					key_consumed = true;
 				}
 
@@ -636,7 +605,6 @@ void Sasteroids::run()
 						MainVolume = 0;
 					DispVolume = 64;
 					Mix_Volume(-1, MainVolume);
-					sDisplayTimer = 35;
 					key_consumed = true;
 				}
 
@@ -699,7 +667,7 @@ void Sasteroids::play_timer()
 		set_scrolling_message( st );
 
 		numasts = 0;
-		GenerateAsteroids();
+		GenerateAsteroids( *m_manager_ptr );
 		PlayerShip.addMaxPower(2);
 		PlayerShip.addRegPower(1);
 		if (Glevel != 1)
@@ -718,7 +686,7 @@ void Sasteroids::play_timer()
 		if (shipInvasion < 0)
 			shipInvasion = 0;
 		int j;
-		m_manager.register_object( new Alien );
+		m_manager_ptr->register_object( new Alien );
 		PlaySound(SND_ENEMY);
 	}
 
@@ -728,17 +696,12 @@ void Sasteroids::play_timer()
 	// Create a power up :)
 	if (!(rand() % /* 250 */ 25 ) && !ClassicMode)
 	{
-		m_manager.register_object( new PowerUp );
+		m_manager_ptr->register_object( new PowerUp );
 	}
 
 
-	m_manager.move_game_time( 33 );
-	//if (deathTimer == 0)
-	//{
-		//PlayerShip.destroy();
-		//deathTimer = -1;
-		//aegg = 1;
-	//}
+	m_manager_ptr->move_game_time( 33 );
+
 
 	if( PlayerShip.get_disabled() && !death_displayed)
 	{
@@ -1029,11 +992,14 @@ int main(int argc, char *argv[])
   Mix_ReserveChannels(1);  // for jet engine!
   Mix_Volume( -1, MainVolume);
 
-  Ui::init();
+  UserInterfaceManager::init();
+
+  PlayingField m_manager;
+  m_manager.set_field_size( Vector( 640.0, 480.0 ) );
+  m_manager_ptr = &m_manager;
 
   LoadBitmaps();
   LoadWavs();
-  IntegerDisplay::initialize();
 
   ScreenBitmap mouse("graphics/mouse.png");
   GraphicsMenu main_menu( &mouse, &titleScreen, main_menu_strings );
@@ -1054,7 +1020,7 @@ int main(int argc, char *argv[])
   SDL_JoystickClose(0);
 
   // shutdown & restore text mode
-  Ui::restore();
+  UserInterfaceManager::restore();
  
   return 0;
 }

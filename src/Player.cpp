@@ -100,8 +100,13 @@ int Player::shielded()
 
 void Player::Hyper()
 {
-	if (!deadStick)
-		SetXY((float) (rand() % Ui::WIDTH()), (float) (rand() % Ui::HEIGHT()));
+	if( get_field() && !deadStick )
+	{
+		const Vector& field_size = get_field()->get_field_size();
+
+		SetXY( (float) (rand() % int(field_size.GetX()) ),
+			   (float) (rand() % int(field_size.GetY()) ) );
+	}
 }
 
 void Player::Reset()
@@ -184,16 +189,19 @@ void Player::CreateBullet( int p_discharge_count, int angle, bool p_apply_thrust
     double fsin = -f_math::cos( angle );
     double fcos = f_math::sin( angle );
 
-    PlayingField::register_object( new Bullet( this, angle, false ) );
-
-    if(!ClassicMode)
+    if( get_field() )
     {
-		// Give it a bit of a kick back... ehehehheeheh
-    	add_velocity( float( fcos * p_scale_thrust), float( fsin * p_scale_thrust ) );
+		get_field()->register_object( new Bullet( this, angle, false ) );
 
-    	// lower weapon power
-    	for( int i = 0; i < p_discharge_count; i++ )
-    		dischargeWeapon();
+		if(!ClassicMode)
+		{
+			// Give it a bit of a kick back... ehehehheeheh
+			add_velocity( float( fcos * p_scale_thrust), float( fsin * p_scale_thrust ) );
+
+			// lower weapon power
+			for( int i = 0; i < p_discharge_count; i++ )
+				dischargeWeapon();
+		}
     }
 }
 

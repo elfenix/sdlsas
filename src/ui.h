@@ -24,35 +24,30 @@
 void GraphicsStartDraw(SDL_Surface* visual);
 void GraphicsStopDraw(SDL_Surface* visual);
 
-// Unsafe putpixel functions, may be used, but don't check x/y coord's.
-void g_setpixelB1(SDL_Surface* visual, int x, int y, char r, char g, char b);
-void g_setpixelB2(SDL_Surface* visual, int x, int y, char r, char g, char b);
-void g_setpixelB3(SDL_Surface* visual, int x, int y, char r, char g, char b);
-void g_setpixelB4(SDL_Surface* visual, int x, int y, char r, char g, char b);
-void setpixel(SDL_Surface *screen, int x, int y, char r, char g, char b);
-
-// Unsafe getpixel functions, may be used, but don't check x/y coord's.
-void g_getpixelB1(SDL_Surface* v, int x, int y, char *r, char *g, char *b);
-void g_getpixelB2(SDL_Surface* v, int x, int y, char *r, char *g, char *b);
-void g_getpixelB3(SDL_Surface* v, int x, int y, char *r, char *g, char *b);
-void g_getpixelB4(SDL_Surface* v, int x, int y, char *r, char *g, char *b);
-void getpixel(SDL_Surface *screen, int x, int y, char *r, char *g, char *b);
-
 // Other integers
 extern int wantFullScreen;
 class ScreenBitmap;
 
 
-class Ui 
+class UserInterfaceManager 
 {
- public: 
-  static void updateScreen();
-  static void init();
-  static void restore();
-  static void resync(int x, int y);
+ public:
+	static void init();
+	static void restore();
+	static void CenterText( const char* msg);
+	static void CenterXText(int y, const char* msg);
+	static void ShowText(int x, int y, const char* msg );
+	static void ShowTextColor(int x, int y, const char* msg, char r, char g, char b);
+	static SDL_Surface* get_text( const char* msg, char r,char g, char b);
+	static void resync(int x, int y);
+	static void updateScreen();
+	static void predraw();
+	static void display_integer(int num, float x, float y);
+
+
   
-  static void message( int y, const char *msg ); // message centered at line y
-  static void message( const char *msg ) { message(0,msg); }
+  //static void message( int y, const char *msg ); // message centered at line y
+  //static void message( const char *msg ) { message(0,msg); }
 
   static void CenterText(const std::string& p_str)
   {
@@ -62,43 +57,22 @@ class Ui
   static void CenterXText(int y, const std::string& p_str) {
 	  CenterXText(y,p_str.c_str());
   }
-  static void CenterText( const char* msg);
-  static void CenterXText(int y, const char* msg);
-  static void ShowText(int x, int y, const char* msg );
-  static void ShowTextColor(int x, int y, const char* msg, char r, char g, char b);
-  static char yesNo( const char *msg );
 
-  static SDL_Surface* get_text( const char* msg, char r,char g, char b);
+
+
+
+  //static char yesNo( const char *msg );
+
+
   
-  static int fontHeight()  
-    { 
-      return TTF_FontHeight(myfont); 
-    }
+
+//  static int fontHeight()
+    //{
+//      return TTF_FontHeight(myfont);
+    //}
 
 
-  static void inline startpixels()
-    {
-      //glDisable(GL_TEXTURE_2D);
-    }
-
-  static void inline stoppixels()
-    {
-      //glEnable(GL_TEXTURE_2D);
-    }
-
-
-  static void inline setpixel(int x, int y, char r, char g, char b, char a = 255)
-    {
-      //if(x < 0 || x >= myscreen->w) return;
-      //if(y < 0 || y >= myscreen->h) return;
-
-      //char byteBuffer[4] = { r, g, b, a };
-
-      //glRasterPos2i(x, y);
-      //glDrawPixels(1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &byteBuffer);
-    }
-
-  static int fontWidth() { return 19; } // Fudged, shouldn't be used...
+  //static int fontWidth() { return 19; } // Fudged, shouldn't be used...
    
   static int WIDTH() { if(myscreen) return myscreen->w; return 0; }
   static int HEIGHT() { if(myscreen) return myscreen->h; return 0; }
@@ -112,33 +86,20 @@ class Ui
   };
   
 
-  static void predraw();
+
+
 
   
   friend class ScreenBitmap;
   friend class Bitmap;
   
   static SDL_Surface* myscreen;
+  static ScreenBitmap* numbers;
 
  private:
   static TTF_Font *myfont;
   static void drawCursor(int x, int y);
   static void hideCursor(int x, int y);
-
-  static void (*pixelDriver)(SDL_Surface* visual, 
-			     int x, int y, char r, char g, char b);
-};
-
-
-class IntegerDisplay
-{
- public:
-  static void initialize();
-  static void display_integer(int num, float x, float y);
-  static void finish();
-
- private:
-  static ScreenBitmap* numbers;
 
 };
 

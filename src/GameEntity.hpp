@@ -1,8 +1,12 @@
-#ifndef SCREEN_OBJECT_H
-#define SCREEN_OBJECT_H
+#ifndef GAME_ENTITY_H
+#define GAME_ENTITY_H
 
 #include "vector.h"
 #include "ScreenBitmap.hpp"
+#include <cassert>
+
+// Anonymous class for circular dependency
+class PlayingField;
 
 
 // Basic ScreenObject class, could probably be used on its own for most things
@@ -181,6 +185,12 @@ public:
 		b.setbounce();
 	}
 
+	PlayingField* get_field() { assert( m_field != 0 ); return m_field; }
+	const PlayingField* get_field() const { assert( m_field != 0 ); return m_field; }
+
+private:
+	void set_field( PlayingField* p_field ) { m_field = p_field; }
+
 protected:
 	bool wrapMoves;
 	bool isAlive;
@@ -191,9 +201,13 @@ protected:
 	Vector accelleration;
 	Vector size;
 	ScreenBitmap* 	m_sprite;
+	PlayingField*	m_field;
 	float			m_angular_velocity;
 	int objtype, mysize, bounce;
 	float angle;
+
+private:
+	friend class PlayingField;
 };
 
 

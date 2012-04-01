@@ -13,12 +13,12 @@ GraphicsMenu::GraphicsMenu(ScreenBitmap* tmouse, ScreenBitmap* tback, const std:
 	{
 		SDL_Surface* tmp;
 
-		tmp = Ui::get_text(text[j].c_str(), 255, 255, 255);
+		tmp = UserInterfaceManager::get_text(text[j].c_str(), 255, 255, 255);
 		m_menu_strings[j].load_surface(tmp);
 		m_menu_height += m_menu_strings[j].height();
 		SDL_FreeSurface(tmp);
 
-		tmp = Ui::get_text(text[j].c_str(), 0, 255, 255);
+		tmp = UserInterfaceManager::get_text(text[j].c_str(), 0, 255, 255);
 		m_highlight_strings[j].load_surface(tmp);
 		SDL_FreeSurface(tmp);
 
@@ -76,7 +76,7 @@ void GraphicsMenu::enableSound(int soundNum)
 int GraphicsMenu::get_mouse_selection(float p_x, float p_y )
 {
 	int new_selection = -1;
-	float y = (float(Ui::HEIGHT() - p_y));
+	float y = (float(UserInterfaceManager::HEIGHT() - p_y));
 
 	for( int j = m_minSelect;j <= m_maxSelect;j++)
 	{
@@ -114,13 +114,13 @@ void GraphicsMenu::run_menu()
 	int selected = m_minSelect;
   
 	// Setup mouse areas
-	start_height = float(Ui::HEIGHT() >> 1);
+	start_height = float(UserInterfaceManager::HEIGHT() >> 1);
 	start_height += m_menu_height / 2.0f;
 	start_height -= m_topPad;
     
 	for(j = 0; j < m_num_entries; j++)
 	{
-		start_width = float(Ui::WIDTH() >> 1);
+		start_width = float(UserInterfaceManager::WIDTH() >> 1);
 		start_width -= m_menu_strings[j].width() / 2.0f;
 
 		m_activeRegions[j].x = int(start_width);
@@ -206,17 +206,17 @@ void GraphicsMenu::run_menu()
 			get_mouse_state( mouseX, mouseY );
 		}
 
-		Ui::predraw();
+		UserInterfaceManager::predraw();
 
-		start_height = float(Ui::HEIGHT() >> 1);
+		start_height = float(UserInterfaceManager::HEIGHT() >> 1);
 		start_height += m_menu_height / 2.0f;
 		start_height -= m_topPad;
 
-		m_backdrop->draw_alpha(0.0f, float(Ui::HEIGHT()));
+		m_backdrop->draw_alpha(0.0f, float(UserInterfaceManager::HEIGHT()));
 
 		for (j = 0; j < m_num_entries; j++)
 		{
-			start_width = float(Ui::WIDTH() >> 1);
+			start_width = float(UserInterfaceManager::WIDTH() >> 1);
 			start_width -= m_menu_strings[j].width() / 2.0f;
 			m_menu_strings[j].draw_alpha(start_width, start_height);
 			if (j == selected)
@@ -225,7 +225,7 @@ void GraphicsMenu::run_menu()
 			start_height = start_height - m_menu_strings[j].height();
 		}
 
-		m_mouse->draw(mouseX, float(Ui::HEIGHT()) - mouseY);
-		Ui::updateScreen();
+		m_mouse->draw(mouseX, float(UserInterfaceManager::HEIGHT()) - mouseY);
+		UserInterfaceManager::updateScreen();
 	}
 }

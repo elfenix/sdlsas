@@ -33,13 +33,11 @@ public:
 		death();
 		SetDeadStick( 1 );
 
-		PlayingField::register_object(
-			new Explosion(
-					GetX(),
-					GetY(),
-					VelX(),
-					VelY()
-				) );
+		if( get_field() )
+		{
+			get_field()->register_object( new Explosion( GetX(), GetY(), VelX(), VelY() ) );
+		}
+
 		Reset();
 		SetDeadStick( 1 );
 	}

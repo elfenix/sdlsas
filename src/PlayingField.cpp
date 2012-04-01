@@ -13,6 +13,8 @@
 GameEntity *ObjectList[MAX_OBJECTS];
 Vector ScreenLimits(PLAY_X, PLAY_Y);
 
+
+
 PlayingField::PlayingField()
 {
 	initialize_list();
@@ -34,6 +36,7 @@ void PlayingField::initialize_list()
 	}
 
 	ObjectList[0] = (GameEntity*)&PlayerShip;
+	ObjectList[0]->set_field( this );
 }
 
 
@@ -87,6 +90,7 @@ PlayingField::object_id PlayingField::register_object( GameEntity* screen_object
 		return -1;
 	}
 	ObjectList[openObject] = screen_object;
+	screen_object->set_field( this );
 	return openObject;
 }
 
@@ -111,7 +115,7 @@ int PlayingField::move_game_time( int p_time_ms )
 				if( i == j )
 					continue;
 
-				if (collide(ObjectList[i], ObjectList[j]))
+				if (check_current_collision(*ObjectList[i], *ObjectList[j]))
 				{
 					ObjectList[i]->collision( *ObjectList[j] );
 				}
@@ -125,4 +129,14 @@ int PlayingField::move_game_time( int p_time_ms )
 	}
 
 	return crash;
+}
+
+
+bool PlayingField::check_current_collision( const GameEntity& b1, const GameEntity& b2)
+{
+  float collision_distance  = (float)b1.Size() + (float)b2.Size();
+  float collision_distance_squared = collision_distance * collision_distance;
+  float distance_squared = (b1.get_pos() - b2.get_pos()).lengthSqrd();
+
+  return distance_squared <= collision_distance_squared;
 }

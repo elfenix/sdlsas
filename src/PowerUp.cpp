@@ -34,8 +34,8 @@ PowerUp::PowerUp()
 
   SetVel(0.0f, 0.0f);
   set_acceleration(0.0f, 0.0f);
-  SetXY(float((rand()%Ui::HEIGHT())),
-	float((rand()%Ui::WIDTH())));
+  SetXY(float((rand()%UserInterfaceManager::HEIGHT())),
+	float((rand()%UserInterfaceManager::WIDTH())));
   set_size(10);
   settype(POWERUP);
   restore();

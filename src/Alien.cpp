@@ -41,9 +41,12 @@ bool Alien::check_collide( const GameEntity& p_other ) const
 
 bool Alien::destructive_collision( const GameEntity& p_hitter )
 {
-	PlayingField::register_object(
+	if( get_field() )
+	{
+		get_field()->register_object(
 			new Explosion(GetX(), GetY(), get_velocity().GetX(),
-					get_velocity().GetY()));
+					get_velocity().GetY()) );
+	}
 	PlaySound( SND_BOOM_C );
 	die();
 	return true;
@@ -87,7 +90,7 @@ void Alien::tick()
 
 	GameEntity::tick();
 
-	if (!(rand() % 50) && !PlayerShip.isDeadStick())
+	if (!(rand() % 50) && get_field() )
 	{
 		temp.SetXY(PlayerShip.GetX() - GetX() + PlayerShip.VelX(),
 				PlayerShip.GetY() - GetY() + PlayerShip.VelY());
@@ -95,7 +98,7 @@ void Alien::tick()
 		temp *= 5.0f;
 
 		GameEntity* bullet = new Bullet(get_pos(), temp, true, type());
-		PlayingField::register_object(bullet);
+		get_field()->register_object(bullet);
 	}
 }
 

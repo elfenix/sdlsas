@@ -28,6 +28,7 @@ void GameEntity::initialize(int type)
   mysize = 1;  
   angle = 0;
   m_angular_velocity = 0.0;
+  m_field = 0;
 }
 
 

@@ -6,8 +6,8 @@
  * are included.
  */
 
-#ifndef _FASTMATH_H_
-#define _FASTMATH_H_
+#ifndef FASTMATH_H_
+#define FASTMATH_H_
 
 class _f_math_priv;
 

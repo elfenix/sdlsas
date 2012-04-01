@@ -1,0 +1,40 @@
+# configure.in
+# Process this file with autoconf to produce a configure script.
+AC_INIT(src/sasteroids.cpp)
+
+PACKAGE=SDLSasteroids
+VERSION=3.1.0
+AUTHOR_EMAIL=andrew262@gmail.com
+
+AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
+
+# Checks for programs.
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+
+# Check for SDL
+PKG_CHECK_MODULES([SDL], [sdl SDL_image SDL_mixer SDL_ttf])
+AC_SUBST(SDL_CXXFLAGS)
+AC_SUBST(SDL_CFLAGS)
+AC_SUBST(SDL_LIBS)
+
+# Check for OpenGL
+PKG_CHECK_MODULES([GL], [gl])
+AC_SUBST(GL_CXXFLAGS)
+AC_SUBST(GL_CFLAGS)
+AC_SUBST(GL_LIBS)
+
+# Checks for header files.
+AC_CHECK_HEADERS([fcntl.h stdlib.h string.h termios.h unistd.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_C_INLINE
+
+# Checks for library functions.
+AC_CHECK_FUNCS([atexit memset sqrt])
+
+AC_CONFIG_HEADERS([config.h])
+AC_OUTPUT(Makefile src/Makefile)

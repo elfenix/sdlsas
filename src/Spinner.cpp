@@ -57,9 +57,12 @@ bool Spinner::destructive_collision( const GameEntity& p_hitter )
 
 	if( hitCount <= 0 )
 	{
-		PlayingField::register_object(
+		if( get_field() )
+		{
+			get_field()->register_object(
 				new Explosion(GetX(), GetY(), get_velocity().GetX(),
 						get_velocity().GetY()));
+		}
 		PlaySound(SND_BOOM_B);
 		die();
 		died = true;

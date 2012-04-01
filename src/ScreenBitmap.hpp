@@ -18,8 +18,8 @@
 // Finally: Don't assume degrees=0..359 for rotation. Look in FastMath.h
 // to see how Angle and TRIGSIZE are defined.
 
-#ifndef SBITMAP_H
-#define SBITMAP_H
+#ifndef SCREEN_BITMAP_H
+#define SCREEN_BITMAP_H
 
 #include <SDL.h>
 #include <GL/gl.h>
@@ -27,7 +27,7 @@
 
 class ScreenBitmap
 {
-public:
+private:
 	typedef struct {
 		GLfloat x1, y1;
 		GLfloat x2, y2;
@@ -57,7 +57,10 @@ public:
 	  return m_height;
 	};
 
-protected:
+private:
+	static GLuint GL_LoadTexture(SDL_Surface *surface, ScreenBitmap::TexCoord& texcoord);
+
+private:
 	GLuint		m_texture;
 	bool   		m_texture_owned;
 	GLfloat 	m_width;

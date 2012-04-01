@@ -4,14 +4,17 @@
 #include "sasteroids.h"
 #include "GameEntity.hpp"
 
-void GenerateAsteroids();
+void GenerateAsteroids( PlayingField& p_field );
 
 
 class Asteroid : public GameEntity
 {
 public:
-	static int CreateAsteroid(float x, float y, float xv, float yv, ObjectType type);
-	static void KillAsteroid(int number, int killedBy, bool killChildren = false);
+	Asteroid();
+	virtual ~Asteroid();
+
+	static Asteroid* create_asteroid( PlayingField& p_field, float x, float y, float xv, float yv, ObjectType type);
+
 
 	virtual bool destructive_collision( const GameEntity& p_hitter );
 	virtual void create_children() = 0;
