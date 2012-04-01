@@ -107,11 +107,11 @@ void PowerUp::do_powerup( Player& p_player ) const
         break;
 
     case WEAPON_THREE_FIRE:
-        p_player.canShootThree = 1;
+        p_player.set_can_shoot_three(true);
         break;
 
     case SHIELD_RECHARGE:
-        p_player.canRecharge = 1;
+        p_player.set_can_shield_recharge(true);
         break;
 
     default:

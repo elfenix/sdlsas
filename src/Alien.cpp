@@ -8,7 +8,7 @@
 #include "Alien.hpp"
 #include "Bullet.hpp"
 #include "Asteroid.hpp"
-#include "sasteroids.h"
+#include "Resources.hpp"
 #include "PlayingField.hpp"
 
 const float MassEnemy = 1.0f;

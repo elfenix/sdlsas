@@ -1,8 +1,8 @@
-#ifndef ASTEROID_H
-#define ASTEROID_H
+#ifndef ASTEROID_HPP_
+#define ASTEROID_HPP_
 
-#include "sasteroids.h"
 #include "GameEntity.hpp"
+#include "PlayingField.hpp"
 
 void GenerateAsteroids( PlayingField& p_field );
 
@@ -21,15 +21,16 @@ public:
     virtual void create_explosion();
 
     virtual bool check_bounce( const GameEntity& p_other ) const
-            {
+    {
         return !object_is_asteroid( p_other );
     }
 
     virtual bool check_collide( const GameEntity& p_other ) const
-            {
+    {
         return !object_is_asteroid( p_other );
     }
 };
+
 
 class SmallAsteroid:
     public Asteroid
@@ -46,6 +47,7 @@ private:
     bool m_evil;
 };
 
+
 class MediumAsteroid:
     public Asteroid
 {
@@ -58,6 +60,7 @@ public:
     virtual void create_children();
 };
 
+
 class LargeAsteroid:
     public Asteroid
 {
@@ -69,5 +72,7 @@ public:
 
     virtual void create_children();
 };
+
+
 
 #endif

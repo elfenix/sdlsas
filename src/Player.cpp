@@ -98,6 +98,163 @@ int Player::shielded()
     return shieldStatus;
 }
 
+void Player::set_can_shoot_three( bool p_enabled )
+{
+    canShootThree = (p_enabled) ? 1 : 0;
+}
+
+
+void Player::set_can_shield_recharge( bool p_enabled )
+{
+    canRecharge = (p_enabled) ? 1 : 0;
+}
+
+
+bool Player::get_disabled() const
+{
+    return deadStick;
+}
+
+
+void Player::destroy()
+{
+    PlaySound( SND_BOOM_C );
+    death();
+    SetDeadStick( 1 );
+
+    if( get_field() )
+    {
+        get_field()->register_object(
+                new Explosion( GetX(), GetY(), VelX(), VelY() ) );
+    }
+
+    Reset();
+    SetDeadStick( 1 );
+}
+
+
+bool Player::destructive_collision( const GameEntity& p_other )
+{
+    const PowerUp* powerup = 0;
+    bool died = false;
+
+    if( (p_other.type() == GameEntity::BULLET
+            || p_other.type() == GameEntity::EVIL_BULLET) &&
+            shielded() )
+    {
+        // do nothing,
+    }
+    else if( (powerup = dynamic_cast< const PowerUp* >( &p_other )) )
+    {
+        powerup->do_powerup( *this );
+    }
+    else
+    {
+        destroy();
+        died = true;
+    }
+
+    return died;
+}
+
+
+bool Player::check_bounce( const GameEntity& p_other ) const
+{
+    return !isDeadStick() && PlayerShip.shielded();
+}
+
+
+bool Player::check_collide( const GameEntity& p_other ) const
+{
+    return !isDeadStick();
+}
+
+
+void Player::notify_bounce( const GameEntity& p_other ) const
+{
+}
+
+
+void Player::notify_destroyed( const GameEntity& p_other )
+{
+    switch( p_other.type() )
+    {
+    case ASTEROID_BIG:
+        score += 500;
+        break;
+
+    case ASTEROID_MEDIUM:
+        score += 250;
+        break;
+
+    case ASTEROID_SMALL:
+        score += 125;
+        break;
+
+    case SHIP_ALIEN:
+        score += 300;
+        break;
+
+    case SHIP_SPINNER:
+        score += 300;
+        break;
+    }
+}
+
+
+void Player::reset_score()
+{
+    score = 0;
+}
+
+int Player::get_score()
+{
+    return score;
+}
+
+void Player::death()
+{
+    lives--;
+}
+
+int Player::ships()
+{
+    return lives;
+}
+
+void Player::setships( int sships )
+{
+    lives = sships;
+}
+
+void Player::addship()
+{
+    lives++;
+}
+
+int Player::isDeadStick() const
+{
+    return deadStick;
+}
+
+int Player::shieldPercent() const
+{
+    return (100 * (int) (shieldTimeLeft)) / (int) (shieldMax);
+}
+
+int Player::weaponPercent() const
+{
+    return (100 * wPower) / (maxPower);
+}
+
+int Player::weaponPower()
+{
+    if( deadStick )
+        return 0;
+
+    return wPower;
+}
+
 void Player::Hyper()
 {
     if( get_field() && !deadStick )
