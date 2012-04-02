@@ -32,12 +32,13 @@ void PlayingField::initialize_list()
 
 void PlayingField::free_objects()
 {
-    for( entity_iterator it = begin_nonplayer_entity(); it != end_nonplayer_entity(); it++)
+    for( entity_iterator it = begin_nonplayer_entity(); it != end_nonplayer_entity();)
     {
         GameEntity* entity_ptr = *it;
 
         if( entity_ptr )
             delete entity_ptr;
+        it = m_game_entities.erase(it);
     }
 }
 
