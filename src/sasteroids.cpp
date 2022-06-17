@@ -9,6 +9,8 @@
 // 
 // SDL Sasteroids Code by Andrew M. (aka Merlin262)
 
+#define SDL_MAIN_HANDLED
+
 #include "sasteroids.h"
 #include <PlayingField.hpp>
 using namespace std;
@@ -316,7 +318,8 @@ Sasteroids::Sasteroids()
         throw std::runtime_error( "Unable to create SDL timer" );
     }
 
-    keystatebuffer = SDL_GetKeyState( NULL );
+// BORKEN
+//    keystatebuffer = SDL_GetKeyState( NULL );
     Mix_ExpireChannel( 0, 0 );
 
     PlayerShip.Reset();
@@ -469,11 +472,11 @@ void Sasteroids::run()
 
             switch( event.type )
             {
-            case SDL_VIDEORESIZE:
-                ScreenLimits.SetXY( (event.resize.w), (event.resize.h) );
-                UserInterfaceManager::resync( event.resize.w, event.resize.h );
-                need_redraw = true;
-                break;
+//            case SDL_VIDEORESIZE:
+//                ScreenLimits.SetXY( (event.resize.w), (event.resize.h) );
+//                UserInterfaceManager::resync( event.resize.w, event.resize.h );
+//                need_redraw = true;
+                //break;
 
             case SDL_KEYDOWN:
                 need_redraw = true;
@@ -971,7 +974,7 @@ int main( int argc, char *argv[] )
 
     srand( (unsigned int) time( NULL ) );
 
-    chdir( GAMEDIR );
+    //chdir( GAMEDIR );
 
     InitializeSDL();
     HandleCommandLine( argc, argv );

@@ -30,7 +30,7 @@ void UserInterfaceManager::init()
 
     resync( SCREEN_X, SCREEN_Y );
 
-    SDL_WM_SetCaption( "SDL Sasteroids", "SDL Sasteroids" );
+//    SDL_WM_SetCaption( "SDL Sasteroids", "SDL Sasteroids" );
     SDL_ShowCursor( 0 );
 
     if( TTF_Init() < 0 )
@@ -148,10 +148,10 @@ void UserInterfaceManager::resync( int newX, int newY )
     SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
-    flags = SDL_OPENGL | SDL_ANYFORMAT | WANT_FULLSCREEN;
-    if( wantFullScreen )
-        flags |= SDL_FULLSCREEN;
-    myscreen = SDL_SetVideoMode( newX, newY, 16, flags );
+//    flags = SDL_WINDOW_OPENGL | SDL_ANYFORMAT | WANT_FULLSCREEN;
+//    if( wantFullScreen )
+//        flags |= SDL_FULLSCREEN;
+//    myscreen = SDL_SetVideoMode( newX, newY, 16, flags );
 
     if( !myscreen )
     {
@@ -164,7 +164,7 @@ void UserInterfaceManager::resync( int newX, int newY )
 // update physical screen from virtualScn
 void UserInterfaceManager::updateScreen()
 {
-    SDL_GL_SwapBuffers();
+//    SDL_GL_SwapBuffers();
 }
 
 void UserInterfaceManager::predraw()

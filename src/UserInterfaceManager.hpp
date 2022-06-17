@@ -16,8 +16,7 @@
 
 #include "sasteroids.h"
 
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <glad/glad.h>
 
 // call before using setpixel or getpixel. =)
 void GraphicsStartDraw( SDL_Surface* visual );
@@ -86,7 +85,7 @@ public:
 
     static void FullScreen()
     {
-        SDL_WM_ToggleFullScreen( myscreen );
+       // SDL_WM_ToggleFullScreen( myscreen );
     }
     ;
 

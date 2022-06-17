@@ -1,4 +1,3 @@
-syntax: glob
 aclocal.m4
 autom4te.cache
 autoscan.log
@@ -20,3 +19,7 @@ missing
 .cproject
 .project
 .settings
+out
+build
+.vs
+

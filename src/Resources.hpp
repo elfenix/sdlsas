@@ -8,9 +8,9 @@
 #ifndef RESOURCES_HPP_
 #define RESOURCES_HPP_
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_ttf.h>
-#include <SDL/SDL_mixer.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 
 #include "ScreenBitmap.hpp"
 #include "vector.h"

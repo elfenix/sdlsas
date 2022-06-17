@@ -21,9 +21,9 @@
 #ifndef SCREEN_BITMAP_H
 #define SCREEN_BITMAP_H
 
-#include <SDL.h>
-#include <GL/gl.h>
+#include <SDL2/SDL.h>
 #include <string>
+#include <glad/glad.h>
 
 class ScreenBitmap
 {
